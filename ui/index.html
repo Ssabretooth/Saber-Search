@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Saber Search · XRPL Meme Tracker</title>
+  <style>
+    /* ── Variables ─────────────────────────────────────────────────────── */
+    :root {
+      --bg:        #0b0e11;
+      --bg2:       #141920;
+      --bg3:       #1c2333;
+      --bg4:       #212c3d;
+      --border:    #252d3a;
+      --text:      #e2e8f0;
+      --text2:     #8fa3bf;
+      --muted:     #4a6080;
+      --green:     #22c55e;
+      --green-dim: rgba(34,197,94,.15);
+      --red:       #ef4444;
+      --red-dim:   rgba(239,68,68,.15);
+      --yellow:    #eab308;
+      --blue:      #3b82f6;
+      --purple:    #a855f7;
+      --orange:    #f97316;
+      --radius:    6px;
+      --font:      -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --mono:      'JetBrains Mono','Fira Code','Cascadia Code',Consolas,monospace;
+    }
+
+    /* ── Reset ─────────────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; background: var(--bg); color: var(--text);
+      font-family: var(--font); font-size: 14px; line-height: 1.5;
+      -webkit-font-smoothing: antialiased; }
+
+    /* ── App shell ─────────────────────────────────────────────────────── */
+    #app { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+    /* ── Header ────────────────────────────────────────────────────────── */
+    .header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 20px; height: 52px;
+      background: var(--bg2); border-bottom: 1px solid var(--border);
+      flex-shrink: 0; gap: 16px; z-index: 20;
+    }
+    .header-left  { display: flex; align-items: center; gap: 18px; flex: 1; }
+    .logo         { font-size: 16px; font-weight: 800; white-space: nowrap;
+                    letter-spacing: -.4px; }
+    .logo span    { color: var(--blue); }
+    .search-wrap  { flex: 1; max-width: 380px; position: relative; }
+    .search-wrap::before { content: '🔍'; position: absolute; left: 10px; top: 50%;
+                           transform: translateY(-50%); font-size: 12px; pointer-events: none; }
+    #search { width: 100%; background: var(--bg3); border: 1px solid var(--border);
+              border-radius: var(--radius); padding: 6px 10px 6px 30px;
+              color: var(--text); font-size: 13px; outline: none;
+              transition: border-color .15s; }
+    #search::placeholder { color: var(--muted); }
+    #search:focus { border-color: var(--blue); }
+    .header-right { display: flex; align-items: center; gap: 14px; font-size: 11px;
+                    color: var(--text2); white-space: nowrap; }
+    .conn-group   { display: flex; align-items: center; gap: 5px; }
+    .conn-dot     { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .conn-dot.on  { background: var(--green); box-shadow: 0 0 5px var(--green); }
+    .conn-dot.off { background: var(--muted); }
+    .conn-dot.err { background: var(--red); }
+
+    /* ── XRPL network bar ──────────────────────────────────────────────── */
+    .xrpl-bar {
+      display: flex; align-items: center; gap: 24px; padding: 5px 20px;
+      background: var(--bg2); border-bottom: 1px solid var(--border);
+      font-size: 11px; color: var(--text2); flex-shrink: 0;
+    }
+    .xrpl-bar-item { display: flex; align-items: center; gap: 6px; }
+    .xrpl-bar-label { color: var(--muted); text-transform: uppercase; letter-spacing: .4px; }
+    .xrpl-bar-value { font-weight: 600; font-variant-numeric: tabular-nums; }
+    .xrpl-bar-value.live { color: var(--green); }
+
+    /* ── Stats cards ───────────────────────────────────────────────────── */
+    .stats-row { display: flex; gap: 1px; background: var(--border);
+                 border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .stat-card { flex: 1; background: var(--bg2); padding: 10px 18px;
+                 display: flex; flex-direction: column; gap: 2px; }
+    .stat-label { font-size: 10px; color: var(--text2); text-transform: uppercase;
+                  letter-spacing: .5px; }
+    .stat-value { font-size: 20px; font-weight: 700; letter-spacing: -.5px; }
+    .stat-value.g { color: var(--green); }
+    .stat-value.r { color: var(--red); }
+    .stat-value.b { color: var(--blue); }
+
+    /* ── Filter bar ────────────────────────────────────────────────────── */
+    .filter-bar {
+      display: flex; align-items: center; gap: 4px; padding: 7px 16px;
+      background: var(--bg2); border-bottom: 1px solid var(--border); flex-shrink: 0;
+    }
+    .filter-btn { background: transparent; border: 1px solid transparent;
+                  border-radius: var(--radius); color: var(--text2); cursor: pointer;
+                  font-size: 12px; padding: 4px 12px; transition: all .15s; white-space: nowrap; }
+    .filter-btn:hover  { background: var(--bg3); color: var(--text); }
+    .filter-btn.active { background: var(--bg3); border-color: var(--border); color: var(--text); }
+    .spacer { flex: 1; }
+    .toggle-label { display: flex; align-items: center; gap: 5px; font-size: 11px;
+                    color: var(--text2); cursor: pointer; user-select: none; }
+    .toggle-label input { accent-color: var(--blue); cursor: pointer; }
+
+    /* ── Main layout: table + trade feed ──────────────────────────────── */
+    .main-area { display: flex; flex: 1 1 auto; overflow: hidden; }
+
+    /* ── Pair table ────────────────────────────────────────────────────── */
+    .table-wrap { flex: 1 1 auto; overflow: auto; }
+    .table-wrap::-webkit-scrollbar { width: 5px; height: 5px; }
+    .table-wrap::-webkit-scrollbar-track { background: var(--bg); }
+    .table-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    .pairs-table { width: 100%; border-collapse: collapse; min-width: 860px; }
+    .pairs-table thead { position: sticky; top: 0; z-index: 10; background: var(--bg2); }
+    .pairs-table th {
+      padding: 9px 12px; text-align: right; font-size: 10px; font-weight: 600;
+      color: var(--text2); text-transform: uppercase; letter-spacing: .5px;
+      border-bottom: 1px solid var(--border); white-space: nowrap;
+    }
+    .pairs-table th:first-child, .pairs-table th.th-left { text-align: left; }
+    .pairs-table th.sortable { cursor: pointer; user-select: none; }
+    .pairs-table th.sortable:hover { color: var(--text); }
+    .pairs-table tbody tr { border-bottom: 1px solid var(--border); cursor: pointer;
+                            transition: background .1s; }
+    .pairs-table tbody tr:hover { background: var(--bg3); }
+    .pairs-table td { padding: 9px 12px; text-align: right; font-size: 12px; }
+    .rank  { text-align: left !important; color: var(--muted); font-size: 11px; width: 34px; }
+    .num   { font-variant-numeric: tabular-nums; }
+    .up    { color: var(--green); }
+    .down  { color: var(--red); }
+    .muted { color: var(--text2); }
+
+    /* Token cell */
+    .token-cell { text-align: left !important; min-width: 170px; }
+    .token-wrap { display: flex; align-items: center; gap: 9px; }
+    .token-avatar { width: 32px; height: 32px; border-radius: 50%; display: flex;
+                    align-items: center; justify-content: center; font-size: 9px;
+                    font-weight: 800; color: #fff; flex-shrink: 0; letter-spacing: -.3px; }
+    .token-name { font-weight: 600; font-size: 12px; display: flex;
+                  align-items: center; gap: 4px; flex-wrap: wrap; }
+    .token-sub  { font-size: 10px; color: var(--text2); margin-top: 1px; }
+
+    /* On-chain indicator */
+    .onchain-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--green);
+                   animation: pulse 2s infinite; flex-shrink: 0; }
+
+    /* Badges */
+    .badge { font-size: 8px; font-weight: 700; padding: 1px 4px; border-radius: 3px;
+             letter-spacing: .3px; text-transform: uppercase; vertical-align: middle; }
+    .badge-new  { background: var(--green-dim); color: var(--green);
+                  border: 1px solid rgba(34,197,94,.3); }
+    .badge-hot  { background: rgba(249,115,22,.15); border: 1px solid rgba(249,115,22,.3); }
+    .badge-xrpl { background: rgba(59,130,246,.15); color: var(--blue);
+                  border: 1px solid rgba(59,130,246,.3); }
+
+    /* DEX badge */
+    .dex-badge { font-size: 9px; background: var(--bg3); border: 1px solid var(--border);
+                 border-radius: 3px; padding: 2px 6px; color: var(--text2);
+                 text-transform: uppercase; letter-spacing: .3px; }
+
+    /* External link */
+    .ext-link { color: var(--text2); text-decoration: none; font-size: 14px;
+                padding: 2px 4px; border-radius: 3px; transition: color .15s; }
+    .ext-link:hover { color: var(--blue); }
+
+    /* Empty state */
+    .empty-state { padding: 50px 20px; text-align: center; color: var(--text2); }
+    .empty-icon  { font-size: 36px; margin-bottom: 10px; }
+    .empty-sub   { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+    /* ── Live trade feed (right panel) ─────────────────────────────────── */
+    .trade-panel {
+      width: 260px; flex-shrink: 0; border-left: 1px solid var(--border);
+      display: flex; flex-direction: column; overflow: hidden;
+    }
+    .trade-panel-header {
+      padding: 8px 12px; background: var(--bg2); border-bottom: 1px solid var(--border);
+      font-size: 10px; font-weight: 700; color: var(--text2); text-transform: uppercase;
+      letter-spacing: .5px; display: flex; align-items: center; gap: 6px;
+    }
+    .trade-feed { flex: 1; overflow-y: auto; padding: 4px 0; }
+    .trade-feed::-webkit-scrollbar { width: 4px; }
+    .trade-feed::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    .trade-row {
+      padding: 7px 12px; border-bottom: 1px solid var(--border);
+      font-size: 11px; display: flex; flex-direction: column; gap: 2px;
+      animation: slideIn .3s ease;
+    }
+    .trade-row:hover { background: var(--bg3); }
+    .trade-top { display: flex; align-items: center; justify-content: space-between; gap: 4px; }
+    .trade-sym  { font-weight: 700; font-size: 12px; }
+    .trade-type { font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 3px;
+                  text-transform: uppercase; }
+    .trade-type.buy  { background: var(--green-dim); color: var(--green); }
+    .trade-type.sell { background: var(--red-dim);   color: var(--red); }
+    .trade-bottom { display: flex; justify-content: space-between; color: var(--muted);
+                    font-size: 10px; }
+    .trade-meme { color: var(--orange); font-size: 9px; }
+
+    /* ── Status bar ─────────────────────────────────────────────────────── */
+    .status-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 5px 16px; background: var(--bg2); border-top: 1px solid var(--border);
+      font-size: 10px; color: var(--text2); flex-shrink: 0;
+    }
+    .status-left  { display: flex; align-items: center; gap: 6px; }
+    .status-right { display: flex; align-items: center; gap: 10px; }
+    .live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green);
+                animation: pulse 2s infinite; }
+    .live-dot.loading { background: var(--yellow); animation: blink .6s infinite; }
+    .live-dot.error   { background: var(--red);    animation: none; }
+    .refresh-btn { background: var(--bg3); border: 1px solid var(--border);
+                   border-radius: var(--radius); color: var(--text2); cursor: pointer;
+                   font-size: 13px; padding: 1px 7px; transition: all .15s; }
+    .refresh-btn:hover { background: var(--border); color: var(--text); }
+
+    /* ── Modal ──────────────────────────────────────────────────────────── */
+    .modal { position: fixed; inset: 0; background: rgba(0,0,0,.7); backdrop-filter: blur(4px);
+             display: flex; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
+    .modal-content { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+                     width: 100%; max-width: 540px; max-height: 82vh; overflow-y: auto; }
+    .modal-header { display: flex; align-items: center; justify-content: space-between;
+                    padding: 16px 20px; border-bottom: 1px solid var(--border); }
+    .modal-title  { display: flex; align-items: center; gap: 10px; }
+    .modal-avatar { width: 40px; height: 40px; border-radius: 50%; display: flex;
+                    align-items: center; justify-content: center; font-size: 11px;
+                    font-weight: 800; color: #fff; }
+    .modal-sym { font-size: 16px; font-weight: 700; }
+    .modal-sub { font-size: 11px; color: var(--text2); margin-top: 2px; }
+    .modal-close { background: none; border: none; color: var(--text2); cursor: pointer;
+                   font-size: 18px; padding: 3px 7px; border-radius: 4px; transition: all .15s; }
+    .modal-close:hover { background: var(--bg3); color: var(--text); }
+    .modal-body { padding: 18px 20px; }
+    .modal-section-title { font-size: 10px; font-weight: 700; color: var(--text2);
+                           text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+    .detail-card { background: var(--bg3); border: 1px solid var(--border);
+                   border-radius: var(--radius); padding: 9px 12px; }
+    .detail-label { font-size: 9px; color: var(--text2); text-transform: uppercase;
+                    letter-spacing: .5px; margin-bottom: 3px; }
+    .detail-value { font-size: 14px; font-weight: 600; }
+    .detail-value.up   { color: var(--green); }
+    .detail-value.down { color: var(--red); }
+
+    /* Order book */
+    .order-book { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+    .ob-side { background: var(--bg3); border: 1px solid var(--border);
+               border-radius: var(--radius); padding: 10px 12px; }
+    .ob-title { font-size: 9px; font-weight: 700; text-transform: uppercase;
+                letter-spacing: .5px; margin-bottom: 6px; }
+    .ob-title.bid { color: var(--green); }
+    .ob-title.ask { color: var(--red); }
+    .ob-row { display: flex; justify-content: space-between; font-size: 11px;
+              padding: 2px 0; font-variant-numeric: tabular-nums; }
+    .ob-row .ob-price { font-weight: 600; }
+    .ob-row.bid .ob-price { color: var(--green); }
+    .ob-row.ask .ob-price { color: var(--red); }
+    .ob-empty { font-size: 11px; color: var(--muted); }
+
+    .modal-addr-label { font-size: 9px; color: var(--text2); text-transform: uppercase;
+                        letter-spacing: .5px; margin-bottom: 3px; }
+    .modal-addr-val { font-family: var(--mono); font-size: 10px; color: var(--text);
+                      word-break: break-all; background: var(--bg3); border: 1px solid var(--border);
+                      border-radius: 4px; padding: 5px 9px; display: block; margin-bottom: 10px; }
+    .modal-actions { margin-top: 14px; }
+    .btn-primary { display: inline-block; background: var(--blue); color: #fff;
+                   text-decoration: none; padding: 8px 16px; border-radius: var(--radius);
+                   font-size: 12px; font-weight: 600; transition: opacity .15s; }
+    .btn-primary:hover { opacity: .85; }
+
+    /* ── Animations ─────────────────────────────────────────────────────── */
+    @keyframes pulse   { 0%,100% { opacity:1; } 50% { opacity:.35; } }
+    @keyframes blink   { 0%,100% { opacity:1; } 50% { opacity:0; } }
+    @keyframes slideIn { from { opacity:0; transform:translateX(10px); } to { opacity:1; transform:translateX(0); } }
+    @keyframes fadeIn  { from { opacity:0; } to { opacity:1; } }
+    .row-new { animation: fadeIn .5s ease; }
+
+    /* ── Utilities ──────────────────────────────────────────────────────── */
+    .hidden { display: none !important; }
+    a { color: inherit; text-decoration: none; }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ── Header ─────────────────────────────────────────────────────────── -->
+  <header class="header">
+    <div class="header-left">
+      <div class="logo">🗡️ Saber<span>Search</span></div>
+      <div class="search-wrap">
+        <input id="search" type="text" placeholder="Search XRPL meme tokens…" autocomplete="off" />
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="conn-group">
+        <div id="dot-xrpl" class="conn-dot off"></div>
+        <span id="lbl-xrpl">XRPL</span>
+      </div>
+      <div class="conn-group">
+        <div id="dot-dex" class="conn-dot off"></div>
+        <span>DexScreener</span>
+      </div>
+      <div class="conn-group">
+        <div id="dot-bot" class="conn-dot off"></div>
+        <span id="lbl-bot">Standalone</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── XRPL Network Bar ────────────────────────────────────────────────── -->
+  <div class="xrpl-bar">
+    <div class="xrpl-bar-item">
+      <span class="xrpl-bar-label">Ledger</span>
+      <span class="xrpl-bar-value" id="xb-ledger">—</span>
+    </div>
+    <div class="xrpl-bar-item">
+      <span class="xrpl-bar-label">Txns</span>
+      <span class="xrpl-bar-value" id="xb-txns">—</span>
+    </div>
+    <div class="xrpl-bar-item">
+      <span class="xrpl-bar-label">Live Trades</span>
+      <span class="xrpl-bar-value live" id="xb-trades">0</span>
+    </div>
+    <div class="xrpl-bar-item">
+      <span class="xrpl-bar-label">Meme Trades</span>
+      <span class="xrpl-bar-value live" id="xb-meme">0</span>
+    </div>
+    <div class="xrpl-bar-item">
+      <span class="xrpl-bar-label">Node</span>
+      <span class="xrpl-bar-value" id="xb-node">wss://xrplcluster.com</span>
+    </div>
+  </div>
+
+  <!-- ── Stats ───────────────────────────────────────────────────────────── -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-label">XRPL Pairs</div>
+      <div class="stat-value" id="stat-total">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">New (Session)</div>
+      <div class="stat-value g" id="stat-new">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Volume 24h</div>
+      <div class="stat-value b" id="stat-volume">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Alerts</div>
+      <div class="stat-value r" id="stat-alerts">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">On-Chain DEX</div>
+      <div class="stat-value g" id="stat-onchain">—</div>
+    </div>
+  </div>
+
+  <!-- ── Filter bar ──────────────────────────────────────────────────────── -->
+  <div class="filter-bar">
+    <button class="filter-btn active" data-filter="all">All Pairs</button>
+    <button class="filter-btn" data-filter="new">🆕 New</button>
+    <button class="filter-btn" data-filter="trending">🔥 Trending</button>
+    <button class="filter-btn" data-filter="alerts">⚠️ Alerts</button>
+    <button class="filter-btn" data-filter="onchain">⛓️ On-Chain</button>
+    <div class="spacer"></div>
+    <label class="toggle-label">
+      <input type="checkbox" id="meme-only" checked /> Meme filter
+    </label>
+  </div>
+
+  <!-- ── Main area: table + live trade feed ──────────────────────────────── -->
+  <div class="main-area">
+
+    <!-- Pair table -->
+    <div class="table-wrap">
+      <table class="pairs-table">
+        <thead>
+          <tr>
+            <th class="th-left">#</th>
+            <th class="th-left sortable" data-sort="name"    data-label="Token">Token ↕</th>
+            <th class="sortable" data-sort="price"    data-label="Price">Price ↕</th>
+            <th class="sortable" data-sort="change1h" data-label="1h %">1h % ↕</th>
+            <th class="sortable" data-sort="change6h" data-label="6h %">6h % ↕</th>
+            <th class="sortable" data-sort="change24h"data-label="24h %">24h % ↕</th>
+            <th class="sortable" data-sort="volume"   data-label="Vol 24h">Vol 24h ↕</th>
+            <th class="sortable" data-sort="liquidity"data-label="Liquidity">Liquidity ↕</th>
+            <th class="sortable" data-sort="age"      data-label="Age">Age ↕</th>
+            <th>DEX</th>
+            <th>Chain</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="pairs-body"></tbody>
+      </table>
+      <div id="empty-state" class="empty-state hidden">
+        <div class="empty-icon">🔍</div>
+        <div>No XRPL meme pairs found</div>
+        <div class="empty-sub">Waiting for data from DexScreener + XRPL ledger…</div>
+      </div>
+    </div>
+
+    <!-- Live XRPL trade feed -->
+    <div class="trade-panel">
+      <div class="trade-panel-header">
+        <div class="live-dot" id="feed-dot"></div>
+        Live XRPL Trades
+      </div>
+      <div class="trade-feed" id="trade-feed">
+        <div style="padding:20px 12px;color:var(--muted);font-size:11px;">
+          Waiting for XRPL trade events…
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /.main-area -->
+
+  <!-- ── Status bar ──────────────────────────────────────────────────────── -->
+  <div class="status-bar">
+    <div class="status-left">
+      <div class="live-dot" id="status-dot"></div>
+      <span id="status-text">Initialising…</span>
+    </div>
+    <div class="status-right">
+      <span id="refresh-cd"></span>
+      <button class="refresh-btn" id="refresh-btn" title="Refresh now">↺</button>
+      <span style="color:var(--muted)">DexScreener · XRPL</span>
+    </div>
+  </div>
+
+</div><!-- /#app -->
+
+<!-- ── Pair detail modal ────────────────────────────────────────────────── -->
+<div id="modal" class="modal hidden">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title"></div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════════════════════════
+
+const CFG = {
+  dexBase:     'https://api.dexscreener.com',
+  localBase:   'http://localhost:3030',    // Python server (optional)
+  refresh:     30,                          // seconds between auto-refreshes
+  queries:     ['meme','pepe','frog','moon','dog','cat','inu','pixel','based','pump','degen','shib'],
+  meme: {
+    maxLiquidityUsd:  500_000,
+    maxAgeDays:       30,
+    minChange24hPct:  5,
+    minVolumeUsd:     500,
+  },
+  priceAlertPct: 50,
+  maxTrades:     50,
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════════════════
+
+const S = {
+  allPairs:    [],
+  displayPairs:[],
+  newPairs:    new Set(),
+  alertPairs:  new Set(),
+  activeFilter:'all',
+  memeOnly:    true,
+  searchQuery: '',
+  sortField:   'volume',
+  sortDir:     'desc',
+  refreshTimer: 0,
+  lastUpdated:  null,
+  loading:      false,
+  error:        null,
+  serverMode:   false,   // true when Python server is providing data via SSE
+  xrplConnected:false,
+  dexConnected: false,
+  trades:       [],
+  totalTrades:  0,
+  memeTrades:   0,
+  ledger:       {},
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// DexScreener API (direct browser calls — CORS enabled)
+// ═══════════════════════════════════════════════════════════════════════════
+
+async function dexFetch(path) {
+  // Try local proxy first (avoids CORS edge cases with file:// protocol)
+  const proxyUrl = `${CFG.localBase}/api/dex?path=${encodeURIComponent(path)}`;
+  const directUrl = `${CFG.dexBase}${path}`;
+
+  for (const url of [proxyUrl, directUrl]) {
+    try {
+      const res = await fetch(url, { headers: { Accept: 'application/json' }, signal: AbortSignal.timeout(10000) });
+      if (res.ok) return res.json();
+    } catch (_) {}
+  }
+  throw new Error('DexScreener unreachable');
+}
+
+async function fetchXrplPairs() {
+  const results = await Promise.allSettled(
+    CFG.queries.map(q =>
+      dexFetch(`/latest/dex/search?q=${encodeURIComponent(q)}`)
+        .then(d => (d.pairs ?? []).filter(p => p.chainId === 'xrpl'))
+    )
+  );
+  const seen = new Map();
+  for (const r of results) {
+    if (r.status !== 'fulfilled') continue;
+    for (const p of r.value) {
+      if (p.pairAddress) seen.set(p.pairAddress, p);
+    }
+  }
+  return [...seen.values()];
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Meme heuristics
+// ═══════════════════════════════════════════════════════════════════════════
+
+function isMemePair(p) {
+  if (!S.memeOnly) return true;
+  const { maxLiquidityUsd, maxAgeDays, minChange24hPct, minVolumeUsd } = CFG.meme;
+  const liq = p.liquidity?.usd ?? Infinity;
+  if (liq > maxLiquidityUsd) return false;
+  if (p.pairCreatedAt) {
+    if ((Date.now() - p.pairCreatedAt) / 86_400_000 > maxAgeDays) return false;
+  }
+  if (Math.abs(p.priceChange?.h24 ?? 0) < minChange24hPct) return false;
+  if ((p.volume?.h24 ?? 0) < minVolumeUsd) return false;
+  return true;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Filter + Sort
+// ═══════════════════════════════════════════════════════════════════════════
+
+function applyFiltersAndSort() {
+  let pairs = S.allPairs.filter(isMemePair);
+
+  if (S.searchQuery) {
+    const q = S.searchQuery.toLowerCase();
+    pairs = pairs.filter(p =>
+      (p.baseToken?.symbol ?? '').toLowerCase().includes(q) ||
+      (p.baseToken?.name   ?? '').toLowerCase().includes(q) ||
+      (p.pairAddress       ?? '').toLowerCase().includes(q)
+    );
+  }
+
+  if (S.activeFilter === 'new')     pairs = pairs.filter(p => S.newPairs.has(p.pairAddress));
+  if (S.activeFilter === 'trending') pairs = pairs.filter(p => Math.abs(p.priceChange?.h24 ?? 0) >= CFG.priceAlertPct);
+  if (S.activeFilter === 'alerts')  pairs = pairs.filter(p => S.alertPairs.has(p.pairAddress));
+  if (S.activeFilter === 'onchain') pairs = pairs.filter(p => !!p.xrpl);
+
+  const dir = S.sortDir === 'asc' ? 1 : -1;
+  pairs.sort((a, b) => {
+    let va, vb;
+    switch (S.sortField) {
+      case 'price':     va = +( a.priceUsd ?? 0);         vb = +(b.priceUsd ?? 0);         break;
+      case 'change1h':  va = a.priceChange?.h1  ?? 0;     vb = b.priceChange?.h1  ?? 0;    break;
+      case 'change6h':  va = a.priceChange?.h6  ?? 0;     vb = b.priceChange?.h6  ?? 0;    break;
+      case 'change24h': va = a.priceChange?.h24 ?? 0;     vb = b.priceChange?.h24 ?? 0;    break;
+      case 'volume':    va = a.volume?.h24       ?? 0;     vb = b.volume?.h24       ?? 0;   break;
+      case 'liquidity': va = a.liquidity?.usd    ?? 0;     vb = b.liquidity?.usd    ?? 0;   break;
+      case 'age':       va = a.pairCreatedAt     ?? 0;     vb = b.pairCreatedAt     ?? 0;   break;
+      case 'name':      return (a.baseToken?.symbol ?? '').localeCompare(b.baseToken?.symbol ?? '') * dir;
+      default:          va = a.volume?.h24 ?? 0;           vb = b.volume?.h24 ?? 0;
+    }
+    return (va - vb) * dir;
+  });
+
+  S.displayPairs = pairs;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Formatting
+// ═══════════════════════════════════════════════════════════════════════════
+
+function fPrice(p) {
+  if (p == null) return '—';
+  const n = +p;
+  if (n >= 1_000) return '$' + n.toLocaleString(undefined, { maximumFractionDigits: 2 });
+  if (n >= 1)     return '$' + n.toFixed(4);
+  if (n >= 0.0001)return '$' + n.toFixed(6);
+  return '$' + n.toPrecision(4);
+}
+
+function fChange(c) {
+  if (c == null) return '—';
+  return (+c >= 0 ? '+' : '') + (+c).toFixed(2) + '%';
+}
+
+function fVol(v) {
+  if (v == null) return '—';
+  const n = +v;
+  if (n >= 1e9) return '$' + (n / 1e9).toFixed(2) + 'B';
+  if (n >= 1e6) return '$' + (n / 1e6).toFixed(2) + 'M';
+  if (n >= 1e3) return '$' + (n / 1e3).toFixed(1) + 'K';
+  return '$' + n.toFixed(0);
+}
+
+function fAge(ms) {
+  if (!ms) return '—';
+  const s = (Date.now() - ms) / 1000;
+  if (s < 3600)   return Math.floor(s / 60) + 'm';
+  if (s < 86400)  return Math.floor(s / 3600) + 'h';
+  return Math.floor(s / 86400) + 'd';
+}
+
+function fXrp(v) {
+  if (v == null) return '—';
+  const n = +v;
+  if (n >= 1)     return n.toFixed(4) + ' XRP';
+  if (n >= 0.0001)return n.toFixed(6) + ' XRP';
+  return n.toPrecision(4) + ' XRP';
+}
+
+function cc(v) {
+  if (v == null) return '';
+  return +v >= 0 ? 'up' : 'down';
+}
+
+function symbolColor(sym) {
+  let h = 0;
+  for (const c of (sym ?? '')) h = (h * 31 + c.charCodeAt(0)) & 0xffff;
+  return `hsl(${h % 360},65%,48%)`;
+}
+
+function initials(sym) {
+  return (sym ?? '?').slice(0, 3).toUpperCase();
+}
+
+function esc(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Rendering — pair table
+// ═══════════════════════════════════════════════════════════════════════════
+
+function renderTable() {
+  const tbody = qs('#pairs-body');
+  const pairs = S.displayPairs;
+
+  if (pairs.length === 0) { tbody.innerHTML = ''; show('#empty-state'); return; }
+  hide('#empty-state');
+
+  tbody.innerHTML = pairs.map((p, i) => renderRow(p, i + 1)).join('');
+  tbody.querySelectorAll('tr[data-addr]').forEach(tr =>
+    tr.addEventListener('click', () => {
+      const p = S.allPairs.find(x => x.pairAddress === tr.dataset.addr);
+      if (p) openModal(p);
+    })
+  );
+}
+
+function renderRow(p, rank) {
+  const isNew   = S.newPairs.has(p.pairAddress);
+  const isAlert = Math.abs(p.priceChange?.h24 ?? 0) >= CFG.priceAlertPct;
+  const hasXrpl = !!p.xrpl;
+  const sym     = p.baseToken?.symbol ?? '?';
+  const quote   = p.quoteToken?.symbol ?? 'XRP';
+  const url     = p.url ?? `https://dexscreener.com/xrpl/${p.pairAddress}`;
+
+  const badges = [
+    isNew   ? '<span class="badge badge-new">NEW</span>' : '',
+    isAlert ? '<span class="badge badge-hot">🔥</span>'  : '',
+    hasXrpl ? '<span class="badge badge-xrpl">⛓</span>'  : '',
+  ].join('');
+
+  const onchainDot = hasXrpl ? '<div class="onchain-dot" title="Live on-chain order book"></div>' : '';
+
+  return `
+<tr data-addr="${esc(p.pairAddress ?? '')}" class="${isNew ? 'row-new' : ''}">
+  <td class="rank">${rank}</td>
+  <td class="token-cell">
+    <div class="token-wrap">
+      <div class="token-avatar" style="background:${symbolColor(sym)}">${esc(initials(sym))}</div>
+      <div>
+        <div class="token-name">${esc(sym)}/${esc(quote)} ${badges}</div>
+        <div class="token-sub">${esc(p.baseToken?.name ?? sym)}</div>
+      </div>
+    </div>
+  </td>
+  <td class="num">${fPrice(p.priceUsd)}</td>
+  <td class="num ${cc(p.priceChange?.h1)}">${fChange(p.priceChange?.h1)}</td>
+  <td class="num ${cc(p.priceChange?.h6)}">${fChange(p.priceChange?.h6)}</td>
+  <td class="num ${cc(p.priceChange?.h24)}">${fChange(p.priceChange?.h24)}</td>
+  <td class="num">${fVol(p.volume?.h24)}</td>
+  <td class="num">${fVol(p.liquidity?.usd)}</td>
+  <td class="num muted">${fAge(p.pairCreatedAt)}</td>
+  <td style="text-align:right"><span class="dex-badge">${esc(p.dexId ?? 'DEX')}</span></td>
+  <td style="text-align:right;padding-right:4px">${onchainDot}</td>
+  <td style="text-align:right;padding-right:14px">
+    <a href="${esc(url)}" target="_blank" rel="noopener" class="ext-link"
+       title="View on DexScreener" onclick="event.stopPropagation()">↗</a>
+  </td>
+</tr>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Rendering — stats
+// ═══════════════════════════════════════════════════════════════════════════
+
+function renderStats() {
+  const filtered = S.allPairs.filter(isMemePair);
+  const totalVol = filtered.reduce((s, p) => s + (p.volume?.h24 ?? 0), 0);
+  const onchain  = filtered.filter(p => p.xrpl).length;
+
+  qs('#stat-total').textContent   = filtered.length;
+  qs('#stat-new').textContent     = S.newPairs.size;
+  qs('#stat-volume').textContent  = fVol(totalVol);
+  qs('#stat-alerts').textContent  = S.alertPairs.size;
+  qs('#stat-onchain').textContent = onchain;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Rendering — XRPL network bar
+// ═══════════════════════════════════════════════════════════════════════════
+
+function renderXrplBar() {
+  if (S.ledger.ledger_index) qs('#xb-ledger').textContent = '#' + S.ledger.ledger_index.toLocaleString();
+  if (S.ledger.txn_count != null) qs('#xb-txns').textContent = S.ledger.txn_count;
+  qs('#xb-trades').textContent = S.totalTrades;
+  qs('#xb-meme').textContent   = S.memeTrades;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Live trade feed
+// ═══════════════════════════════════════════════════════════════════════════
+
+function addTrade(trade) {
+  S.trades.unshift(trade);
+  if (S.trades.length > CFG.maxTrades) S.trades.pop();
+  S.totalTrades++;
+  if (trade.is_meme) S.memeTrades++;
+
+  // Prepend to DOM feed
+  const feed = qs('#trade-feed');
+  // Remove placeholder
+  feed.querySelectorAll('div[style]').forEach(el => el.remove());
+
+  const sym    = trade.gets?.currency ?? trade.pays?.currency ?? '?';
+  const isBuy  = trade.type === 'buy';
+  const price  = isBuy ? (trade.pays?.value / trade.gets?.value) : (trade.gets?.value / trade.pays?.value);
+  const div = document.createElement('div');
+  div.className = 'trade-row';
+  div.innerHTML = `
+    <div class="trade-top">
+      <span class="trade-sym">${esc(sym)}/XRP${trade.is_meme ? ' <span class="trade-meme">🔥</span>' : ''}</span>
+      <span class="trade-type ${isBuy ? 'buy' : 'sell'}">${isBuy ? 'BUY' : 'SELL'}</span>
+    </div>
+    <div class="trade-bottom">
+      <span>${fXrp(price)}</span>
+      <span>${trade.is_meme ? '🔥 meme' : 'DEX'}</span>
+    </div>`;
+  feed.prepend(div);
+
+  // Keep feed trimmed
+  while (feed.children.length > CFG.maxTrades) feed.lastChild.remove();
+
+  renderXrplBar();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Modal
+// ═══════════════════════════════════════════════════════════════════════════
+
+function openModal(p) {
+  const sym   = p.baseToken?.symbol ?? '?';
+  const quote = p.quoteToken?.symbol ?? 'XRP';
+  const url   = p.url ?? `https://dexscreener.com/xrpl/${p.pairAddress}`;
+
+  qs('#modal-title').innerHTML = `
+    <div class="modal-avatar" style="background:${symbolColor(sym)}">${esc(initials(sym))}</div>
+    <div>
+      <div class="modal-sym">${esc(sym)}/${esc(quote)}</div>
+      <div class="modal-sub">${esc(p.baseToken?.name ?? '')} · XRPL</div>
+    </div>`;
+
+  const book = p.xrpl;
+  const orderBookHtml = book ? `
+    <div class="modal-section-title" style="margin-top:12px">⛓️ Live XRPL Order Book</div>
+    <div class="order-book">
+      <div class="ob-side">
+        <div class="ob-title bid">Bids (buy orders)</div>
+        ${(book.bids ?? []).slice(0,5).map(o => {
+          try {
+            const xrp = +o.TakerPays / 1e6;
+            const tok = +o.TakerGets?.value;
+            const px  = tok > 0 ? (xrp / tok).toFixed(8) : '—';
+            return `<div class="ob-row bid"><span class="ob-price">${px}</span><span>${fVol(xrp)} XRP</span></div>`;
+          } catch { return ''; }
+        }).join('') || '<div class="ob-empty">No bids</div>'}
+      </div>
+      <div class="ob-side">
+        <div class="ob-title ask">Asks (sell orders)</div>
+        ${(book.asks ?? []).slice(0,5).map(o => {
+          try {
+            const xrp = +o.TakerGets / 1e6;
+            const tok = +o.TakerPays?.value;
+            const px  = tok > 0 ? (xrp / tok).toFixed(8) : '—';
+            return `<div class="ob-row ask"><span class="ob-price">${px}</span><span>${fVol(xrp)} XRP</span></div>`;
+          } catch { return ''; }
+        }).join('') || '<div class="ob-empty">No asks</div>'}
+      </div>
+    </div>
+    <div class="detail-grid" style="grid-template-columns:1fr 1fr 1fr">
+      ${dc('Best Bid', fXrp(book.best_bid_xrp), 'up')}
+      ${dc('Best Ask', fXrp(book.best_ask_xrp), 'down')}
+      ${dc('Spread', book.spread_pct != null ? book.spread_pct.toFixed(2) + '%' : '—')}
+    </div>` : '';
+
+  qs('#modal-body').innerHTML = `
+    <div class="detail-grid">
+      ${dc('Price USD',   fPrice(p.priceUsd))}
+      ${dc('1h Change',   fChange(p.priceChange?.h1),  cc(p.priceChange?.h1))}
+      ${dc('6h Change',   fChange(p.priceChange?.h6),  cc(p.priceChange?.h6))}
+      ${dc('24h Change',  fChange(p.priceChange?.h24), cc(p.priceChange?.h24))}
+      ${dc('Volume 24h',  fVol(p.volume?.h24))}
+      ${dc('Liquidity',   fVol(p.liquidity?.usd))}
+      ${dc('FDV',         fVol(p.fdv))}
+      ${dc('Listed',      fAge(p.pairCreatedAt) + ' ago')}
+    </div>
+    ${orderBookHtml}
+    <div class="modal-addr-label">Pair address</div>
+    <code class="modal-addr-val">${esc(p.pairAddress ?? '—')}</code>
+    <div class="modal-addr-label">Base token issuer</div>
+    <code class="modal-addr-val">${esc(p.baseToken?.address ?? '—')}</code>
+    <div class="modal-actions">
+      <a href="${esc(url)}" target="_blank" rel="noopener" class="btn-primary">View on DexScreener ↗</a>
+    </div>`;
+
+  show('#modal');
+}
+
+function dc(label, value, cls = '') {
+  return `<div class="detail-card">
+    <div class="detail-label">${esc(label)}</div>
+    <div class="detail-value ${cls}">${value}</div>
+  </div>`;
+}
+
+function closeModal() { hide('#modal'); }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Main refresh (DexScreener)
+// ═══════════════════════════════════════════════════════════════════════════
+
+async function refresh() {
+  if (S.loading) return;
+  S.loading = true;
+  setStatus('Fetching XRPL pairs from DexScreener…', true);
+
+  try {
+    const fresh = await fetchXrplPairs();
+    S.dexConnected = true;
+    qs('#dot-dex').className = 'conn-dot on';
+
+    for (const p of fresh) {
+      if (p.pairAddress && !S.allPairs.some(x => x.pairAddress === p.pairAddress)) {
+        S.newPairs.add(p.pairAddress);
+      }
+      if (Math.abs(p.priceChange?.h24 ?? 0) >= CFG.priceAlertPct) {
+        S.alertPairs.add(p.pairAddress ?? '');
+      } else {
+        S.alertPairs.delete(p.pairAddress ?? '');
+      }
+    }
+
+    // Merge with any existing XRPL-enriched data (keep xrpl book if already present)
+    const merged = new Map(S.allPairs.map(p => [p.pairAddress, p]));
+    for (const p of fresh) {
+      const existing = merged.get(p.pairAddress);
+      merged.set(p.pairAddress, existing?.xrpl ? { ...p, xrpl: existing.xrpl } : p);
+    }
+    S.allPairs = [...merged.values()];
+    S.lastUpdated = new Date();
+    S.error = null;
+
+    applyFiltersAndSort();
+    renderTable();
+    renderStats();
+    setStatus(`DexScreener · last updated ${S.lastUpdated.toLocaleTimeString()}`);
+  } catch (err) {
+    S.dexConnected = false;
+    qs('#dot-dex').className = 'conn-dot err';
+    setStatus(`DexScreener error: ${err.message}`, false, true);
+  } finally {
+    S.loading = false;
+    startRefreshTimer();
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SSE — connect to Python server for XRPL stream + bot pushes
+// ═══════════════════════════════════════════════════════════════════════════
+
+function connectSSE() {
+  try {
+    const es = new EventSource(`${CFG.localBase}/api/stream`);
+
+    es.onopen = () => {
+      S.serverMode = true;
+      qs('#dot-bot').className = 'conn-dot on';
+      qs('#lbl-bot').textContent = 'Bot connected';
+    };
+    es.onerror = () => {
+      S.serverMode = false;
+      qs('#dot-bot').className = 'conn-dot off';
+      qs('#lbl-bot').textContent = 'Standalone';
+    };
+
+    // Initial state snapshot from server
+    es.addEventListener('init', e => {
+      const d = JSON.parse(e.data);
+      mergePairs(d.pairs ?? []);
+      for (const t of d.trades ?? []) addTrade(t);
+      if (d.ledger?.ledger_index) {
+        S.ledger = d.ledger;
+        renderXrplBar();
+      }
+      updateXrplStatus(d.xrpl_connected);
+    });
+
+    // Pair updates (DexScreener data pushed from server or your bot)
+    es.addEventListener('pairs', e => {
+      mergePairs(JSON.parse(e.data));
+    });
+
+    // Live XRPL DEX trade
+    es.addEventListener('trade', e => {
+      addTrade(JSON.parse(e.data));
+    });
+
+    // XRPL ledger closed
+    es.addEventListener('ledger', e => {
+      S.ledger = JSON.parse(e.data);
+      renderXrplBar();
+    });
+
+    // XRPL connection status
+    es.addEventListener('xrpl_status', e => {
+      updateXrplStatus(JSON.parse(e.data).connected);
+    });
+
+    es.addEventListener('reset', () => {
+      S.allPairs = [];
+      applyFiltersAndSort();
+      renderTable();
+      renderStats();
+    });
+
+  } catch (_) {
+    // server not running — UI works standalone
+  }
+}
+
+function mergePairs(incoming) {
+  const map = new Map(S.allPairs.map(p => [p.pairAddress, p]));
+  for (const p of incoming) {
+    if (!p.pairAddress) continue;
+    if (!map.has(p.pairAddress)) S.newPairs.add(p.pairAddress);
+    if (Math.abs(p.priceChange?.h24 ?? 0) >= CFG.priceAlertPct) {
+      S.alertPairs.add(p.pairAddress);
+    }
+    map.set(p.pairAddress, p);
+  }
+  S.allPairs = [...map.values()];
+  applyFiltersAndSort();
+  renderTable();
+  renderStats();
+}
+
+function updateXrplStatus(connected) {
+  S.xrplConnected = connected;
+  qs('#dot-xrpl').className = `conn-dot ${connected ? 'on' : 'off'}`;
+  qs('#lbl-xrpl').textContent = connected ? 'XRPL Live' : 'XRPL';
+  qs('#feed-dot').className = `live-dot${connected ? '' : ' error'}`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Timer
+// ═══════════════════════════════════════════════════════════════════════════
+
+let _cdInterval = null, _refreshInterval = null;
+
+function startRefreshTimer() {
+  S.refreshTimer = CFG.refresh;
+  clearInterval(_cdInterval);
+  clearInterval(_refreshInterval);
+  _cdInterval = setInterval(() => {
+    S.refreshTimer = Math.max(0, S.refreshTimer - 1);
+    qs('#refresh-cd').textContent = `Refresh in ${S.refreshTimer}s`;
+  }, 1000);
+  _refreshInterval = setInterval(refresh, CFG.refresh * 1000);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Status bar
+// ═══════════════════════════════════════════════════════════════════════════
+
+function setStatus(msg, loading = false, error = false) {
+  qs('#status-text').textContent = msg;
+  qs('#status-dot').className = 'live-dot' + (loading ? ' loading' : error ? ' error' : '');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Event wiring
+// ═══════════════════════════════════════════════════════════════════════════
+
+function wireEvents() {
+  qs('#search').addEventListener('input', e => {
+    S.searchQuery = e.target.value;
+    applyFiltersAndSort();
+    renderTable();
+  });
+
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      S.activeFilter = btn.dataset.filter;
+      applyFiltersAndSort();
+      renderTable();
+    });
+  });
+
+  qs('#meme-only').addEventListener('change', e => {
+    S.memeOnly = e.target.checked;
+    applyFiltersAndSort();
+    renderTable();
+    renderStats();
+  });
+
+  document.querySelectorAll('th[data-sort]').forEach(th => {
+    th.addEventListener('click', () => {
+      const f = th.dataset.sort;
+      if (S.sortField === f) S.sortDir = S.sortDir === 'desc' ? 'asc' : 'desc';
+      else { S.sortField = f; S.sortDir = 'desc'; }
+      updateSortArrows();
+      applyFiltersAndSort();
+      renderTable();
+    });
+  });
+
+  qs('#refresh-btn').addEventListener('click', refresh);
+
+  qs('#modal').addEventListener('click', e => { if (e.target === qs('#modal')) closeModal(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+}
+
+function updateSortArrows() {
+  document.querySelectorAll('th[data-sort]').forEach(th => {
+    const label = th.dataset.label ?? th.textContent.replace(/[↕↑↓]/g,'').trim();
+    th.dataset.label = label;
+    th.textContent = label + (th.dataset.sort === S.sortField
+      ? (S.sortDir === 'asc' ? ' ↑' : ' ↓') : ' ↕');
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Utilities
+// ═══════════════════════════════════════════════════════════════════════════
+
+function qs(sel)   { return document.querySelector(sel); }
+function show(sel) { qs(sel)?.classList.remove('hidden'); }
+function hide(sel) { qs(sel)?.classList.add('hidden'); }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Init
+// ═══════════════════════════════════════════════════════════════════════════
+
+document.addEventListener('DOMContentLoaded', () => {
+  wireEvents();
+  connectSSE();       // optional Python server connection
+  refresh();          // initial DexScreener fetch
+});
+</script>
+</body>
+</html>

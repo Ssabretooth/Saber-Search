@@ -294,6 +294,66 @@ def push_pairs_to_ui(
 
 
 # ---------------------------------------------------------------------------
+# XRPL live order-book enrichment
+# ---------------------------------------------------------------------------
+
+
+def enrich_with_xrpl_data(pairs: list[dict], *, timeout: float = 8.0) -> list[dict]:
+    """Cross-reference DexScreener pairs with live XRPL order-book data.
+
+    For each pair that has an identifiable XRPL token issuer address, this
+    function fetches the current on-chain order book (bids + asks) from the
+    XRPL ledger and attaches it as ``pair["xrpl"]``.
+
+    Args:
+        pairs:   List of XRPL pair dicts from DexScreener.
+        timeout: Per-pair HTTP query timeout in seconds.
+
+    Returns:
+        Same list, with a ``"xrpl"`` key added to pairs that have live data.
+        Pairs that cannot be enriched are returned unchanged.
+
+    Example::
+
+        from dexscreener import search_xrpl_meme_pairs, enrich_with_xrpl_data
+        from xrpl_client import XRPLClient
+
+        pairs = search_xrpl_meme_pairs("pepe")
+        pairs = enrich_with_xrpl_data(pairs)
+
+        for p in pairs:
+            book = p.get("xrpl", {})
+            print(p["baseToken"]["symbol"],
+                  "bid:", book.get("best_bid_xrp"),
+                  "ask:", book.get("best_ask_xrp"))
+    """
+    # Lazy import to keep dexscreener.py standalone when xrpl_client is absent.
+    try:
+        from xrpl_client import XRPLClient  # type: ignore[import]
+    except ImportError:
+        return pairs
+
+    client = XRPLClient()
+    enriched = []
+
+    for pair in pairs:
+        base = pair.get("baseToken") or {}
+        currency = base.get("symbol", "")
+        issuer = base.get("address", "")
+
+        if currency and issuer and pair.get("chainId") == "xrpl":
+            try:
+                book = client.get_token_order_book(currency, issuer)
+                pair = {**pair, "xrpl": book}
+            except Exception:
+                pass  # leave pair unchanged if XRPL query fails
+
+        enriched.append(pair)
+
+    return enriched
+
+
+# ---------------------------------------------------------------------------
 # CLI — run directly for a quick test
 # ---------------------------------------------------------------------------
 

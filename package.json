@@ -1,7 +1,7 @@
 {
   "name": "saber-search",
   "version": "1.0.0",
-  "description": "A DeFi search tool powered by DexScreener",
+  "description": "XRPL meme token tracker with DexScreener-like UI — Python 3 + Node.js",
   "main": "src/index.js",
   "type": "module",
   "bin": {
@@ -9,10 +9,12 @@
   },
   "scripts": {
     "start": "node src/index.js",
-    "test": "node --test src/sources/dexscreener.test.js src/tracker/memeTracker.test.js"
+    "test": "node --test src/sources/dexscreener.test.js src/tracker/memeTracker.test.js",
+    "ui": "python3 server.py"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=18.0.0",
+    "python": ">=3.10"
   },
   "license": "MIT"
 }

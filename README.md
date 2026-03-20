@@ -1,4 +1,211 @@
-# Saber-Search
+# Saber-Search — XRPL Meme Tracker
+
+A DexScreener-like dashboard for tracking meme tokens on the **XRP Ledger**,
+plugged directly into both the **XRPL API** (live ledger + DEX order book) and
+the **DexScreener public API** (price, volume, liquidity).
+
+Zero npm/pip dependencies for the core files — drop them straight into VS Code.
+
+---
+
+## Files — paste these into your VS Code project
+
+| File | What it is |
+|---|---|
+| `ui/index.html` | **The dashboard** — open in any browser or VS Code Live Server |
+| `dexscreener.py` | Python 3 DexScreener API client — import into your bot |
+| `xrpl_client.py` | Python 3 XRPL HTTP + WebSocket client — import into your bot |
+| `server.py` | Python 3 bridge server — connects XRPL + DexScreener → UI |
+
+---
+
+## Quick start (VS Code)
+
+### Option A — Open the dashboard directly (no server needed)
+
+```
+ui/index.html → right-click → Open with Live Server
+```
+
+The dashboard fetches XRPL pairs from DexScreener in the browser.
+No Python needed. The XRPL trade feed will be empty until you run the server.
+
+---
+
+### Option B — Full live feed (Python server + XRPL WebSocket)
+
+```bash
+python3 server.py
+```
+
+Then open: **http://localhost:3030**
+
+The server will:
+1. Connect to `wss://xrplcluster.com` — live XRPL ledger subscription
+2. Stream DEX trade events to the browser in real-time (right-hand panel)
+3. Poll DexScreener every 30 s for XRPL meme pairs
+4. Enrich each pair with its live on-chain order book (bids + asks)
+
+---
+
+## Bot integration — push your own pair data to the UI
+
+In your existing Python 3 bot, use the built-in helper:
+
+```python
+from dexscreener import search_xrpl_meme_pairs, push_pairs_to_ui
+
+# Detect meme pairs
+pairs = search_xrpl_meme_pairs('pepe', max_liquidity_usd=200_000, min_change_24h_pct=20)
+
+# Push to dashboard instantly (server.py must be running)
+push_pairs_to_ui(pairs)
+```
+
+Or with raw `urllib.request` (no extra imports):
+
+```python
+import urllib.request, json
+
+pair = {
+    "pairAddress": "rMyPairAddress...",
+    "chainId":     "xrpl",
+    "baseToken":   {"symbol": "PEPE", "name": "Pepe Coin", "address": "rIssuer..."},
+    "quoteToken":  {"symbol": "XRP"},
+    "priceUsd":    "0.000012",
+    "priceChange": {"h1": 5.2, "h6": 18.4, "h24": 120.0},
+    "volume":      {"h24": 45000},
+    "liquidity":   {"usd": 12000},
+    "pairCreatedAt": 1710000000000,
+    "dexId":       "xrpldex",
+}
+
+body = json.dumps([pair]).encode()
+req  = urllib.request.Request(
+    "http://localhost:3030/api/pairs", data=body,
+    headers={"Content-Type": "application/json"}, method="POST")
+urllib.request.urlopen(req)
+```
+
+---
+
+## XRPL API client (`xrpl_client.py`)
+
+```python
+from xrpl_client import XRPLClient
+
+client = XRPLClient()
+
+# Query the live order book for a XRPL meme token
+book = client.get_token_order_book("PEPE", "rIssuerAddress...")
+print("Best bid:", book["best_bid_xrp"], "XRP")
+print("Best ask:", book["best_ask_xrp"], "XRP")
+print("Spread:  ", book["spread_pct"], "%")
+
+# Get recent transactions for an account
+txns = client.get_account_tx("rYourBotAddress...", limit=20)
+
+# Subscribe to live XRPL DEX trade events (background thread)
+def on_event(event):
+    trade = XRPLClient.extract_dex_trade(event)
+    if trade and trade["is_meme"]:
+        print(f"🔥 MEME TRADE: {trade['type']} {trade['token_currency']}")
+
+client.subscribe(on_event)
+# ... your bot logic ...
+client.close()
+```
+
+Test the XRPL connection from the terminal:
+
+```bash
+# Basic connectivity test
+python3 xrpl_client.py
+
+# Watch live DEX trades for 10 seconds
+python3 xrpl_client.py
+
+# Check order book for a specific token
+python3 xrpl_client.py PEPE rIssuerAddress...
+```
+
+---
+
+## DexScreener API client (`dexscreener.py`)
+
+```python
+from dexscreener import (
+    search_xrpl_meme_pairs,
+    get_xrpl_token_pairs,
+    enrich_with_xrpl_data,
+    format_pair,
+    push_pairs_to_ui,
+)
+
+# Search for meme pairs on XRPL
+pairs = search_xrpl_meme_pairs('pepe')
+
+# Enrich with live XRPL order-book data
+pairs = enrich_with_xrpl_data(pairs)
+
+for p in pairs:
+    print(format_pair(p))
+    book = p.get('xrpl', {})
+    if book:
+        print(f"  On-chain bid: {book['best_bid_xrp']} XRP")
+```
+
+Quick test:
+
+```bash
+python3 dexscreener.py pepe
+python3 dexscreener.py moon
+```
+
+---
+
+## Server API endpoints
+
+| Method | Path | Description |
+|---|---|---|
+| `GET`    | `/`             | Serve `ui/index.html` |
+| `GET`    | `/api/stream`   | SSE stream → browser receives XRPL + DexScreener events |
+| `POST`   | `/api/pairs`    | Bot pushes pair data (JSON array) |
+| `GET`    | `/api/state`    | Current tracked pairs as JSON |
+| `GET`    | `/api/trades`   | Recent XRPL DEX trades as JSON |
+| `GET`    | `/api/ledger`   | Latest XRPL ledger close info |
+| `DELETE` | `/api/pairs`    | Clear all tracked pairs |
+| `GET`    | `/api/dex?path=…` | CORS proxy to DexScreener API |
+
+---
+
+## Dashboard features
+
+| Feature | Source |
+|---|---|
+| Token table (price, 1h/6h/24h change, volume, liquidity, age) | DexScreener API |
+| XRPL network bar (ledger #, tx count, live trade counter) | XRPL WebSocket |
+| Live trade feed (right panel, real-time DEX offers) | XRPL WebSocket |
+| On-chain order book in pair modal (bids + asks) | XRPL HTTP JSON-RPC |
+| ⛓ badge on pairs with live order-book data | XRPL HTTP JSON-RPC |
+| 🔥 badge on pumping pairs (|24h| ≥ 50%) | DexScreener |
+| 🆕 badge on pairs first seen this session | Session state |
+| Meme filter toggle (liquidity / age / volatility) | Local heuristics |
+| Filter tabs: All / New / Trending / Alerts / On-Chain | Local |
+| Auto-refresh every 30 s | DexScreener |
+| Click row → pair detail modal with order book | Both |
+
+---
+
+## Running the Node.js CLI (optional)
+
+```bash
+node src/index.js search ETH
+node src/index.js xrpl pepe
+node src/index.js track pepe,moon,frog 30
+node src/index.js trending
+```
+
 
 A DeFi search and meme-token tracking tool for the **XRP Ledger (XRPL)**, powered by the [DexScreener](https://dexscreener.com) public API.
 
