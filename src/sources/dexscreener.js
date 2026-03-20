@@ -112,6 +112,109 @@ export async function getTopBoostedTokens() {
   return Array.isArray(data) ? data : [];
 }
 
+// ---------------------------------------------------------------------------
+// XRPL-specific helpers
+// ---------------------------------------------------------------------------
+
+/** The chain identifier used by DexScreener for the XRP Ledger. */
+export const XRPL_CHAIN_ID = 'xrpl';
+
+/**
+ * Search DexScreener for XRPL trading pairs matching a query.
+ *
+ * This is a convenience wrapper around {@link searchPairs} that pre-filters
+ * results to only pairs on the XRP Ledger.
+ *
+ * @param {string} query - Token name, symbol, or issuer address
+ * @returns {Promise<Array>} XRPL pairs matching the query
+ */
+export async function searchXrplPairs(query) {
+  const pairs = await searchPairs(query);
+  return pairs.filter((p) => p.chainId === XRPL_CHAIN_ID);
+}
+
+/**
+ * Get all known pairs for an XRPL token issuer address.
+ *
+ * @param {string} issuerAddress - The XRPL issuer account address (r…)
+ * @returns {Promise<Array>} Array of XRPL pair objects
+ */
+export async function getXrplTokenPairs(issuerAddress) {
+  const pairs = await getTokenPairs(issuerAddress);
+  return pairs.filter((p) => p.chainId === XRPL_CHAIN_ID);
+}
+
+/**
+ * Determine whether a pair looks like a meme token on the XRPL.
+ *
+ * Heuristics (all configurable via the `options` argument):
+ * - Liquidity < `maxLiquidityUsd`   (meme tokens are usually low-liquidity)
+ * - Pair age  < `maxAgeDays`        (recently listed)
+ * - 24 h price change magnitude > `minChange24hPct`  (high volatility)
+ *
+ * @param {object} pair
+ * @param {object} [options]
+ * @param {number} [options.maxLiquidityUsd=500_000]   Max liquidity in USD
+ * @param {number} [options.maxAgeDays=30]             Max listing age in days
+ * @param {number} [options.minChange24hPct=10]        Minimum |24 h change| %
+ * @returns {boolean}
+ */
+export function isXrplMemePair(pair, options = {}) {
+  const {
+    maxLiquidityUsd = 500_000,
+    maxAgeDays = 30,
+    minChange24hPct = 10,
+  } = options;
+
+  if (pair.chainId !== XRPL_CHAIN_ID) return false;
+
+  const liquidity = pair.liquidity?.usd ?? Infinity;
+  if (liquidity > maxLiquidityUsd) return false;
+
+  if (pair.pairCreatedAt) {
+    const ageMs = Date.now() - pair.pairCreatedAt;
+    const ageDays = ageMs / (1000 * 60 * 60 * 24);
+    if (ageDays > maxAgeDays) return false;
+  }
+
+  const change24h = Math.abs(pair.priceChange?.h24 ?? 0);
+  if (change24h < minChange24hPct) return false;
+
+  return true;
+}
+
+/**
+ * Fetch and return only XRPL pairs that pass the meme-token heuristics.
+ *
+ * @param {string} query - Search query forwarded to DexScreener
+ * @param {object} [memeOptions] - Options forwarded to {@link isXrplMemePair}
+ * @returns {Promise<Array>} Filtered array of meme-like XRPL pairs
+ */
+export async function searchXrplMemePairs(query, memeOptions = {}) {
+  const xrplPairs = await searchXrplPairs(query);
+  return xrplPairs.filter((p) => isXrplMemePair(p, memeOptions));
+}
+
+// ---------------------------------------------------------------------------
+
+/**
+ * Format a price number with adaptive decimal precision.
+ *  - Price >= 1 000   → 2 decimal places  (e.g. "$1,234.56")
+ *  - Price >= 1       → 4 decimal places  (e.g. "$2.5001")
+ *  - Price >= 0.0001  → 6 decimal places  (e.g. "$0.000012")
+ *  - Smaller          → up to 10 significant figures (e.g. "$0.0000000012")
+ *
+ * @param {number} price
+ * @returns {string}
+ */
+function formatPrice(price) {
+  if (price >= 1_000) return price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  if (price >= 1)     return price.toFixed(4);
+  if (price >= 0.0001) return price.toFixed(6);
+  // Very small values: show up to 10 significant figures to avoid "0.000000"
+  return price.toPrecision(4);
+}
+
 /**
  * Format a pair object into a human-readable summary string.
  *
@@ -121,7 +224,7 @@ export async function getTopBoostedTokens() {
 export function formatPair(pair) {
   const base = pair.baseToken?.symbol ?? '?';
   const quote = pair.quoteToken?.symbol ?? '?';
-  const price = pair.priceUsd != null ? `$${Number(pair.priceUsd).toFixed(6)}` : 'N/A';
+  const price = pair.priceUsd != null ? `$${formatPrice(Number(pair.priceUsd))}` : 'N/A';
   const liquidity = pair.liquidity?.usd != null
     ? `$${Number(pair.liquidity.usd).toLocaleString()}`
     : 'N/A';

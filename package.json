@@ -9,7 +9,7 @@
   },
   "scripts": {
     "start": "node src/index.js",
-    "test": "node --test src/sources/dexscreener.test.js"
+    "test": "node --test src/sources/dexscreener.test.js src/tracker/memeTracker.test.js"
   },
   "engines": {
     "node": ">=18.0.0"

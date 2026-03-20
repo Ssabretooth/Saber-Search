@@ -3,12 +3,15 @@
  *
  * CLI usage:
  *   node src/index.js search <query>
- *   node src/index.js token <address> [chainId]
+ *   node src/index.js token <address>
  *   node src/index.js pair <chainId> <pairAddress>
  *   node src/index.js trending
+ *   node src/index.js xrpl <query>
+ *   node src/index.js track [query1,query2,...] [intervalSeconds]
  */
 
-import { searchPairs, getTokenPairs, getPair, getTopBoostedTokens, formatPair } from './sources/dexscreener.js';
+import { searchPairs, getTokenPairs, getPair, getTopBoostedTokens, formatPair, searchXrplPairs, getXrplTokenPairs } from './sources/dexscreener.js';
+import { startBot } from './tracker/bot.js';
 
 const [,, command, ...args] = process.argv;
 
@@ -85,20 +88,81 @@ async function main() {
       break;
     }
 
+    // ------------------------------------------------------------------
+    // XRPL-specific commands
+    // ------------------------------------------------------------------
+
+    case 'xrpl': {
+      const query = args.join(' ');
+      if (!query) {
+        console.error('Usage: saber-search xrpl <query>');
+        process.exit(1);
+      }
+      console.log(`Searching DexScreener for XRPL pairs matching: "${query}" …\n`);
+      const pairs = await searchXrplPairs(query);
+      if (pairs.length === 0) {
+        console.log('No XRPL pairs found.');
+      } else {
+        console.log(`Found ${pairs.length} XRPL pair(s):\n`);
+        pairs.slice(0, 10).forEach((pair, i) => {
+          console.log(`[${i + 1}] ${formatPair(pair)}\n`);
+        });
+      }
+      break;
+    }
+
+    case 'track': {
+      // Usage: track [comma-separated queries] [intervalSeconds]
+      // e.g.:  track pepe,moon,frog 30
+      const queriesArg = args[0];
+      const intervalArg = args[1];
+
+      const queries = queriesArg
+        ? queriesArg.split(',').map((q) => q.trim()).filter(Boolean)
+        : undefined;
+
+      const intervalMs = intervalArg
+        ? Number(intervalArg) * 1000
+        : 60_000;
+
+      if (isNaN(intervalMs) || intervalMs < 5_000) {
+        console.error('Interval must be a number >= 5 seconds.');
+        process.exit(1);
+      }
+
+      console.log('Starting XRPL Meme Tracker Bot. Press Ctrl+C to stop.\n');
+
+      const bot = startBot({ queries, intervalMs });
+
+      // Graceful shutdown on Ctrl+C.
+      process.on('SIGINT', () => {
+        bot.stop();
+        process.exit(0);
+      });
+
+      // Keep the process alive.
+      await new Promise(() => {});
+      break;
+    }
+
     default:
       console.log([
         'Saber-Search — DeFi search powered by DexScreener',
         '',
         'Commands:',
-        '  search <query>              Search for trading pairs by token name, symbol, or address',
-        '  token <address>             Get all pairs for a token address',
-        '  pair <chainId> <address>    Get details for a specific pair',
-        '  trending                    Show top boosted tokens on DexScreener',
+        '  search <query>                    Search all chains for trading pairs',
+        '  token <address>                   Get all pairs for a token address',
+        '  pair <chainId> <address>          Get details for a specific pair',
+        '  trending                          Show top boosted tokens on DexScreener',
+        '  xrpl <query>                      Search XRPL-only trading pairs',
+        '  track [queries] [intervalSecs]    Start the XRPL meme tracker bot',
         '',
         'Examples:',
         '  node src/index.js search ETH',
-        '  node src/index.js token 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
-        '  node src/index.js pair ethereum 0x11b815efB8f581194ae79006d24E0d814B7697F6',
+        '  node src/index.js xrpl pepe',
+        '  node src/index.js token rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh',
+        '  node src/index.js pair xrpl <pairAddress>',
+        '  node src/index.js track pepe,moon,frog 60',
         '  node src/index.js trending',
       ].join('\n'));
   }
@@ -108,3 +172,4 @@ main().catch((err) => {
   console.error('Error:', err.message);
   process.exit(1);
 });
+

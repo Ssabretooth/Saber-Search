@@ -162,7 +162,8 @@ describe('formatPair', () => {
 
   it('includes price', () => {
     const text = formatPair(samplePair);
-    assert.ok(text.includes('2500.123456'));
+    // Price 2500.123456 >= 1000, so it's formatted with 2 decimal places as "2,500.12"
+    assert.ok(text.includes('2,500.12'));
   });
 
   it('includes 24h change with sign', () => {
