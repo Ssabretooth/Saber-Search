@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>XRP Africa – Powering Financial Corridors Across the Continent</title>
+  <meta name="description" content="Discover how XRP and the XRP Ledger are transforming cross-border payments and financial inclusion across Africa. Interactive live demo included." />
+  <meta property="og:title"       content="XRP Africa – Powering Financial Corridors" />
+  <meta property="og:description" content="Learn how XRPL technology slashes remittance fees and settlement times across African financial corridors." />
+  <meta property="og:type"        content="website" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<!-- ======================================================
+     NAVIGATION
+====================================================== -->
+<nav id="navbar">
+  <a href="#hero" class="nav-logo">
+    <div class="logo-icon">X</div>
+    <span>XRP Africa</span>
+  </a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#problem">The Challenge</a></li>
+    <li><a href="#solution">How It Works</a></li>
+    <li><a href="#use-cases">Use Cases</a></li>
+    <li><a href="#corridors">Corridors</a></li>
+    <li><a href="#live-demo">Live Demo</a></li>
+    <li><a href="#technical">Technical</a></li>
+    <li><a href="#live-demo" class="nav-cta">Try Demo →</a></li>
+  </ul>
+  <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- ======================================================
+     HERO
+====================================================== -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="container">
+    <div class="hero-grid">
+
+      <!-- Left: Text -->
+      <div class="hero-text">
+        <div class="hero-badge">
+          <span class="dot"></span>
+          Live on XRP Ledger Mainnet
+        </div>
+        <h1 class="hero-title">
+          Rewiring Africa's<br/>
+          <span class="accent">Financial Future</span><br/>
+          with XRP
+        </h1>
+        <p class="hero-desc">
+          Billions of dollars flow across Africa's borders every year — but slow rails, sky-high fees, 
+          and limited access trap wealth instead of growing it. The XRP Ledger changes the equation: 
+          settlement in <strong style="color:var(--text-primary)">3-5 seconds</strong>, fees under 
+          <strong style="color:var(--text-primary)">$0.0001</strong>, and open to anyone.
+        </p>
+        <div class="hero-actions">
+          <a href="#live-demo" class="btn-primary">
+            ⚡ Explore Live Demo
+          </a>
+          <a href="#solution" class="btn-secondary">
+            Learn How It Works
+          </a>
+        </div>
+
+        <div class="hero-stats">
+          <div class="hero-stat-item">
+            <div class="hero-stat-value"><span class="accent" id="heroLedger">–</span></div>
+            <div class="hero-stat-label">Current Ledger</div>
+          </div>
+          <div class="hero-stat-item">
+            <div class="hero-stat-value"><span class="accent">~3s</span></div>
+            <div class="hero-stat-label">Settlement Time</div>
+          </div>
+          <div class="hero-stat-item">
+            <div class="hero-stat-value"><span class="accent">$0.0001</span></div>
+            <div class="hero-stat-label">Avg Transaction Fee</div>
+          </div>
+          <div class="hero-stat-item">
+            <div class="hero-stat-value"><span id="heroTps" class="accent">–</span></div>
+            <div class="hero-stat-label">Transactions / Ledger</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Live Price Card -->
+      <div class="hero-visual">
+        <div class="hero-card">
+          <div class="hero-card-header">
+            <span class="hero-card-title">XRP / USD — Live</span>
+            <span class="live-badge"><span class="live-dot"></span>LIVE</span>
+          </div>
+          <div class="xrp-price-display">
+            <div class="xrp-price-big" id="xrpPrice">$—</div>
+            <div class="xrp-price-change" id="xrpChange">Loading…</div>
+          </div>
+          <div class="hero-card-divider"></div>
+          <div class="corridor-preview">
+            <p style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:6px;">Sample Corridors — Cost to send $100</p>
+            <div class="corridor-item">
+              <div class="corridor-route">
+                <span class="corridor-flag">🇳🇬</span>
+                <span class="corridor-arrow">→</span>
+                <span class="corridor-flag">🇬🇧</span>
+                <span>Nigeria → UK</span>
+              </div>
+              <div>
+                <div class="corridor-fee">~$0.01 via XRPL</div>
+                <div class="corridor-time">vs $8–12 traditional</div>
+              </div>
+            </div>
+            <div class="corridor-item">
+              <div class="corridor-route">
+                <span class="corridor-flag">🇰🇪</span>
+                <span class="corridor-arrow">→</span>
+                <span class="corridor-flag">🇺🇸</span>
+                <span>Kenya → USA</span>
+              </div>
+              <div>
+                <div class="corridor-fee">~$0.01 via XRPL</div>
+                <div class="corridor-time">vs $7–10 traditional</div>
+              </div>
+            </div>
+            <div class="corridor-item">
+              <div class="corridor-route">
+                <span class="corridor-flag">🇬🇭</span>
+                <span class="corridor-arrow">→</span>
+                <span class="corridor-flag">🇫🇷</span>
+                <span>Ghana → France</span>
+              </div>
+              <div>
+                <div class="corridor-fee">~$0.01 via XRPL</div>
+                <div class="corridor-time">vs $6–9 traditional</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="floating-badge floating-badge-1">⚡ 3-5 sec settlement</div>
+        <div class="floating-badge floating-badge-2">💰 Save up to 95% on fees</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================
+     THE PROBLEM
+====================================================== -->
+<section id="problem">
+  <div class="container">
+    <div class="text-center">
+      <div class="section-label">The Challenge</div>
+      <h2 class="section-title">Africa's Financial Corridors Are Broken</h2>
+      <p class="section-subtitle">
+        Sub-Saharan Africa is the <strong style="color:var(--text-primary)">most expensive region</strong> in the world to send money to. 
+        Legacy infrastructure, currency risk, and correspondent banking chains bleed wealth from every transaction.
+      </p>
+    </div>
+    <div class="problem-grid">
+      <div class="problem-card fade-up stagger-1">
+        <div class="problem-icon">💸</div>
+        <h3>Crippling Remittance Fees</h3>
+        <p>Families lose a significant share of every transfer to fees before the money even arrives.</p>
+        <div class="problem-stat">8.2%<small>average cost to send $200 to Sub-Saharan Africa (World Bank 2024)</small></div>
+      </div>
+      <div class="problem-card fade-up stagger-2">
+        <div class="problem-icon">⏳</div>
+        <h3>Painfully Slow Settlement</h3>
+        <p>Cross-border transfers can take 3–5 business days, leaving businesses and families in limbo.</p>
+        <div class="problem-stat">3–5 days<small>typical settlement window for international wire transfers</small></div>
+      </div>
+      <div class="problem-card fade-up stagger-3">
+        <div class="problem-icon">🏦</div>
+        <h3>Banking Exclusion</h3>
+        <p>Nearly 57% of adults in Sub-Saharan Africa remain unbanked, shut out of formal financial systems.</p>
+        <div class="problem-stat">57%<small>adults in Sub-Saharan Africa without bank accounts (World Bank)</small></div>
+      </div>
+      <div class="problem-card fade-up stagger-4">
+        <div class="problem-icon">🔗</div>
+        <h3>Fragmented Correspondent Networks</h3>
+        <p>Money passes through 3–5 intermediary banks, each adding delay, cost, and settlement risk.</p>
+        <div class="problem-stat">3–5×<small>more intermediaries than developed-market corridors</small></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================
+     HOW XRPL WORKS – SOLUTION
+====================================================== -->
+<section id="solution">
+  <div class="solution-bg"></div>
+  <div class="container">
+    <div class="text-center">
+      <div class="section-label">The Solution</div>
+      <h2 class="section-title">How XRP &amp; the XRPL Solve This</h2>
+      <p class="section-subtitle">
+        The XRP Ledger is an open-source, decentralised blockchain engineered specifically for global value transfer — 
+        fast, green, and cheap enough to make micro-remittances viable for the first time.
+      </p>
+    </div>
+
+    <div class="how-steps">
+      <div class="step-card fade-up stagger-1">
+        <div class="step-number">1</div>
+        <div class="step-icon">🌍</div>
+        <h3>Sender Initiates</h3>
+        <p style="font-size:0.88rem;">A user in Lagos, Nairobi, or Accra opens a wallet app and enters an amount and recipient address — no bank account required.</p>
+      </div>
+      <div class="step-card fade-up stagger-2">
+        <div class="step-number">2</div>
+        <div class="step-icon">🔄</div>
+        <h3>Auto Bridge via XRP</h3>
+        <p style="font-size:0.88rem;">The payment protocol finds the optimal path: local currency → XRP → destination currency, using the XRPL's built-in decentralised exchange (DEX).</p>
+      </div>
+      <div class="step-card fade-up stagger-3">
+        <div class="step-number">3</div>
+        <div class="step-icon">✅</div>
+        <h3>Consensus &amp; Settlement</h3>
+        <p style="font-size:0.88rem;">The network's 150+ independent validators reach agreement via the XRP Ledger Consensus Protocol (XRPLCP) — no mining, no waiting.</p>
+      </div>
+      <div class="step-card fade-up stagger-4">
+        <div class="step-number">4</div>
+        <div class="step-icon">💱</div>
+        <h3>Recipient Receives</h3>
+        <p style="font-size:0.88rem;">In 3–5 seconds the recipient's wallet is credited in their local currency. The total fee is a fraction of a cent.</p>
+      </div>
+    </div>
+
+    <!-- Comparison Table -->
+    <div class="comparison-wrap fade-up" style="margin-top:64px;">
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th>Traditional Wire / SWIFT</th>
+            <th>Mobile Money (M-Pesa etc.)</th>
+            <th>XRP Ledger ⚡</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Settlement Time</td>
+            <td class="bad">3 – 5 business days</td>
+            <td class="bad">Minutes – hours</td>
+            <td class="good">3 – 5 seconds</td>
+          </tr>
+          <tr>
+            <td>Cost per $100 transfer</td>
+            <td class="bad">$7 – $12 (7–12%)</td>
+            <td class="bad">$2 – $6 (2–6%)</td>
+            <td class="good">&lt; $0.01 (&lt;0.01%)</td>
+          </tr>
+          <tr>
+            <td>Bank Account Required</td>
+            <td class="bad">Yes</td>
+            <td class="bad">SIM card + KYC</td>
+            <td class="good">No — wallet only</td>
+          </tr>
+          <tr>
+            <td>Intermediaries</td>
+            <td class="bad">3 – 5 banks</td>
+            <td class="bad">1 – 2 aggregators</td>
+            <td class="good">Zero</td>
+          </tr>
+          <tr>
+            <td>Energy Use per Tx</td>
+            <td class="bad">High (paper + systems)</td>
+            <td style="color:var(--gold)">Moderate</td>
+            <td class="good">0.0079 kWh (carbon neutral)</td>
+          </tr>
+          <tr>
+            <td>Programmability</td>
+            <td class="bad">None</td>
+            <td class="bad">Limited API</td>
+            <td class="good">Smart contracts, NFTs, DEX</td>
+          </tr>
+          <tr>
+            <td>Currency Coverage</td>
+            <td style="color:var(--gold)">Major currencies only</td>
+            <td class="bad">Domestic / regional</td>
+            <td class="good">Any — via IOU / DEX</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================
+     USE CASES
+====================================================== -->
+<section id="use-cases">
+  <div class="container">
+    <div class="text-center">
+      <div class="section-label">Use Cases</div>
+      <h2 class="section-title">Real Applications Across Africa</h2>
+      <p class="section-subtitle">From daily remittances to enterprise trade finance, XRPL unlocks a spectrum of financial services.</p>
+    </div>
+
+    <div class="use-case-tabs">
+      <button class="tab-btn active" data-panel="remittance">💸 Remittances</button>
+      <button class="tab-btn" data-panel="trade">🤝 Trade Finance</button>
+      <button class="tab-btn" data-panel="cbdc">🏦 CBDCs &amp; Digital Currency</button>
+      <button class="tab-btn" data-panel="defi">📈 DeFi &amp; Savings</button>
+      <button class="tab-btn" data-panel="nft">🎨 NFTs &amp; Ownership</button>
+    </div>
+
+    <!-- Remittance -->
+    <div class="use-case-panel active" id="panel-remittance">
+      <div class="use-case-content">
+        <div class="use-case-text">
+          <h3>Remittances — Keeping More Money in Families</h3>
+          <p>
+            <strong style="color:var(--text-primary)">$95 billion</strong> flows into Sub-Saharan Africa as remittances each year 
+            (World Bank, 2024). With an average fee of 8.2%, roughly <strong style="color:#f87171)">$7.8 billion</strong> is 
+            consumed by intermediaries annually — money that could fund healthcare, education, and businesses.
+          </p>
+          <p>
+            On-Demand Liquidity (ODL) — Ripple's commercial product built on XRPL — uses XRP as a bridge currency, 
+            eliminating pre-funded nostro accounts and slashing costs to near-zero.
+          </p>
+          <div class="use-case-features">
+            <div class="feature-item">
+              <div class="feature-check">✓</div>
+              <span>Sub-penny transaction fees regardless of amount</span>
+            </div>
+            <div class="feature-item">
+              <div class="feature-check">✓</div>
+              <span>3–5 second end-to-end settlement, 24 / 7 / 365</span>
+            </div>
+            <div class="feature-item">
+              <div class="feature-check">✓</div>
+              <span>No bank account needed — mobile wallet is enough</span>
+            </div>
+            <div class="feature-item">
+              <div class="feature-check">✓</div>
+              <span>Real-time FX via the XRPL decentralised exchange</span>
+            </div>
+            <div class="feature-item">
+              <div class="feature-check">✓</div>
+              <span>Immutable, auditable transaction history on-chain</span>
+            </div>
+          </div>
+        </div>
+        <div class="use-case-visual">
+          <p style="font-size:0.78rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:16px;">Payment Flow</p>
+          <div class="remittance-flow">
+            <div class="flow-node">
+              <div class="flow-node-icon">👩</div>
+              <div class="flow-node-label">Sender<br/><strong style="color:var(--text-primary)">Lagos</strong></div>
+            </div>
+            <div class="flow-arrow">
+              <div class="arrow-line"></div>
+              <span style="color:var(--green)">XRP bridge</span>
+            </div>
+            <div class="flow-node">
+              <div class="flow-node-icon">⚡</div>
+              <div class="flow-node-label">XRPL<br/><strong style="color:var(--green)">3–5 sec</strong></div>
+            </div>
+            <div class="flow-arrow">
+              <div class="arrow-line"></div>
+              <span style="color:var(--blue)">GBP / USD</span>
+            </div>
+            <div class="flow-node">
+              <div class="flow-node-icon">👨</div>
+              <div class="flow-node-label">Recipient<br/><strong style="color:var(--text-primary)">London</strong></div>
+            </div>
+          </div>
+
+          <div class="savings-bar-container">
+            <div class="savings-bar-label"><span>Traditional cost — sending $200</span><span class="bad">$16.40 (8.2%)</span></div>
+            <div class="savings-bar"><div class="savings-bar-fill bad" style="width:82%"></div></div>
+            <div class="savings-bar-label"><span>XRPL cost — sending $200</span><span class="good">$0.02 (&lt;0.01%)</span></div>
+            <div class="savings-bar"><div class="savings-bar-fill good" style="width:1%"></div></div>
+          </div>
+
+          <div style="margin-top:16px;padding:12px;background:rgba(0,200,150,0.07);border-radius:8px;text-align:center;">
+            <div style="font-size:1.4rem;font-weight:800;color:var(--green)">$16.38 saved</div>
+            <div style="font-size:0.78rem;color:var(--text-muted);margin-top:2px;">per $200 remittance — 99.9% reduction in fees</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Trade Finance -->
+    <div class="use-case-panel" id="panel-trade">
+      <div class="use-case-content">
+        <div class="use-case-text">
+          <h3>Trade Finance — Unlocking Intra-African Commerce</h3>
+          <p>
+            The African Continental Free Trade Area (AfCFTA) aims to boost intra-African trade from 15% to 50% of 
+            total trade. The biggest bottleneck? Payment infrastructure. XRPL's native payment channels and 
+            escrow features make trade settlement programmable and instant.
+          </p>
+          <p>
+            XRPL's <strong style="color:var(--text-primary)">Escrow</strong> feature allows conditional payments — 
+            funds are locked on-chain and released only when delivery conditions are met, eliminating letter-of-credit 
+            friction and counterparty risk for SMEs.
+          </p>
+          <div class="use-case-features">
+            <div class="feature-item"><div class="feature-check">✓</div><span>Programmable escrow — release on delivery confirmation</span></div>
+            <div class="feature-item"><div class="feature-check">✓</div><span>Multi-currency settlement via XRPL DEX</span></div>
+            <div class="feature-item"><div class="feature-check">✓</div><span>Tokenised trade documents and invoices as NFTs</span></div>
+            <div class="feature-item"><div class="feature-check">✓</div><span>Fractional ownership of physical goods and commodities</span></div>
+            <div class="feature-item"><div class="feature-check">✓</div><span>Transparent, auditable supply chain records on-chain</span></div>
+          </div>
+        </div>
+        <div class="use-case-visual">
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div style="display:flex;align-items:center;gap:12px;padding:14px;background:var(--bg-card2);border-radius:10px;">
+              <div style="font-size:1.5rem;">📦</div>
+              <div>
+                <div style="font-weight:600;font-size:0.9rem;">Exporter creates XRPL Escrow</div>
+                <div style="font-size:0.78rem;color:var(--text-muted);">Goods dispatched from Durban → Cairo</div>
+              </div>
+              <div style="margin-left:auto;color:var(--gold);font-size:0.75rem;font-weight:600;">LOCKED</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:14px;background:var(--bg-card2);border-radius:10px;">
+              <div style="font-size:1.5rem;">🚢</div>
+              <div>
+                <div style="font-weight:600;font-size:0.9rem;">Shipment tracked on-chain</div>
+                <div style="font-size:0.78rem;color:var(--text-muted);">IoT oracle updates delivery status</div>
+              </div>
+              <div style="margin-left:auto;color:var(--blue);font-size:0.75rem;font-weight:600;">IN TRANSIT</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:14px;background:var(--bg-card2);border-radius:10px;">
+              <div style="font-size:1.5rem;">✅</div>
+              <div>
+                <div style="font-weight:600;font-size:0.9rem;">Delivery confirmed → funds released</div>
+                <div style="font-size:0.78rem;color:var(--text-muted);">Smart escrow executes automatically</div>
+              </div>
+              <div style="margin-left:auto;color:var(--green);font-size:0.75rem;font-weight:600;">SETTLED</div>
+            </div>
+            <div style="text-align:center;padding:12px;background:rgba(0,200,150,0.07);border-radius:8px;margin-top:8px;">
+              <div style="font-weight:700;color:var(--green)">Zero counterparty risk · Zero letter-of-credit fees</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CBDCs -->
+    <div class="use-case-panel" id="panel-cbdc">
+      <div class="use-case-content">
+        <div class="use-case-text">
+          <h3>CBDCs — A Private Ledger for Central Banks</h3>
+          <p>
+            Ripple's CBDC platform — built on a private version of XRPL — lets central banks issue, manage, and 
+            redeem digital currencies on a controlled, compliant infrastructure. Several African nations are 
+            piloting or researching CBDCs as a leap-frog technology.
+          </p>
+          <p>
+            By interoperating with XRPL's open network, a digital naira, cedi, or shilling can settle against 
+            any other currency or asset in seconds — domestically or cross-border — while preserving central bank 
+            sovereignty and monetary policy control.
+          </p>
+          <div class="use-case-features">
+            <div class="feature-item"><div class="feature-check">✓</div><span>eNaira (Nigeria) — first African CBDC already live</span></div>
+            <div class="feature-item"><div class="feature-check">✓</div><span>Interoperable with private and public XRPL networks</span></div>
+            <div class="feature-item"><div class="feature-check">✓</div><span>Programmable (conditional spending, social transfers)</span></div>
+            <div class="feature-item"><div class="feature-check">✓</div><span>Offline-capable design for low-connectivity regions</span></div>
+            <div class="feature-item"><div class="feature-check">✓</div><span>Full AML / KYC hooks built into the protocol</span></div>
+          </div>
+        </div>
+        <div class="use-case-visual">
+          <div style="text-align:center;margin-bottom:20px;">
+            <div style="font-size:0.78rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:12px;">African CBDC Landscape</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg-card2);border-radius:8px;font-size:0.85rem;">
+              <span>🇳🇬 Nigeria — eNaira</span>
+              <span style="color:var(--green);font-weight:600">✓ Live</span>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg-card2);border-radius:8px;font-size:0.85rem;">
+              <span>🇿🇦 South Africa — Project Khokha</span>
+              <span style="color:var(--gold);font-weight:600">◉ Pilot</span>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg-card2);border-radius:8px;font-size:0.85rem;">
+              <span>🇰🇪 Kenya — Research Phase</span>
+              <span style="color:var(--blue);font-weight:600">◎ Research</span>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg-card2);border-radius:8px;font-size:0.85rem;">
+              <span>🇬🇭 Ghana — e-Cedi Pilot</span>
+              <span style="color:var(--gold);font-weight:600">◉ Pilot</span>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg-card2);border-radius:8px;font-size:0.85rem;">
+              <span>🇷🇼 Rwanda — Digital Franc</span>
+              <span style="color:var(--blue);font-weight:600">◎ Research</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DeFi -->
+    <div class="use-case-panel" id="panel-defi">
+      <div class="use-case-content">
+        <div class="use-case-text">
+          <h3>DeFi &amp; Savings — Wealth Creation Without Banks</h3>
+          <p>
+            The XRPL includes a native decentralised exchange (DEX) and Automated Market Makers (AMMs) — 
+            enabling anyone with a smartphone to access trading, lending, and yield-bearing products without 
+            an intermediary.
+          </p>
+          <p>
+            For African users who cannot access traditional investment products, XRPL's DeFi layer offers 
+            transparent, permissionless finance. Stablecoins pegged to local currencies can protect savings 
+            from inflation while earning on-chain yield.
+          </p>
+          <div class="use-case-features">
+            <div class="feature-item"><div class="feature-check">✓</div><span>Native DEX — swap any asset pair in one transaction</span></div>
+            <div class="feature-item"><div class="feature-check">✓</div><span>Automated Market Makers (AMM) — earn liquidity fees</span></div>
+            <div class="feature-item"><div class="feature-check">✓</div><span>Stablecoin IOUs — hedge against currency volatility</span></div>
+            <div class="feature-item"><div class="feature-check">✓</div><span>No smart-contract exploits — logic is protocol-level</span></div>
+            <div class="feature-item"><div class="feature-check">✓</div><span>Carbon-neutral — XRPL uses &lt;0.0079 kWh per transaction</span></div>
+          </div>
+        </div>
+        <div class="use-case-visual">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+            <div style="background:var(--bg-card2);border-radius:10px;padding:16px;text-align:center;">
+              <div style="font-size:1.6rem;margin-bottom:8px;">📊</div>
+              <div style="font-weight:700;font-size:0.9rem;margin-bottom:4px;">XRPL DEX</div>
+              <div style="font-size:0.78rem;color:var(--text-muted);">Trade any IOU or XRP pair with no KYC or custodian</div>
+            </div>
+            <div style="background:var(--bg-card2);border-radius:10px;padding:16px;text-align:center;">
+              <div style="font-size:1.6rem;margin-bottom:8px;">🌊</div>
+              <div style="font-weight:700;font-size:0.9rem;margin-bottom:4px;">AMM Pools</div>
+              <div style="font-size:0.78rem;color:var(--text-muted);">Provide liquidity and earn trading fees passively</div>
+            </div>
+            <div style="background:var(--bg-card2);border-radius:10px;padding:16px;text-align:center;">
+              <div style="font-size:1.6rem;margin-bottom:8px;">🔒</div>
+              <div style="font-weight:700;font-size:0.9rem;margin-bottom:4px;">Escrow Savings</div>
+              <div style="font-size:0.78rem;color:var(--text-muted);">Time-locked savings — release funds on a schedule</div>
+            </div>
+            <div style="background:var(--bg-card2);border-radius:10px;padding:16px;text-align:center;">
+              <div style="font-size:1.6rem;margin-bottom:8px;">💵</div>
+              <div style="font-weight:700;font-size:0.9rem;margin-bottom:4px;">Stablecoins</div>
+              <div style="font-size:0.78rem;color:var(--text-muted);">RLUSD and USD IOUs on XRPL — inflation protection</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NFTs -->
+    <div class="use-case-panel" id="panel-nft">
+      <div class="use-case-content">
+        <div class="use-case-text">
+          <h3>NFTs &amp; Ownership — Tokenising Africa's Assets</h3>
+          <p>
+            The XRPL's XLS-20 standard brings native, low-cost NFTs to the network. In Africa, this 
+            opens transformative applications: land titles, crop insurance certificates, digital identity, 
+            creative-economy royalties, and micro-investment in real assets.
+          </p>
+          <p>
+            With minting fees under $0.001 and built-in royalty enforcement, XRPL NFTs are the first 
+            practical infrastructure for tokenising Africa's vast informal economy.
+          </p>
+          <div class="use-case-features">
+            <div class="feature-item"><div class="feature-check">✓</div><span>Land title NFTs — tamper-proof property ownership records</span></div>
+            <div class="feature-item"><div class="feature-check">✓</div><span>Crop insurance certificates — parametric payouts via oracle</span></div>
+            <div class="feature-item"><div class="feature-check">✓</div><span>Digital identity credentials — self-sovereign ID on-chain</span></div>
+            <div class="feature-item"><div class="feature-check">✓</div><span>Creator royalties — automatic on every secondary sale</span></div>
+            <div class="feature-item"><div class="feature-check">✓</div><span>Mint cost &lt; $0.001 — accessible to micro-entrepreneurs</span></div>
+          </div>
+        </div>
+        <div class="use-case-visual">
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div style="padding:16px;background:var(--bg-card2);border-radius:10px;border-left:3px solid var(--green);">
+              <div style="font-weight:700;font-size:0.9rem;margin-bottom:4px;">🏠 Land Title NFT</div>
+              <div style="font-size:0.78rem;color:var(--text-muted);">Smallholder farmers in Kenya tokenise land rights, enabling them to use land as collateral for microloans.</div>
+            </div>
+            <div style="padding:16px;background:var(--bg-card2);border-radius:10px;border-left:3px solid var(--blue);">
+              <div style="font-weight:700;font-size:0.9rem;margin-bottom:4px;">🌾 Parametric Crop Insurance</div>
+              <div style="font-size:0.78rem;color:var(--text-muted);">Rainfall data triggers automatic insurance payouts to farmers — no claims process required.</div>
+            </div>
+            <div style="padding:16px;background:var(--bg-card2);border-radius:10px;border-left:3px solid var(--gold);">
+              <div style="font-weight:700;font-size:0.9rem;margin-bottom:4px;">🎵 Creator Royalties</div>
+              <div style="font-size:0.78rem;color:var(--text-muted);">African musicians and artists earn automatic royalties every time their NFT artwork is resold globally.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================
+     AFRICAN CORRIDORS
+====================================================== -->
+<section id="corridors">
+  <div class="container">
+    <div class="corridors-header fade-up">
+      <div class="section-label">Financial Corridors</div>
+      <h2 class="section-title">Key African Payment Corridors</h2>
+      <p class="section-subtitle">
+        These are the highest-volume corridors where XRPL technology delivers the most transformative impact. 
+        Figures compare traditional wire costs versus XRPL-based settlement.
+      </p>
+    </div>
+
+    <div class="corridors-grid">
+      <div class="corridor-card fade-up stagger-1">
+        <div class="corridor-card-header">
+          <div class="corridor-flags"><span>🇳🇬</span><span>🇬🇧</span></div>
+          <div>
+            <div class="corridor-name">Nigeria → United Kingdom</div>
+            <div class="corridor-volume">~$22B annual remittance flow</div>
+          </div>
+        </div>
+        <div class="corridor-metrics">
+          <div class="metric-box">
+            <div class="metric-label">Traditional Fee</div>
+            <div class="metric-val old">8–10%</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-label">XRPL Fee</div>
+            <div class="metric-val new">&lt;0.01%</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-label">Old Speed</div>
+            <div class="metric-val old">3–5 days</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-label">XRPL Speed</div>
+            <div class="metric-val new">3–5 sec</div>
+          </div>
+        </div>
+        <div class="corridor-saving">On a $500 transfer, XRPL saves a family <strong>$40–$50</strong> vs traditional rail.</div>
+      </div>
+
+      <div class="corridor-card fade-up stagger-2">
+        <div class="corridor-card-header">
+          <div class="corridor-flags"><span>🇰🇪</span><span>🇺🇸</span></div>
+          <div>
+            <div class="corridor-name">Kenya → United States</div>
+            <div class="corridor-volume">~$4.3B annual remittance flow</div>
+          </div>
+        </div>
+        <div class="corridor-metrics">
+          <div class="metric-box"><div class="metric-label">Traditional Fee</div><div class="metric-val old">7–9%</div></div>
+          <div class="metric-box"><div class="metric-label">XRPL Fee</div><div class="metric-val new">&lt;0.01%</div></div>
+          <div class="metric-box"><div class="metric-label">Old Speed</div><div class="metric-val old">2–4 days</div></div>
+          <div class="metric-box"><div class="metric-label">XRPL Speed</div><div class="metric-val new">3–5 sec</div></div>
+        </div>
+        <div class="corridor-saving">Kenyan diaspora workers keep <strong>$35–$45 more</strong> per $500 sent home.</div>
+      </div>
+
+      <div class="corridor-card fade-up stagger-3">
+        <div class="corridor-card-header">
+          <div class="corridor-flags"><span>🇬🇭</span><span>🇫🇷</span></div>
+          <div>
+            <div class="corridor-name">Ghana → France</div>
+            <div class="corridor-volume">~$3.1B annual remittance flow</div>
+          </div>
+        </div>
+        <div class="corridor-metrics">
+          <div class="metric-box"><div class="metric-label">Traditional Fee</div><div class="metric-val old">6–9%</div></div>
+          <div class="metric-box"><div class="metric-label">XRPL Fee</div><div class="metric-val new">&lt;0.01%</div></div>
+          <div class="metric-box"><div class="metric-label">Old Speed</div><div class="metric-val old">3–5 days</div></div>
+          <div class="metric-box"><div class="metric-label">XRPL Speed</div><div class="metric-val new">3–5 sec</div></div>
+        </div>
+        <div class="corridor-saving">Ghanaian families in France save <strong>$30–$45</strong> on every $500 remittance.</div>
+      </div>
+
+      <div class="corridor-card fade-up stagger-4">
+        <div class="corridor-card-header">
+          <div class="corridor-flags"><span>🇿🇦</span><span>🇿🇼</span></div>
+          <div>
+            <div class="corridor-name">South Africa → Zimbabwe</div>
+            <div class="corridor-volume">~$1.2B annual remittance flow</div>
+          </div>
+        </div>
+        <div class="corridor-metrics">
+          <div class="metric-box"><div class="metric-label">Traditional Fee</div><div class="metric-val old">10–15%</div></div>
+          <div class="metric-box"><div class="metric-label">XRPL Fee</div><div class="metric-val new">&lt;0.01%</div></div>
+          <div class="metric-box"><div class="metric-label">Old Speed</div><div class="metric-val old">1–3 days</div></div>
+          <div class="metric-box"><div class="metric-label">XRPL Speed</div><div class="metric-val new">3–5 sec</div></div>
+        </div>
+        <div class="corridor-saving">One of the most expensive corridors globally — XRPL could save <strong>$50–$75</strong> per $500.</div>
+      </div>
+
+      <div class="corridor-card fade-up stagger-1">
+        <div class="corridor-card-header">
+          <div class="corridor-flags"><span>🇸🇳</span><span>🇫🇷</span></div>
+          <div>
+            <div class="corridor-name">Senegal → France</div>
+            <div class="corridor-volume">~$2.7B annual remittance flow</div>
+          </div>
+        </div>
+        <div class="corridor-metrics">
+          <div class="metric-box"><div class="metric-label">Traditional Fee</div><div class="metric-val old">7–10%</div></div>
+          <div class="metric-box"><div class="metric-label">XRPL Fee</div><div class="metric-val new">&lt;0.01%</div></div>
+          <div class="metric-box"><div class="metric-label">Old Speed</div><div class="metric-val old">2–4 days</div></div>
+          <div class="metric-box"><div class="metric-label">XRPL Speed</div><div class="metric-val new">3–5 sec</div></div>
+        </div>
+        <div class="corridor-saving">Senegalese workers in Paris could redirect <strong>$35–$50</strong> back to family per $500.</div>
+      </div>
+
+      <div class="corridor-card fade-up stagger-2">
+        <div class="corridor-card-header">
+          <div class="corridor-flags"><span>🇪🇹</span><span>🇺🇸</span></div>
+          <div>
+            <div class="corridor-name">Ethiopia → United States</div>
+            <div class="corridor-volume">~$5.2B annual remittance flow</div>
+          </div>
+        </div>
+        <div class="corridor-metrics">
+          <div class="metric-box"><div class="metric-label">Traditional Fee</div><div class="metric-val old">9–12%</div></div>
+          <div class="metric-box"><div class="metric-label">XRPL Fee</div><div class="metric-val new">&lt;0.01%</div></div>
+          <div class="metric-box"><div class="metric-label">Old Speed</div><div class="metric-val old">3–5 days</div></div>
+          <div class="metric-box"><div class="metric-label">XRPL Speed</div><div class="metric-val new">3–5 sec</div></div>
+        </div>
+        <div class="corridor-saving">Ethiopia's large diaspora could retain <strong>$45–$60</strong> more per $500 transferred.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================
+     LIVE DEMO
+====================================================== -->
+<section id="live-demo">
+  <div class="container">
+    <div class="text-center">
+      <div class="section-label">Live Demo</div>
+      <h2 class="section-title">Connected to the XRP Ledger — Right Now</h2>
+      <p class="section-subtitle">
+        Everything below is live data from the XRP Ledger mainnet, streamed directly via the public XRPL WebSocket API. 
+        No middleman, no cache — just the blockchain.
+      </p>
+    </div>
+
+    <div class="demo-container">
+
+      <!-- Panel 1: Network Stats -->
+      <div class="demo-panel fade-up stagger-1">
+        <div class="demo-panel-header">
+          <span class="demo-panel-title">📡 Network Stats</span>
+          <span class="connection-status" id="connStatus">
+            <span class="status-dot" id="statusDot"></span>
+            <span id="statusText">Connecting…</span>
+          </span>
+        </div>
+        <div class="demo-panel-body">
+          <div class="stats-grid">
+            <div class="stat-box">
+              <div class="stat-box-label">Ledger Index</div>
+              <div class="stat-box-value" id="statLedger">–</div>
+              <div class="stat-box-sub">Current validated ledger</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-box-label">Transactions</div>
+              <div class="stat-box-value" id="statTxCount">–</div>
+              <div class="stat-box-sub">In last ledger</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-box-label">Close Time</div>
+              <div class="stat-box-value" id="statCloseTime">–<span class="unit">s</span></div>
+              <div class="stat-box-sub">Ledger close interval</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-box-label">Reserve Base</div>
+              <div class="stat-box-value" id="statReserve">10<span class="unit">XRP</span></div>
+              <div class="stat-box-sub">Wallet activation cost</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-box-label">XRP Price</div>
+              <div class="stat-box-value" id="statPrice">–</div>
+              <div class="stat-box-sub">USD (CoinGecko)</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-box-label">Fee (drops)</div>
+              <div class="stat-box-value" id="statFee">12</div>
+              <div class="stat-box-sub">Base tx fee (1 drop = 0.000001 XRP)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel 2: Live Transaction Feed -->
+      <div class="demo-panel fade-up stagger-2">
+        <div class="demo-panel-header">
+          <span class="demo-panel-title">⚡ Live Transaction Feed</span>
+          <span id="txCounter" style="font-size:0.75rem;color:var(--text-muted);">0 transactions</span>
+        </div>
+        <div class="demo-panel-body">
+          <div class="tx-feed" id="txFeed">
+            <div style="text-align:center;padding:24px;color:var(--text-muted);font-size:0.85rem;">
+              <div class="spinner" style="margin:0 auto 12px;"></div>
+              Connecting to XRPL mainnet…
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel 3: Payment Simulator -->
+      <div class="demo-panel simulator-full fade-up">
+        <div class="demo-panel-header">
+          <span class="demo-panel-title">🔁 Cross-Border Payment Simulator</span>
+          <span style="font-size:0.75rem;color:var(--text-muted);">Simulated — no real funds</span>
+        </div>
+        <div class="demo-panel-body">
+          <div class="simulator-grid">
+            <!-- Sender -->
+            <div class="sim-endpoint">
+              <div class="sim-label">Sender</div>
+              <div class="sim-country">
+                <span class="sim-flag" id="senderFlag">🇳🇬</span>
+                <div>
+                  <div class="sim-country-name" id="senderCountry">Nigeria</div>
+                  <div class="sim-currency" id="senderCurrency">NGN — Nigerian Naira</div>
+                </div>
+              </div>
+              <div style="margin-bottom:10px;">
+                <label style="font-size:0.78rem;color:var(--text-muted);display:block;margin-bottom:6px;">Select Country</label>
+                <select id="senderSelect" style="width:100%;background:var(--bg-dark);border:1.5px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text-primary);font-size:0.85rem;font-family:var(--font-main);">
+                  <option value="NG">🇳🇬 Nigeria (NGN)</option>
+                  <option value="KE">🇰🇪 Kenya (KES)</option>
+                  <option value="GH">🇬🇭 Ghana (GHS)</option>
+                  <option value="ZA">🇿🇦 South Africa (ZAR)</option>
+                  <option value="ET">🇪🇹 Ethiopia (ETB)</option>
+                  <option value="SN">🇸🇳 Senegal (XOF)</option>
+                </select>
+              </div>
+              <div class="sim-input-wrap">
+                <input type="number" class="sim-input" id="sendAmount" value="500" min="1" max="100000" />
+                <span class="sim-currency-label" id="senderCurrencyCode">USD</span>
+              </div>
+            </div>
+
+            <!-- Middle -->
+            <div class="sim-middle">
+              <div class="sim-arrow-icon">⚡</div>
+              <div style="font-size:0.78rem;color:var(--text-muted);text-align:center;margin-bottom:8px;">via XRP Bridge</div>
+              <button class="btn-simulate" onclick="runSimulation()">Simulate →</button>
+            </div>
+
+            <!-- Recipient -->
+            <div class="sim-endpoint">
+              <div class="sim-label">Recipient</div>
+              <div class="sim-country">
+                <span class="sim-flag" id="recipientFlag">🇬🇧</span>
+                <div>
+                  <div class="sim-country-name" id="recipientCountry">United Kingdom</div>
+                  <div class="sim-currency" id="recipientCurrency">GBP — British Pound</div>
+                </div>
+              </div>
+              <div style="margin-bottom:10px;">
+                <label style="font-size:0.78rem;color:var(--text-muted);display:block;margin-bottom:6px;">Select Country</label>
+                <select id="recipientSelect" style="width:100%;background:var(--bg-dark);border:1.5px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text-primary);font-size:0.85rem;font-family:var(--font-main);">
+                  <option value="GB">🇬🇧 United Kingdom (GBP)</option>
+                  <option value="US">🇺🇸 United States (USD)</option>
+                  <option value="FR">🇫🇷 France (EUR)</option>
+                  <option value="CA">🇨🇦 Canada (CAD)</option>
+                  <option value="AE">🇦🇪 UAE (AED)</option>
+                  <option value="CN">🇨🇳 China (CNY)</option>
+                </select>
+              </div>
+              <div class="sim-input-wrap">
+                <input type="number" class="sim-input" id="receiveAmount" readonly placeholder="–" />
+                <span class="sim-currency-label" id="recipientCurrencyCode">GBP</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Result -->
+          <div class="sim-result" id="simResult">
+            <p style="font-size:0.78rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:16px;">Simulation Results</p>
+            <div class="sim-result-grid">
+              <div class="sim-result-item">
+                <div class="sim-result-label">XRPL Fee</div>
+                <div class="sim-result-value good" id="resXrplFee">$0.01</div>
+              </div>
+              <div class="sim-result-item">
+                <div class="sim-result-label">Traditional Fee</div>
+                <div class="sim-result-value bad" id="resTradFee">–</div>
+              </div>
+              <div class="sim-result-item">
+                <div class="sim-result-label">You Save</div>
+                <div class="sim-result-value good" id="resSavings">–</div>
+              </div>
+              <div class="sim-result-item">
+                <div class="sim-result-label">Settlement</div>
+                <div class="sim-result-value good">~3–5 sec</div>
+              </div>
+            </div>
+            <div id="resMessage" style="margin-top:16px;padding:12px 16px;background:rgba(0,200,150,0.07);border-radius:8px;font-size:0.85rem;color:var(--text-secondary);"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================
+     TECHNICAL DEEP DIVE
+====================================================== -->
+<section id="technical">
+  <div class="tech-bg"></div>
+  <div class="container">
+    <div class="text-center">
+      <div class="section-label">Technical Deep Dive</div>
+      <h2 class="section-title">How the XRP Ledger Works Under the Hood</h2>
+      <p class="section-subtitle">
+        For the technically curious: a precise look at consensus, transaction types, 
+        and the features that make XRPL purpose-built for payments.
+      </p>
+    </div>
+
+    <div class="tech-grid">
+      <!-- Accordion -->
+      <div class="tech-accordion">
+
+        <div class="accordion-item">
+          <button class="accordion-toggle">
+            <span>🔄 XRPL Consensus Protocol (XRPLCP)</span>
+            <span class="accordion-icon">+</span>
+          </button>
+          <div class="accordion-body">
+            <div class="accordion-body-inner">
+              <p>Unlike Bitcoin's Proof-of-Work or Ethereum's Proof-of-Stake, XRPL uses a unique 
+              <strong>Federated Byzantine Agreement</strong>-style consensus. Validators maintain a 
+              Unique Node List (UNL) — a trusted set of peers. Each round, validators propose and 
+              agree on a transaction set; once 80% threshold is reached, the ledger closes.</p>
+              <p style="margin-top:10px;">Result: <strong style="color:var(--green)">finality in 3–5 seconds</strong> with 
+              no forks, no mining rewards, and <strong style="color:var(--green)">energy usage 57,000× lower</strong> than Bitcoin.</p>
+              <div class="code-block">
+<span class="cmt">// Simplified consensus round</span>
+<span class="kw">1.</span> Validators <span class="str">broadcast</span> candidate tx sets
+<span class="kw">2.</span> Each validator <span class="str">votes</span> on tx validity
+<span class="kw">3.</span> Convergence requires <span class="num">&gt;80%</span> agreement
+<span class="kw">4.</span> Ledger <span class="str">closes</span> → hash published
+<span class="kw">5.</span> Next round begins (avg <span class="num">3-5s</span>)
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item">
+          <button class="accordion-toggle">
+            <span>💱 On-Demand Liquidity (ODL)</span>
+            <span class="accordion-icon">+</span>
+          </button>
+          <div class="accordion-body">
+            <div class="accordion-body-inner">
+              <p>ODL is Ripple's commercial payment product that uses XRP as a <strong>bridge currency</strong> 
+              to eliminate the need for pre-funded nostro/vostro accounts. Instead of a bank 
+              pre-depositing USD in a Nigerian account, ODL converts USD → XRP → NGN in real-time.</p>
+              <p style="margin-top:10px;">This frees up <strong style="color:var(--green)">trillions of dollars</strong> 
+              in capital that banks currently hold idle across 27,000 correspondent banking relationships worldwide.</p>
+              <div class="code-block">
+<span class="cmt">// ODL payment flow (simplified)</span>
+<span class="prop">USD</span> (source) 
+  → <span class="str">buy XRP</span> on US exchange
+  → <span class="str">send XRP</span> across XRPL (<span class="num">3–5s</span>)
+  → <span class="str">sell XRP</span> on Nigerian exchange
+  → <span class="prop">NGN</span> (destination) ✓
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item">
+          <button class="accordion-toggle">
+            <span>🏷️ Transaction Types on XRPL</span>
+            <span class="accordion-icon">+</span>
+          </button>
+          <div class="accordion-body">
+            <div class="accordion-body-inner">
+              <p>XRPL supports a rich set of native transaction types — no smart-contract language needed. 
+              Logic is baked into the protocol for security and predictability:</p>
+              <div class="code-block" style="margin-top:8px;">
+<span class="prop">Payment</span>       <span class="cmt">→ transfer XRP or IOUs</span>
+<span class="prop">OfferCreate</span>   <span class="cmt">→ DEX limit order</span>
+<span class="prop">TrustSet</span>      <span class="cmt">→ accept an IOU issuer</span>
+<span class="prop">EscrowCreate</span>  <span class="cmt">→ time/condition locked funds</span>
+<span class="prop">PaymentChannels</span><span class="cmt">→ high-frequency micropayments</span>
+<span class="prop">NFTokenMint</span>   <span class="cmt">→ mint an NFT (XLS-20)</span>
+<span class="prop">AMM</span>           <span class="cmt">→ automated market maker</span>
+<span class="prop">Checks</span>        <span class="cmt">→ delayed debit authorisation</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item">
+          <button class="accordion-toggle">
+            <span>🔑 Accounts, Addresses &amp; Keys</span>
+            <span class="accordion-icon">+</span>
+          </button>
+          <div class="accordion-body">
+            <div class="accordion-body-inner">
+              <p>Every XRPL account has a <strong>classic address</strong> (Base58 encoded, starts with "r") 
+              and an optional human-readable <strong>X-Address</strong>. Accounts require a 
+              <strong style="color:var(--green)">10 XRP reserve</strong> to activate — this prevents spam 
+              and ensures network integrity.</p>
+              <div class="code-block">
+<span class="cmt">// Example XRPL address</span>
+<span class="str">rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh</span>
+
+<span class="cmt">// Cryptographic signing (ed25519)</span>
+<span class="prop">privateKey</span> → <span class="kw">sign</span>(txBlob) → <span class="prop">signature</span>
+<span class="prop">publicKey</span>  → <span class="kw">verify</span>(sig, txBlob) ✓
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item">
+          <button class="accordion-toggle">
+            <span>🌐 XRPL APIs &amp; Developer Tools</span>
+            <span class="accordion-icon">+</span>
+          </button>
+          <div class="accordion-body">
+            <div class="accordion-body-inner">
+              <p>XRPL exposes a public WebSocket and HTTP JSON-RPC API. Anyone can connect for free:</p>
+              <div class="code-block">
+<span class="cmt">// Free public endpoints</span>
+<span class="str">wss://xrplcluster.com</span>   <span class="cmt">← mainnet</span>
+<span class="str">wss://s.altnet.rippletest.net:51233</span> <span class="cmt">← testnet</span>
+
+<span class="cmt">// JavaScript SDK</span>
+<span class="kw">import</span> { Client } <span class="kw">from</span> <span class="str">'xrpl'</span>
+<span class="kw">const</span> client = <span class="kw">new</span> <span class="prop">Client</span>(<span class="str">'wss://xrplcluster.com'</span>)
+<span class="kw">await</span> client.<span class="prop">connect</span>()
+<span class="kw">const</span> info = <span class="kw">await</span> client.<span class="prop">request</span>({
+  <span class="prop">command</span>: <span class="str">'server_info'</span>
+})
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Visual: Consensus Animator + Tokenomics -->
+      <div class="tech-visual">
+        <div class="consensus-viz">
+          <div class="consensus-title">Live Consensus Visualisation</div>
+          <div class="validator-grid" id="validatorGrid">
+            <div class="validator-node" data-idx="0"><div class="validator-icon">🖥️</div><div class="validator-name">Validator 1</div></div>
+            <div class="validator-node" data-idx="1"><div class="validator-icon">🖥️</div><div class="validator-name">Validator 2</div></div>
+            <div class="validator-node" data-idx="2"><div class="validator-icon">🖥️</div><div class="validator-name">Validator 3</div></div>
+            <div class="validator-node" data-idx="3"><div class="validator-icon">🖥️</div><div class="validator-name">Validator 4</div></div>
+            <div class="validator-node" data-idx="4"><div class="validator-icon">🖥️</div><div class="validator-name">Validator 5</div></div>
+            <div class="validator-node" data-idx="5"><div class="validator-icon">🖥️</div><div class="validator-name">Validator 6</div></div>
+            <div class="validator-node" data-idx="6"><div class="validator-icon">🖥️</div><div class="validator-name">Ripple</div></div>
+            <div class="validator-node" data-idx="7"><div class="validator-icon">🖥️</div><div class="validator-name">Coil</div></div>
+          </div>
+          <div class="consensus-stage" id="consensusStage">Waiting for next ledger…</div>
+        </div>
+
+        <div class="tokenomics-grid" style="margin-top:28px;">
+          <div class="token-stat">
+            <div class="token-stat-value">100B</div>
+            <div class="token-stat-label">Total XRP Supply</div>
+            <div class="token-stat-sub">Fixed at genesis — no inflation</div>
+          </div>
+          <div class="token-stat">
+            <div class="token-stat-value">~57B</div>
+            <div class="token-stat-label">Circulating Supply</div>
+            <div class="token-stat-sub">As of early 2025</div>
+          </div>
+          <div class="token-stat">
+            <div class="token-stat-value">150+</div>
+            <div class="token-stat-label">Active Validators</div>
+            <div class="token-stat-sub">Worldwide, independent</div>
+          </div>
+          <div class="token-stat">
+            <div class="token-stat-value">12yr+</div>
+            <div class="token-stat-label">Ledger Age</div>
+            <div class="token-stat-sub">100% uptime since 2012</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================
+     ECOSYSTEM
+====================================================== -->
+<section id="ecosystem">
+  <div class="container text-center">
+    <div class="section-label">Ecosystem</div>
+    <h2 class="section-title">Building on XRPL</h2>
+    <p class="section-subtitle">A growing ecosystem of exchanges, wallets, payment providers, and institutions trust the XRP Ledger.</p>
+    <div class="ecosystem-logos">
+      <div class="ecosystem-logo">🏦 Ripple</div>
+      <div class="ecosystem-logo">🔄 Bitso (ODL Mexico)</div>
+      <div class="ecosystem-logo">💳 SBI Remit</div>
+      <div class="ecosystem-logo">🌐 Coins.ph (ODL Philippines)</div>
+      <div class="ecosystem-logo">📱 Xumm Wallet</div>
+      <div class="ecosystem-logo">🔒 Ledger Hardware</div>
+      <div class="ecosystem-logo">📊 XRPL.org</div>
+      <div class="ecosystem-logo">🎓 XRPL Grants</div>
+      <div class="ecosystem-logo">💱 Bitstamp</div>
+      <div class="ecosystem-logo">🇳🇬 Flutterwave</div>
+      <div class="ecosystem-logo">🇰🇪 Chipper Cash</div>
+      <div class="ecosystem-logo">🌍 AZA Finance</div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================
+     CTA
+====================================================== -->
+<section id="cta">
+  <div class="container">
+    <div class="cta-inner">
+      <div class="section-label">Get Started</div>
+      <h2>Ready to Build on XRPL?</h2>
+      <p>Whether you're a developer, fintech entrepreneur, or policy maker — the XRP Ledger is open, free, and ready for Africa's next financial chapter.</p>
+      <div class="cta-actions">
+        <a href="https://xrpl.org/docs.html" target="_blank" rel="noopener noreferrer" class="btn-primary">📄 Read the Docs</a>
+        <a href="https://xrpl.org/xrp-testnet-faucet.html" target="_blank" rel="noopener noreferrer" class="btn-secondary">🚰 Get Testnet XRP</a>
+      </div>
+      <div class="disclaimer">
+        ⚠️ <strong>Disclaimer:</strong> This website is for educational purposes only. XRP price data is fetched live from public APIs. 
+        Payment simulations do not involve real funds. Nothing on this page constitutes financial advice.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================
+     FOOTER
+====================================================== -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="#hero" class="nav-logo" style="font-size:1.1rem;">
+          <div class="logo-icon">X</div>
+          <span>XRP Africa</span>
+        </a>
+        <p>An educational resource exploring how XRP and the XRP Ledger can transform financial corridors across the African continent.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Learn</h4>
+        <ul>
+          <li><a href="#problem">The Challenge</a></li>
+          <li><a href="#solution">How XRPL Works</a></li>
+          <li><a href="#use-cases">Use Cases</a></li>
+          <li><a href="#corridors">Corridors</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Explore</h4>
+        <ul>
+          <li><a href="#live-demo">Live Demo</a></li>
+          <li><a href="#technical">Technical Docs</a></li>
+          <li><a href="#ecosystem">Ecosystem</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Resources</h4>
+        <ul>
+          <li><a href="https://xrpl.org" target="_blank" rel="noopener noreferrer">XRPL.org ↗</a></li>
+          <li><a href="https://ripple.com" target="_blank" rel="noopener noreferrer">Ripple.com ↗</a></li>
+          <li><a href="https://xrpl.org/docs.html" target="_blank" rel="noopener noreferrer">Documentation ↗</a></li>
+          <li><a href="https://xrpl.org/xrp-testnet-faucet.html" target="_blank" rel="noopener noreferrer">Testnet Faucet ↗</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 XRP Africa — Educational Resource. Not affiliated with Ripple Labs.</span>
+      <span>Built with ❤️ for Africa's financial future</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ======================================================
+     SCRIPTS
+====================================================== -->
+<!-- xrpl.js — official XRPL JavaScript library -->
+<script src="https://unpkg.com/xrpl@3.0.0/build/xrpl-latest-min.js"></script>
+<script src="js/app.js"></script>
+<script src="js/xrpl-demo.js"></script>
+</body>
+</html>
