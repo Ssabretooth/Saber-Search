@@ -144,9 +144,10 @@ function addTxToFeed(tx) {
 
 /* ── Update ledger stats ─────────────────────────────────── */
 function updateLedgerStats(ledger) {
-  var idx      = ledger.ledger_index || ledger.ledger_hash;
-  var txCount  = ledger.txn_count || 0;
-  var closeEpoch = ledger.close_time; // XRPL epoch (seconds since 2000-01-01)
+  var ledgerIndex  = ledger.ledger_index;   // numeric index (preferred for display)
+  var ledgerIdent  = ledgerIndex != null ? ledgerIndex : ledger.ledger_hash; // fallback to hash
+  var txCount      = ledger.txn_count || 0;
+  var closeEpoch   = ledger.close_time; // XRPL epoch (seconds since 2000-01-01)
 
   var closeInterval = 0;
   if (prevLedgerCloseTime && closeEpoch) {
@@ -154,7 +155,7 @@ function updateLedgerStats(ledger) {
   }
   if (closeEpoch) prevLedgerCloseTime = closeEpoch;
 
-  if (statLedger)    statLedger.textContent    = fmt(idx);
+  if (statLedger)    statLedger.textContent    = fmt(ledgerIdent);
   if (statTxCount)   statTxCount.textContent   = fmt(txCount);
   if (statCloseTime) {
     statCloseTime.innerHTML = (closeInterval > 0
@@ -162,16 +163,17 @@ function updateLedgerStats(ledger) {
       : '~4') + '<span class="unit">s</span>';
   }
 
-  if (heroLedger) heroLedger.textContent = fmt(idx);
+  if (heroLedger) heroLedger.textContent = fmt(ledgerIdent);
   if (heroTps)    heroTps.textContent    = fmt(txCount);
 
   // Animate consensus stage based on ledger close
   if (consensusStage) {
-    consensusStage.textContent = '✅ Ledger #' + fmt(idx) + ' closed — ' + fmt(txCount) + ' transactions';
+    consensusStage.textContent = '✅ Ledger #' + fmt(ledgerIdent) + ' closed — ' + fmt(txCount) + ' transactions';
     consensusStage.style.color = 'var(--green)';
     setTimeout(function () {
       if (consensusStage) {
-        consensusStage.textContent = '🔄 Round ' + fmt((idx || 0) + 1) + ' — broadcasting proposals…';
+        var nextIndex = ledgerIndex != null ? ledgerIndex + 1 : '';
+        consensusStage.textContent = '🔄 Round ' + fmt(nextIndex) + ' — broadcasting proposals…';
         consensusStage.style.color = '';
       }
     }, 2000);
