@@ -1,88 +1,132 @@
 import { notFound } from "next/navigation";
+import { AlertTriangle, ExternalLink } from "lucide-react";
 import { supabase } from "@/lib/supabase";
-import { SpendTable } from "@/components/SpendTable";
-import { DisclosuresTable } from "@/components/DisclosuresTable";
-import { JudicialTable } from "@/components/JudicialTable";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { FlagBadge } from "@/components/FlagBadge";
-import type { FlagType } from "@/lib/types/flags";
+import { SourceCitation } from "@/components/SourceCitation";
+import { DisclosuresTable } from "@/components/DisclosuresTable";
+import { SpendTable } from "@/components/SpendTable";
+import { JudicialTable } from "@/components/JudicialTable";
+import type {
+  DisclosurePublic,
+  Flag,
+  JudicialPublic,
+  MPProfile,
+  SourceDocument,
+  SpendingPublic,
+} from "@/lib/types/database";
 
-type Mp = {
-  id: string;
-  full_name: string;
-  known_as: string | null;
-  chamber: "na" | "ncop";
-  party: string | null;
-  constituency: string | null;
-  portfolio: string | null;
-  official_profile_url: string | null;
-};
+type WithSource<T> = T & { source?: SourceDocument };
 
-export default async function MpPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function MPProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
   const { data: mp } = await supabase
     .from("v_mps_public")
     .select("*")
     .eq("id", id)
-    .maybeSingle<Mp>();
-
+    .maybeSingle<MPProfile>();
   if (!mp) notFound();
 
-  const [spend, disclosures, judicial, flags] = await Promise.all([
-    supabase.from("v_spending_public").select("*").eq("mp_id", id),
-    supabase.from("v_disclosures_public").select("*").eq("mp_id", id),
-    supabase.from("v_judicial_public").select("*").eq("mp_id", id),
+  const [flagsRes, disclosuresRes, spendRes, judicialRes] = await Promise.all([
+    supabase.from("v_flags_public").select("*").eq("subject_id", id).returns<Flag[]>(),
     supabase
-      .from("v_flags_public")
-      .select("id, flag_type")
-      .eq("subject_id", id)
-      .returns<{ id: string; flag_type: FlagType }[]>(),
+      .from("v_disclosures_public")
+      .select("*")
+      .eq("mp_id", id)
+      .order("extracted_at", { ascending: false })
+      .returns<DisclosurePublic[]>(),
+    supabase.from("v_spending_public").select("*").eq("mp_id", id).returns<SpendingPublic[]>(),
+    supabase.from("v_judicial_public").select("*").eq("mp_id", id).returns<JudicialPublic[]>(),
   ]);
 
+  const flags = flagsRes.data ?? [];
+  const disclosures = disclosuresRes.data ?? [];
+  const spend = spendRes.data ?? [];
+  const judicial = judicialRes.data ?? [];
+
+  const sourceIds = [
+    ...new Set([...flags, ...disclosures, ...spend, ...judicial].map((r) => r.source_document_id)),
+  ];
+  const { data: sources } = sourceIds.length
+    ? await supabase
+        .from("v_sources_public")
+        .select("id, publisher, title, url, published_at, licence_note")
+        .in("id", sourceIds)
+        .returns<SourceDocument[]>()
+    : { data: [] as SourceDocument[] };
+  const sourceById = new Map((sources ?? []).map((s) => [s.id, s]));
+
+  const withSource = <T extends { source_document_id: string }>(rows: T[]): WithSource<T>[] =>
+    rows.map((r) => ({ ...r, source: sourceById.get(r.source_document_id) }));
+
   return (
-    <article className="space-y-8">
-      <header>
-        <h1 className="text-2xl font-semibold">{mp.known_as ?? mp.full_name}</h1>
-        <p className="text-sm text-slate-600">
-          {mp.chamber.toUpperCase()}
-          {mp.party ? ` · ${mp.party}` : ""}
-          {mp.constituency ? ` · ${mp.constituency}` : ""}
-          {mp.portfolio ? ` · ${mp.portfolio}` : ""}
-        </p>
+    <main className="container mx-auto max-w-5xl space-y-8 px-4 py-10">
+      <Alert className="border-amber-200 bg-amber-50 text-amber-900">
+        <AlertTriangle className="h-4 w-4 text-amber-600" />
+        <AlertTitle className="font-semibold">Audit Notice</AlertTitle>
+        <AlertDescription>
+          Figures are reproduced from official public records. Flags are statistical or documentary
+          observations, not findings of wrongdoing.
+        </AlertDescription>
+      </Alert>
+
+      <header className="space-y-2 border-b pb-6">
+        <h1 className="text-3xl font-bold tracking-tight">{mp.known_as ?? mp.full_name}</h1>
+        <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+          {mp.party && <p className="font-medium">{mp.party}</p>}
+          {mp.constituency && <p>• {mp.constituency}</p>}
+          {mp.portfolio && <p>• {mp.portfolio}</p>}
+          <p>• Chamber: {mp.chamber.toUpperCase()}</p>
+        </div>
+        {mp.official_profile_url && (
+          <a
+            href={mp.official_profile_url}
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center gap-1 text-sm text-blue-600 hover:underline"
+          >
+            Official Parliament Profile <ExternalLink className="h-3 w-3" />
+          </a>
+        )}
       </header>
 
-      <p className="rounded border border-slate-300 bg-slate-50 p-3 text-sm">
-        Figures are reproduced from official public records. Flags are statistical or
-        documentary observations, not findings of wrongdoing.
-      </p>
-
-      {flags.data && flags.data.length > 0 && (
-        <section className="space-y-2">
-          <h2 className="text-lg font-semibold">Flags</h2>
-          <ul className="flex flex-wrap gap-2">
-            {flags.data.map((f) => (
-              <li key={f.id}>
+      <section className="space-y-4">
+        <h2 className="text-xl font-semibold tracking-tight">Active Flags</h2>
+        {flags.length > 0 ? (
+          <ul className="flex flex-col gap-3">
+            {withSource(flags).map((f) => (
+              <li
+                key={f.id}
+                className="flex items-center gap-3 rounded-md border bg-white p-3 shadow-sm"
+              >
                 <FlagBadge flagType={f.flag_type} />
+                <span className="flex-1 text-sm text-gray-600">{f.public_text}</span>
+                <SourceCitation source={f.source} />
               </li>
             ))}
           </ul>
-        </section>
-      )}
-
-      <section className="space-y-2">
-        <h2 className="text-lg font-semibold">Financial disclosures</h2>
-        <DisclosuresTable rows={disclosures.data ?? []} />
+        ) : (
+          <p className="rounded-md border border-dashed bg-gray-50 p-4 text-sm text-gray-500">
+            No active flags detected for this Member.
+          </p>
+        )}
       </section>
 
-      <section className="space-y-2">
-        <h2 className="text-lg font-semibold">State spending</h2>
-        <SpendTable rows={spend.data ?? []} />
+      <section className="space-y-4">
+        <h2 className="text-xl font-semibold tracking-tight">Financial Disclosures</h2>
+        <DisclosuresTable rows={withSource(disclosures)} />
       </section>
 
-      <section className="space-y-2">
-        <h2 className="text-lg font-semibold">Judicial proceedings</h2>
-        <JudicialTable rows={judicial.data ?? []} />
+      <section className="space-y-4">
+        <h2 className="text-xl font-semibold tracking-tight">State Spending</h2>
+        <SpendTable rows={withSource(spend)} />
       </section>
-    </article>
+
+      <section className="space-y-4">
+        <h2 className="text-xl font-semibold tracking-tight">Judicial Proceedings</h2>
+        <JudicialTable rows={withSource(judicial)} />
+      </section>
+    </main>
   );
 }

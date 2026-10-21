@@ -1,6 +1,8 @@
 import { Badge } from "@/components/ui/badge";
 import type { FlagType } from "@/lib/types/flags";
 
+type Tone = "neutral" | "review";
+
 function flagLabel(flagType: FlagType): string {
   switch (flagType) {
     case "outlier_expense":
@@ -28,6 +30,36 @@ function flagLabel(flagType: FlagType): string {
   }
 }
 
+function flagTone(flagType: FlagType): Tone {
+  switch (flagType) {
+    case "outlier_expense":
+    case "procurement_relationship":
+    case "civil_proceeding":
+    case "criminal_charge_pending":
+    case "acquitted":
+    case "convicted_appeal_pending":
+    case "convicted_final":
+      return "neutral";
+    case "disclosure_inconsistency":
+    case "cipc_directorship_match":
+      return "review";
+    default: {
+      const _exhaustive: never = flagType;
+      throw new Error(`Unhandled flag_type: ${_exhaustive}`);
+    }
+  }
+}
+
+const toneClass: Record<Tone, string> = {
+  neutral: "",
+  review: "bg-amber-100 text-amber-900 hover:bg-amber-200",
+};
+
 export function FlagBadge({ flagType }: { flagType: FlagType }) {
-  return <Badge variant="outline">{flagLabel(flagType)}</Badge>;
+  const tone = flagTone(flagType);
+  return (
+    <Badge variant={tone === "review" ? "secondary" : "outline"} className={toneClass[tone]}>
+      {flagLabel(flagType)}
+    </Badge>
+  );
 }

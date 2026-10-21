@@ -1,4 +1,5 @@
 import { SourceCitation } from "@/components/SourceCitation";
+import type { SourceDocument } from "@/lib/types/database";
 
 type Row = {
   id: string;
@@ -7,7 +8,7 @@ type Row = {
   period_start: string;
   period_end: string;
   department: string | null;
-  source_document_id: string;
+  source?: SourceDocument;
 };
 
 export function SpendTable({ rows }: { rows: Row[] }) {
@@ -30,7 +31,7 @@ export function SpendTable({ rows }: { rows: Row[] }) {
             <td className="p-2">{Number(r.amount_zar).toLocaleString("en-ZA")}</td>
             <td className="p-2">{r.period_start} – {r.period_end}</td>
             <td className="p-2">{r.department ?? "—"}</td>
-            <td className="p-2"><SourceCitation documentId={r.source_document_id} /></td>
+            <td className="p-2"><SourceCitation source={r.source} /></td>
           </tr>
         ))}
       </tbody>

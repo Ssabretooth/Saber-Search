@@ -6,13 +6,13 @@ function judicialLabel(status: JudicialStatus): string {
     case "charge_pending":
       return "Charge pending — presumption of innocence applies";
     case "acquitted":
-      return "Acquitted";
+      return "Acquitted — official record";
     case "convicted_appeal_pending":
-      return "Convicted, appeal pending";
+      return "Convicted, appeal pending — official record";
     case "convicted_final":
-      return "Convicted (final)";
+      return "Convicted (final) — official record";
     case "civil_matter":
-      return "Civil matter";
+      return "Civil matter — official record";
     default: {
       const _exhaustive: never = status;
       throw new Error(`Unhandled judicial_status: ${_exhaustive}`);

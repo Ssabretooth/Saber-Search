@@ -1,4 +1,5 @@
 import { SourceCitation } from "@/components/SourceCitation";
+import type { SourceDocument } from "@/lib/types/database";
 
 type Row = {
   id: string;
@@ -8,7 +9,7 @@ type Row = {
   value_zar: number | null;
   period_start: string | null;
   period_end: string | null;
-  source_document_id: string;
+  source?: SourceDocument;
 };
 
 export function DisclosuresTable({ rows }: { rows: Row[] }) {
@@ -33,7 +34,7 @@ export function DisclosuresTable({ rows }: { rows: Row[] }) {
             <td className="p-2">
               {r.value_zar === null ? "—" : Number(r.value_zar).toLocaleString("en-ZA")}
             </td>
-            <td className="p-2"><SourceCitation documentId={r.source_document_id} /></td>
+            <td className="p-2"><SourceCitation source={r.source} /></td>
           </tr>
         ))}
       </tbody>

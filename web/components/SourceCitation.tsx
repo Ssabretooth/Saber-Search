@@ -1,55 +1,43 @@
-"use client";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { ExternalLink, Info } from "lucide-react";
+import type { SourceDocument } from "@/lib/types/database";
 
-import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-
-type Source = {
-  id: string;
-  publisher: string;
-  title: string;
-  url: string;
-  published_at: string | null;
-};
-
-export function SourceCitation({ documentId }: { documentId: string }) {
-  const [source, setSource] = useState<Source | null>(null);
-  const [failed, setFailed] = useState(false);
-
-  useEffect(() => {
-    let active = true;
-    supabase
-      .from("v_sources_public")
-      .select("id, publisher, title, url, published_at")
-      .eq("id", documentId)
-      .maybeSingle<Source>()
-      .then(({ data, error }) => {
-        if (!active) return;
-        if (error || !data) setFailed(true);
-        else setSource(data);
-      });
-    return () => {
-      active = false;
-    };
-  }, [documentId]);
-
-  if (failed) return <span className="text-xs text-red-700">Source unavailable</span>;
-  if (!source) return <span className="text-xs text-slate-400">Loading source…</span>;
+export function SourceCitation({ source }: { source?: SourceDocument }) {
+  if (!source) return <span className="text-xs italic text-gray-400">No source attached</span>;
 
   return (
-    <Tooltip>
-      <TooltipTrigger render={<span className="cursor-help underline decoration-dotted text-xs" />}>
-        Source
-      </TooltipTrigger>
-      <TooltipContent>
-        <span className="block">
-          {source.publisher} — {source.title}
-          {source.published_at ? ` (${source.published_at})` : ""}
-        </span>
-        <a href={source.url} target="_blank" rel="noopener noreferrer" className="underline">
-          View source
-        </a>
-      </TooltipContent>
-    </Tooltip>
+    <TooltipProvider delay={150}>
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <button
+              type="button"
+              className="flex items-center text-blue-600 transition-colors hover:text-blue-800"
+              aria-label="View source document"
+            />
+          }
+        >
+          <Info className="ml-1 h-4 w-4" />
+        </TooltipTrigger>
+        <TooltipContent className="max-w-xs border-gray-200 p-3 shadow-lg">
+          <p className="mb-1 text-sm font-semibold text-gray-900">{source.title}</p>
+          <p className="mb-3 text-xs text-gray-500">
+            {source.publisher}
+            {source.published_at ? ` • ${source.published_at}` : ""}
+          </p>
+          {source.licence_note && (
+            <p className="mb-3 text-[10px] text-gray-400">{source.licence_note}</p>
+          )}
+          <a
+            href={source.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center text-xs font-medium text-blue-600 hover:underline"
+          >
+            View source document <ExternalLink className="ml-1 h-3 w-3" />
+          </a>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 }

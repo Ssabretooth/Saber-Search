@@ -1,4 +1,5 @@
 import { SourceCitation } from "@/components/SourceCitation";
+import type { SourceDocument } from "@/lib/types/database";
 
 type Row = {
   id: string;
@@ -7,7 +8,7 @@ type Row = {
   court: string | null;
   summary_neutral: string | null;
   status_as_of: string;
-  source_document_id: string;
+  source?: SourceDocument;
 };
 
 export function JudicialTable({ rows }: { rows: Row[] }) {
@@ -32,7 +33,7 @@ export function JudicialTable({ rows }: { rows: Row[] }) {
             <td className="p-2">{r.court ?? "—"}</td>
             <td className="p-2">{r.summary_neutral ?? "—"}</td>
             <td className="p-2">{r.status_as_of}</td>
-            <td className="p-2"><SourceCitation documentId={r.source_document_id} /></td>
+            <td className="p-2"><SourceCitation source={r.source} /></td>
           </tr>
         ))}
       </tbody>
