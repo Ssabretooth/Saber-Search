@@ -8,19 +8,19 @@
   title: Register of Members' Interests
   candidate_domain: parliament.gov.za
   discovery_hint: "locate the current-term Register of Members' Interests PDF; prefer a stable document path over hashed storage paths; record the term and publication date."
-  url: ""
-  format: ""
+  url: "https://www.parliament.gov.za/storage/app/media/Register%20of%20Members%20Interests/Register_of_members_interests_june_2026_v2.pdf"
+  format: "PDF"
   tier: tier1_official
   republication_of: ""
-  licence_note: ""
-  robots_ok: null
+  licence_note: "Users may view, copy, download to a local drive, print and distribute the content of this website, or any part thereof for informational or reference purposes only and for non-commercial purposes"
+  robots_ok: true
   rate_limit_rps: 0.5
   contact_email: transparency@publikeye.org
-  verified: false
-  verified_by: ""
-  verified_at: ""
-  first_fetch_sha256: ""
-  notes: ""
+  verified: true
+  verified_by: "Lucky Sandleni"
+  verified_at: "2026-10-21"
+  first_fetch_sha256: "ce48d84310960119e23da1b4177aa8f903d3c2bca6ca139d5b3bdbdb74d54659"
+  notes: "for transparancy purposes"
 
 - id: parliament_member_list
   publisher: Parliament of South Africa
