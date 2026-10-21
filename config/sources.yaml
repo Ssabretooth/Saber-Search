@@ -1,0 +1,251 @@
+# Worklist of candidate sources. Human-edited. NOT read by ingestion code.
+# A human fills url/format/licence_note/robots_ok and sets verified: true after
+# checking (see docs/sources/CHECKLIST.md), then copies the entry to sources.lock.yaml.
+# candidate_domain and discovery_hint are NOT URLs.
+
+- id: parliament_register_interests
+  publisher: Parliament of South Africa
+  title: Register of Members' Interests
+  candidate_domain: parliament.gov.za
+  discovery_hint: "locate the current-term Register of Members' Interests PDF; prefer a stable document path over hashed storage paths; record the term and publication date."
+  url: ""
+  format: ""
+  tier: tier1_official
+  republication_of: ""
+  licence_note: ""
+  robots_ok: null
+  rate_limit_rps: 0.5
+  contact_email: transparency@publikeye.org
+  verified: false
+  verified_by: ""
+  verified_at: ""
+  first_fetch_sha256: ""
+  notes: ""
+
+- id: parliament_member_list
+  publisher: Parliament of South Africa
+  title: National Assembly and NCOP member lists
+  candidate_domain: parliament.gov.za
+  discovery_hint: "current NA and NCOP member lists; record chamber and term."
+  url: ""
+  format: ""
+  tier: tier1_official
+  republication_of: ""
+  licence_note: ""
+  robots_ok: null
+  rate_limit_rps: 0.5
+  contact_email: transparency@publikeye.org
+  verified: false
+  verified_by: ""
+  verified_at: ""
+  first_fetch_sha256: ""
+  notes: ""
+
+- id: pmg_committee_transcripts
+  publisher: Parliamentary Monitoring Group (PMG)
+  title: Committee transcripts and MP profile pages
+  candidate_domain: pmg.org.za
+  discovery_hint: "committee transcript index and MP profile pages; note PMG's licensing terms for republication."
+  url: ""
+  format: ""
+  tier: tier2_indexed_republication
+  republication_of: parliament_committee_proceedings
+  licence_note: ""
+  robots_ok: null
+  rate_limit_rps: 0.5
+  contact_email: transparency@publikeye.org
+  verified: false
+  verified_by: ""
+  verified_at: ""
+  first_fetch_sha256: ""
+  notes: ""
+
+- id: parliament_committee_proceedings
+  publisher: Parliament of South Africa
+  title: Committee proceedings
+  candidate_domain: parliament.gov.za
+  discovery_hint: "committee proceedings index; record committee, meeting date, and stable document path."
+  url: ""
+  format: ""
+  tier: tier1_official
+  republication_of: ""
+  licence_note: ""
+  robots_ok: null
+  rate_limit_rps: 0.5
+  contact_email: transparency@publikeye.org
+  verified: false
+  verified_by: ""
+  verified_at: ""
+  first_fetch_sha256: ""
+  notes: ""
+
+- id: gazette_official
+  publisher: Government Printing Works
+  title: Government Gazette
+  candidate_domain: gpwonline.co.za
+  discovery_hint: "prefer the searchable Gazette portal; record the gazette number, publication date, and stable download URL; mirror on OpenGazettes as republication_of where the official link is unstable."
+  url: ""
+  format: ""
+  tier: tier1_official
+  republication_of: ""
+  licence_note: ""
+  robots_ok: null
+  rate_limit_rps: 0.5
+  contact_email: transparency@publikeye.org
+  verified: false
+  verified_by: ""
+  verified_at: ""
+  first_fetch_sha256: ""
+  notes: ""
+
+- id: treasury_budget_review
+  publisher: National Treasury
+  title: Budget Review
+  candidate_domain: treasury.gov.za
+  discovery_hint: ""  # SPEC_GAP: no discovery hint provided
+  url: ""
+  format: ""
+  tier: tier1_official
+  republication_of: ""
+  licence_note: ""
+  robots_ok: null
+  rate_limit_rps: 0.5
+  contact_email: transparency@publikeye.org
+  verified: false
+  verified_by: ""
+  verified_at: ""
+  first_fetch_sha256: ""
+  notes: ""
+
+- id: treasury_section32_reports
+  publisher: National Treasury
+  title: Monthly MFMA section 32 reports
+  candidate_domain: treasury.gov.za
+  discovery_hint: ""  # SPEC_GAP: no discovery hint provided
+  url: ""
+  format: ""
+  tier: tier1_official
+  republication_of: ""
+  licence_note: ""
+  robots_ok: null
+  rate_limit_rps: 0.5
+  contact_email: transparency@publikeye.org
+  verified: false
+  verified_by: ""
+  verified_at: ""
+  first_fetch_sha256: ""
+  notes: ""
+
+- id: agsa_audit_outcomes
+  publisher: Auditor-General of South Africa
+  title: Audit outcomes
+  candidate_domain: agsa.co.za
+  discovery_hint: ""  # SPEC_GAP: no discovery hint provided
+  url: ""
+  format: ""
+  tier: tier1_official
+  republication_of: ""
+  licence_note: ""
+  robots_ok: null
+  rate_limit_rps: 0.5
+  contact_email: transparency@publikeye.org
+  verified: false
+  verified_by: ""
+  verified_at: ""
+  first_fetch_sha256: ""
+  notes: ""
+
+- id: public_protector_reports
+  publisher: Public Protector
+  title: Public Protector reports
+  candidate_domain: pp.gov.za
+  discovery_hint: ""  # SPEC_GAP: no discovery hint provided
+  url: ""
+  format: ""
+  tier: tier1_official
+  republication_of: ""
+  licence_note: ""
+  robots_ok: null
+  rate_limit_rps: 0.5
+  contact_email: transparency@publikeye.org
+  verified: false
+  verified_by: ""
+  verified_at: ""
+  first_fetch_sha256: ""
+  notes: ""
+
+- id: siu_reports
+  publisher: Special Investigating Unit
+  title: SIU reports
+  candidate_domain: siu.org.za
+  discovery_hint: ""  # SPEC_GAP: no discovery hint provided
+  url: ""
+  format: ""
+  tier: tier1_official
+  republication_of: ""
+  licence_note: ""
+  robots_ok: null
+  rate_limit_rps: 0.5
+  contact_email: transparency@publikeye.org
+  verified: false
+  verified_by: ""
+  verified_at: ""
+  first_fetch_sha256: ""
+  notes: ""
+
+- id: etenders_publications
+  publisher: National Treasury
+  title: eTenders publications
+  candidate_domain: etenders.gov.za
+  discovery_hint: "per-tender publication pages; respect eTenders ToS and rate limits."
+  url: ""
+  format: ""
+  tier: tier1_official
+  republication_of: ""
+  licence_note: ""
+  robots_ok: null
+  rate_limit_rps: 0.5
+  contact_email: transparency@publikeye.org
+  verified: false
+  verified_by: ""
+  verified_at: ""
+  first_fetch_sha256: ""
+  notes: ""
+
+- id: saflii_judgments
+  publisher: SAFLII
+  title: Published judgments
+  candidate_domain: saflii.org
+  discovery_hint: ""  # SPEC_GAP: no discovery hint provided
+  url: ""
+  format: ""
+  tier: tier2_judgment
+  republication_of: ""
+  licence_note: ""
+  robots_ok: null
+  rate_limit_rps: 0.5
+  contact_email: transparency@publikeye.org
+  verified: false
+  verified_by: ""
+  verified_at: ""
+  first_fetch_sha256: ""
+  notes: ""
+
+- id: ocj_media_releases
+  publisher: Office of the Chief Justice
+  title: Media releases
+  candidate_domain: judiciary.org.za
+  discovery_hint: ""  # SPEC_GAP: no discovery hint provided
+  url: ""
+  format: ""
+  tier: tier1_official
+  republication_of: ""
+  licence_note: ""
+  robots_ok: null
+  rate_limit_rps: 0.5
+  contact_email: transparency@publikeye.org
+  verified: false
+  verified_by: ""
+  verified_at: ""
+  first_fetch_sha256: ""
+  notes: ""
