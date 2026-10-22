@@ -18,6 +18,8 @@ import type {
 
 type WithSource<T> = T & { source?: SourceDocument };
 
+export const dynamic = 'force-dynamic';
+
 export default async function MPProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
