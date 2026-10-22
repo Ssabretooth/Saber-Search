@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { AlertTriangle, ExternalLink } from "lucide-react";
-import { supabase } from "@/lib/supabase";
+import { supabase, validateSupabaseConfig } from "@/lib/supabase";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { FlagBadge } from "@/components/FlagBadge";
 import { SourceCitation } from "@/components/SourceCitation";
@@ -21,6 +21,7 @@ type WithSource<T> = T & { source?: SourceDocument };
 export const dynamic = 'force-dynamic';
 
 export default async function MPProfilePage({ params }: { params: Promise<{ id: string }> }) {
+  validateSupabaseConfig();
   const { id } = await params;
 
   const { data: mp } = await supabase
