@@ -18,13 +18,14 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "oxlint --react-plugin --nextjs-plugin --import-plugin --deny-warnings app components lib",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^26.6.5",
     "@types/react": "^19.3.0",
+    "oxlint": "^1.89.0",
     "tailwindcss": "^4.3.3",
     "typescript": "^7.0.2"
   }
