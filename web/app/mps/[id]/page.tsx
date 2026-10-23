@@ -24,11 +24,12 @@ export default async function MPProfilePage({ params }: { params: Promise<{ id: 
   const supabase = getSupabase();
   const { id } = await params;
 
-  const { data: mp } = await supabase
+  const { data: mp, error: mpError } = await supabase
     .from("v_mps_public")
     .select("*")
     .eq("id", id)
     .maybeSingle<MPProfile>();
+  if (mpError) throw new Error(`Failed to load MP ${id}: ${mpError.message}`);
   if (!mp) notFound();
 
   const [flagsRes, disclosuresRes, spendRes, judicialRes] = await Promise.all([
@@ -43,6 +44,9 @@ export default async function MPProfilePage({ params }: { params: Promise<{ id: 
     supabase.from("v_judicial_public").select("*").eq("mp_id", id).returns<JudicialPublic[]>(),
   ]);
 
+  for (const res of [flagsRes, disclosuresRes, spendRes, judicialRes]) {
+    if (res.error) throw new Error(`Failed to load MP ${id} records: ${res.error.message}`);
+  }
   const flags = flagsRes.data ?? [];
   const disclosures = disclosuresRes.data ?? [];
   const spend = spendRes.data ?? [];
@@ -51,13 +55,14 @@ export default async function MPProfilePage({ params }: { params: Promise<{ id: 
   const sourceIds = [
     ...new Set([...flags, ...disclosures, ...spend, ...judicial].map((r) => r.source_document_id)),
   ];
-  const { data: sources } = sourceIds.length
+  const { data: sources, error: sourcesError } = sourceIds.length
     ? await supabase
         .from("v_sources_public")
         .select("id, publisher, title, url, published_at, licence_note")
         .in("id", sourceIds)
         .returns<SourceDocument[]>()
-    : { data: [] as SourceDocument[] };
+    : { data: [] as SourceDocument[], error: null };
+  if (sourcesError) throw new Error(`Failed to load sources for MP ${id}: ${sourcesError.message}`);
   const sourceById = new Map((sources ?? []).map((s) => [s.id, s]));
 
   const withSource = <T extends { source_document_id: string }>(rows: T[]): WithSource<T>[] =>

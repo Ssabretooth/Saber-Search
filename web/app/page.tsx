@@ -6,12 +6,13 @@ export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const supabase = getSupabase();
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("v_mps_public")
     .select("id, full_name, known_as, party, chamber")
     .order("full_name")
     .returns<Pick<MPProfile, "id" | "full_name" | "known_as" | "party" | "chamber">[]>();
 
+  if (error) throw new Error(`Failed to load MPs: ${error.message}`);
   const mps = data ?? [];
 
   return (
