@@ -1,4 +1,6 @@
+import { TrendingUp } from "lucide-react";
 import { getSupabase } from "@/lib/supabase";
+import { PageHeader, DataCard, DataTable } from "@/components/DataComponents";
 
 export const dynamic = "force-dynamic";
 
@@ -7,38 +9,35 @@ export default async function SpendingPage() {
     .from("v_spending_public")
     .select("id, spend_type, amount_zar, department, period_start")
     .order("period_start", { ascending: false })
-    .limit(50);
+    .limit(100);
 
   if (error) throw new Error(`Failed to load spending data: ${error.message}`);
 
+  const total = data?.reduce((sum, row) => sum + Number(row.amount_zar), 0) || 0;
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">State Spending</h1>
-        <p className="text-slate-600">Government expenditure allocated to MPs</p>
-      </div>
-      <div className="bg-white border rounded-lg p-6">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b">
-              <th className="text-left p-2 font-semibold">Type</th>
-              <th className="text-left p-2 font-semibold">Department</th>
-              <th className="text-right p-2 font-semibold">Amount (ZAR)</th>
-              <th className="text-left p-2 font-semibold">Period</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data?.map((row) => (
-              <tr key={row.id} className="border-b hover:bg-slate-50">
-                <td className="p-2 capitalize">{row.spend_type}</td>
-                <td className="p-2 text-slate-600">{row.department || "—"}</td>
-                <td className="p-2 text-right">R{Number(row.amount_zar).toLocaleString()}</td>
-                <td className="p-2 text-slate-600">{row.period_start}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+    <div className="space-y-8">
+      <PageHeader
+        title="State Spending"
+        subtitle="Government expenditure allocated to members"
+      />
+
+      <DataCard
+        icon={TrendingUp}
+        title="Total Expenditure"
+        value={`R${total.toLocaleString('en-ZA', { maximumFractionDigits: 0 })}`}
+        subtitle={`${data?.length || 0} transactions`}
+      />
+
+      <DataTable
+        headers={["Type", "Department", "Amount (ZAR)", "Period"]}
+        rows={data?.map((row) => [
+          <span key="type" className="capitalize px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">{row.spend_type}</span>,
+          row.department || "—",
+          `R${Number(row.amount_zar).toLocaleString()}`,
+          row.period_start
+        ]) || []}
+      />
     </div>
   );
 }

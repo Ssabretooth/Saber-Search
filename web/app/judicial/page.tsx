@@ -1,4 +1,6 @@
+import { Gavel } from "lucide-react";
 import { getSupabase } from "@/lib/supabase";
+import { PageHeader, DataCard, DataTable } from "@/components/DataComponents";
 
 export const dynamic = "force-dynamic";
 
@@ -7,42 +9,38 @@ export default async function JudicialPage() {
     .from("v_judicial_public")
     .select("id, status, case_number, court, summary_neutral, status_as_of")
     .order("status_as_of", { ascending: false })
-    .limit(50);
+    .limit(100);
 
   if (error) throw new Error(`Failed to load judicial data: ${error.message}`);
 
+  const statusCounts = data?.reduce((acc, row) => {
+    acc[row.status] = (acc[row.status] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>) || {};
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Judicial Proceedings</h1>
-        <p className="text-slate-600">Legal cases involving members of parliament</p>
-      </div>
-      <div className="bg-white border rounded-lg p-6">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b">
-              <th className="text-left p-2 font-semibold">Status</th>
-              <th className="text-left p-2 font-semibold">Case</th>
-              <th className="text-left p-2 font-semibold">Court</th>
-              <th className="text-left p-2 font-semibold">Summary</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data?.map((row) => (
-              <tr key={row.id} className="border-b hover:bg-slate-50">
-                <td className="p-2">
-                  <span className="px-2 py-1 bg-slate-100 text-slate-700 rounded text-xs font-medium capitalize">
-                    {row.status}
-                  </span>
-                </td>
-                <td className="p-2 text-slate-600">{row.case_number || "—"}</td>
-                <td className="p-2 text-slate-600">{row.court || "—"}</td>
-                <td className="p-2 text-slate-600 max-w-xs truncate">{row.summary_neutral || "—"}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+    <div className="space-y-8">
+      <PageHeader
+        title="Judicial Proceedings"
+        subtitle="Legal cases involving members of parliament"
+      />
+
+      <DataCard
+        icon={Gavel}
+        title="Active Cases"
+        value={data?.length || 0}
+        subtitle={`${Object.keys(statusCounts).length} different statuses`}
+      />
+
+      <DataTable
+        headers={["Status", "Case Number", "Court", "Summary"]}
+        rows={data?.map((row) => [
+          <span key="status" className="px-2 py-1 bg-amber-100 text-amber-700 rounded text-xs font-medium capitalize">{row.status}</span>,
+          row.case_number || "—",
+          row.court || "—",
+          row.summary_neutral ? row.summary_neutral.substring(0, 50) + "..." : "—"
+        ]) || []}
+      />
     </div>
   );
 }

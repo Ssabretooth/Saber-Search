@@ -1,42 +1,43 @@
+import { FileText } from "lucide-react";
 import { getSupabase } from "@/lib/supabase";
+import { PageHeader, DataCard, DataTable } from "@/components/DataComponents";
 
 export const dynamic = "force-dynamic";
 
 export default async function DisclosuresPage() {
   const { data, error } = await getSupabase()
     .from("v_disclosures_public")
-    .select("id, mp_id, category, description, value_zar")
+    .select("id, category, description, value_zar, counterparty")
     .order("extracted_at", { ascending: false })
-    .limit(50);
+    .limit(100);
 
   if (error) throw new Error(`Failed to load disclosures: ${error.message}`);
 
+  const total = data?.reduce((sum, row) => sum + (Number(row.value_zar) || 0), 0) || 0;
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Financial Disclosures</h1>
-        <p className="text-slate-600">Declared interests and assets of MPs</p>
-      </div>
-      <div className="bg-white border rounded-lg p-6">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b">
-              <th className="text-left p-2 font-semibold">Category</th>
-              <th className="text-left p-2 font-semibold">Description</th>
-              <th className="text-right p-2 font-semibold">Value (ZAR)</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data?.map((row) => (
-              <tr key={row.id} className="border-b hover:bg-slate-50">
-                <td className="p-2 capitalize">{row.category}</td>
-                <td className="p-2 text-slate-600">{row.description || "—"}</td>
-                <td className="p-2 text-right">{row.value_zar ? `R${Number(row.value_zar).toLocaleString()}` : "—"}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+    <div className="space-y-8">
+      <PageHeader
+        title="Financial Disclosures"
+        subtitle="Declared interests and assets of members"
+      />
+
+      <DataCard
+        icon={FileText}
+        title="Total Declared Value"
+        value={`R${total.toLocaleString('en-ZA', { maximumFractionDigits: 0 })}`}
+        subtitle={`${data?.length || 0} entries`}
+      />
+
+      <DataTable
+        headers={["Category", "Description", "Counterparty", "Value (ZAR)"]}
+        rows={data?.map((row) => [
+          <span key="cat" className="capitalize px-2 py-1 bg-teal-100 text-teal-700 rounded text-xs font-medium">{row.category}</span>,
+          row.description || "—",
+          row.counterparty || "—",
+          row.value_zar ? `R${Number(row.value_zar).toLocaleString()}` : "—"
+        ]) || []}
+      />
     </div>
   );
 }
