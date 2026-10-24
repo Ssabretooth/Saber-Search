@@ -2,6 +2,7 @@ import pytest
 from unittest.mock import MagicMock, patch
 from ingestion.writer import SupabaseWriter
 from ingestion.config import ClearedSource
+from ingestion.errors import PublikEyeError
 
 @pytest.fixture
 def mock_client():
@@ -53,6 +54,15 @@ def test_upsert_facts_never_overwrites_existing_rows(mock_client):
 
     writer.upsert_facts(table="fact_table", rows=[{"row_hash": "h"}], conflict_cols="row_hash")
     assert mock_client.table().upsert.call_args.kwargs["ignore_duplicates"] is True
+
+def test_get_mps_by_name_rejects_ambiguous_names(mock_client):
+    writer = SupabaseWriter("http://url", "key")
+    mock_client.table().select().execute.return_value = MagicMock(data=[
+        {"id": "a", "full_name": "Jane Doe"},
+        {"id": "b", "full_name": "jane doe "},
+    ])
+    with pytest.raises(PublikEyeError, match="ambiguous MP name"):
+        writer.get_mps_by_name()
 
 def test_quarantine_private_schema(mock_client, mock_source):
     writer = SupabaseWriter("http://url", "key")

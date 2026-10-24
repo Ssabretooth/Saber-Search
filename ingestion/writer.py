@@ -75,7 +75,10 @@ class SupabaseWriter:
 
     def get_mps_by_name(self) -> dict[str, str]:
         res = self.client.table("mps").select("id, full_name").execute()
-        return {
-            r["full_name"].strip().lower(): r["id"]
-            for r in (res.data or [])
-        }
+        by_name: dict[str, str] = {}
+        for r in res.data or []:
+            key = r["full_name"].strip().lower()
+            if key in by_name:
+                raise PublikEyeError(f"ambiguous MP name: {key!r}")
+            by_name[key] = r["id"]
+        return by_name
