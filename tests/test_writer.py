@@ -46,6 +46,14 @@ def test_upsert_facts_chunking(mock_client):
     writer.upsert_facts(table="fact_table", rows=rows, conflict_cols="id")
     assert mock_client.table().upsert.call_count == 3 # 500, 500, 200
 
+def test_upsert_facts_never_overwrites_existing_rows(mock_client):
+    writer = SupabaseWriter("http://url", "key")
+    mock_client.table().upsert().execute.return_value = MagicMock(data=[1])
+    mock_client.table().upsert.reset_mock()
+
+    writer.upsert_facts(table="fact_table", rows=[{"row_hash": "h"}], conflict_cols="row_hash")
+    assert mock_client.table().upsert.call_args.kwargs["ignore_duplicates"] is True
+
 def test_quarantine_private_schema(mock_client, mock_source):
     writer = SupabaseWriter("http://url", "key")
     writer.quarantine(

@@ -45,7 +45,7 @@ class SupabaseWriter:
             chunk = rows[i : i + CHUNK_SIZE]
             res = (
                 self.client.table(table)
-                .upsert(chunk, on_conflict=conflict_cols)
+                .upsert(chunk, on_conflict=conflict_cols, ignore_duplicates=True)
                 .execute()
             )
             total += len(res.data or [])
