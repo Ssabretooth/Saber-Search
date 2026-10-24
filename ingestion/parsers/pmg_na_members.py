@@ -20,14 +20,18 @@ class PmgNaMembersParser(BaseParser):
         mps = []
 
         for text_node in soup.stripped_strings:
-            # Matches: "Abader, Ms ZS MKP" or "Abrahams, Mr B"
-            match = re.match(r"^([A-Za-z\-\s]+),\s+(Mr|Ms|Mrs|Dr|Adv|Prof|Rev|Inkosi|Prince|Chief)\s+([A-Z\s]+)\s+([A-Z\s]+)$", text_node)
-            if match:
-                surname = match.group(1).strip()
-                title = match.group(2)
-                initials = match.group(3).strip()
-                full_name = f"{surname}, {title} {initials}"
-                mps.append(MPSeed(full_name=full_name, chamber="na"))
+            for line in text_node.split('\n'):
+                line = line.strip()
+                if not line:
+                    continue
+                # Matches: "Abader, Ms ZS MKP" or "Abrahams, Mr B"
+                match = re.match(r"^([A-Za-z\-\s]+),\s+(Mr|Ms|Mrs|Dr|Adv|Prof|Rev|Inkosi|Prince|Chief)\s+([A-Z\s]+)\s+([A-Z\s]+)$", line)
+                if match:
+                    surname = match.group(1).strip()
+                    title = match.group(2)
+                    initials = match.group(3).strip()
+                    full_name = f"{surname}, {title} {initials}"
+                    mps.append(MPSeed(full_name=full_name, chamber="na"))
 
         if not mps:
             raise ParserSpecGap("Zero MPs parsed from PMG NA list.")

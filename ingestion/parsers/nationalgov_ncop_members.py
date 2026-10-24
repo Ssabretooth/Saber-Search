@@ -20,12 +20,14 @@ class NationalGovNcopMembersParser(BaseParser):
         mps = []
 
         for text_node in soup.stripped_strings:
-            if text_node.startswith("- "):
-                clean_text = text_node[2:].strip()
-                name_match = re.match(r"^((?:Mr|Ms|Mrs|Dr|Adv|Prof|Rev|Inkosi|Prince|Chief)\s+[^\(]+)", clean_text)
-                if name_match:
-                    full_name = name_match.group(1).strip()
-                    mps.append(MPSeed(full_name=full_name, chamber="ncop"))
+            for line in text_node.split('\n'):
+                line = line.strip()
+                if line.startswith("- "):
+                    clean_text = line[2:].strip()
+                    name_match = re.match(r"^((?:Mr|Ms|Mrs|Dr|Adv|Prof|Rev|Inkosi|Prince|Chief)\s+[^\(]+)", clean_text)
+                    if name_match:
+                        full_name = name_match.group(1).strip()
+                        mps.append(MPSeed(full_name=full_name, chamber="ncop"))
 
         if not mps:
             raise ParserSpecGap("Zero MPs parsed from National Government NCOP list.")
