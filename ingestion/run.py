@@ -43,7 +43,7 @@ def _row_hash(*parts) -> str:
 
 
 def _flatten_mps(doc):
-    return [m.model_dump() for m in doc.mps]
+    return [m.model_dump(mode="json") for m in doc.mps]
 
 
 def _flatten_disclosures(doc, source_doc_id, parser_version, mps_by_name):
