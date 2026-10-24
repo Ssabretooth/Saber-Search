@@ -11,13 +11,16 @@ export default function AuthCallbackPage() {
 
   useEffect(() => {
     const url = new URL(window.location.href);
-    const providerError = url.searchParams.get('error_description') ?? url.searchParams.get('error');
+    const hash = new URLSearchParams(window.location.hash.slice(1));
+    const providerError =
+      url.searchParams.get('error_description') ?? url.searchParams.get('error') ??
+      hash.get('error_description') ?? hash.get('error');
     if (providerError) {
       setError(providerError);
       return;
     }
     if (!url.searchParams.get('code')) {
-      router.replace('/login');
+      setError(`No sign-in code received. Landed on ${url.pathname}${url.search ? ' with query' : ''}${url.hash ? ' with hash' : ''}.`);
       return;
     }
     getSupabase()
