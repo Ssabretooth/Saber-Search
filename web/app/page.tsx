@@ -1,8 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
 import { User, FileText, TrendingUp, Gavel, AlertCircle } from "lucide-react";
-import { getSupabase } from "@/lib/supabase";
-import type { MpPublic } from "@/lib/types/database";
 
 export const dynamic = "force-dynamic";
 
@@ -12,47 +10,39 @@ const categories = [
     title: "Members of Parliament",
     description: "Explore profiles of all members",
     icon: User,
-    href: "#members",
+    href: "/members",
   },
   {
     id: "disclosures",
     title: "Financial Disclosures",
     description: "Track declared interests and assets",
     icon: FileText,
-    href: "#disclosures",
+    href: "/disclosures",
   },
   {
     id: "spending",
     title: "State Spending",
     description: "Government expenditure allocation",
     icon: TrendingUp,
-    href: "#spending",
+    href: "/spending",
   },
   {
     id: "judicial",
     title: "Judicial Proceedings",
     description: "Legal matters and court cases",
     icon: Gavel,
-    href: "#judicial",
+    href: "/judicial",
   },
   {
     id: "flags",
     title: "Alerts & Flags",
     description: "Notable patterns and observations",
     icon: AlertCircle,
-    href: "#flags",
+    href: "/flags",
   },
 ];
 
-export default async function HomePage() {
-  const { data, error } = await getSupabase()
-    .from("v_mps_public")
-    .select("id, full_name, known_as, party")
-    .order("full_name");
-
-  if (error) throw new Error(`Failed to load MPs: ${error.message}`);
-  const mps: Pick<MpPublic, "id" | "full_name" | "known_as" | "party">[] = data ?? [];
-
+export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
       {/* Header */}
@@ -101,16 +91,16 @@ export default async function HomePage() {
       </section>
 
       {/* Categories Grid */}
-      <section className="container mx-auto max-w-6xl px-4 py-12">
+      <section className="container mx-auto max-w-6xl px-4 py-16">
         <h3 className="text-xl font-semibold text-slate-900 mb-8">Explore Data</h3>
         <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-4">
           {categories.map((cat) => {
             const Icon = cat.icon;
             return (
-              <a
+              <Link
                 key={cat.id}
                 href={cat.href}
-                className="group p-6 bg-white border rounded-lg hover:border-teal-400 hover:shadow-md transition-all"
+                className="group p-6 bg-white border rounded-lg hover:border-teal-400 hover:shadow-md transition-all cursor-pointer"
               >
                 <div className="flex flex-col gap-3 h-full">
                   <div className="w-12 h-12 bg-teal-50 rounded-lg flex items-center justify-center group-hover:bg-teal-100 transition-colors">
@@ -121,38 +111,9 @@ export default async function HomePage() {
                   </h4>
                   <p className="text-xs text-slate-600">{cat.description}</p>
                 </div>
-              </a>
+              </Link>
             );
           })}
-        </div>
-      </section>
-
-      {/* Members List */}
-      <section id="members" className="container mx-auto max-w-6xl px-4 py-12">
-        <h3 className="text-xl font-semibold text-slate-900 mb-8">Members of Parliament</h3>
-        <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-3">
-          {mps.map((mp) => (
-            <div key={mp.id}>
-              <Link
-                href={`/mps/${mp.id}`}
-                className="block p-4 bg-white border rounded-lg hover:border-teal-400 hover:shadow-md hover:bg-teal-50 transition-all"
-              >
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 bg-gradient-to-br from-teal-400 to-blue-600 rounded-full flex items-center justify-center text-white flex-shrink-0 text-xs font-semibold mt-0.5">
-                    {mp.known_as?.[0] ?? mp.full_name[0]}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm text-slate-900 truncate">
-                      {mp.known_as ?? mp.full_name}
-                    </p>
-                    {mp.party && (
-                      <p className="text-xs text-slate-600 truncate">{mp.party}</p>
-                    )}
-                  </div>
-                </div>
-              </Link>
-            </div>
-          ))}
         </div>
       </section>
 
