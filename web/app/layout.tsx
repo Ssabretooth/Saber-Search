@@ -20,7 +20,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body className="bg-white text-slate-900 antialiased">
         <AuthProvider>
           <TooltipProvider>
-            <main className="mx-auto max-w-5xl p-6">{children}</main>
+            <main className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6">{children}</main>
           </TooltipProvider>
         </AuthProvider>
         <Analytics />

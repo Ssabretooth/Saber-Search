@@ -1,8 +1,9 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import { User, FileText, TrendingUp, Gavel, AlertCircle } from "lucide-react";
-
-export const dynamic = "force-dynamic";
+import { useAuth } from "@/lib/auth-context";
 
 const categories = [
   {
@@ -43,44 +44,41 @@ const categories = [
 ];
 
 export default function HomePage() {
+  const { user, profile } = useAuth();
+  const initials = profile?.first_name && profile?.last_name
+    ? `${profile.first_name[0]}${profile.last_name[0]}`.toUpperCase()
+    : user?.email?.[0]?.toUpperCase();
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
-      {/* Header */}
-      <header className="border-b bg-white sticky top-0 z-50">
-        <div className="container mx-auto max-w-7xl px-4 py-4 flex items-center justify-between">
-          {/* Logo (top left) */}
-          <div className="flex items-center gap-3 w-32">
-            <Image
-              src="/logo.jpg"
-              alt="PublikEye"
-              width={40}
-              height={40}
-              className="rounded-lg"
-            />
-            <span className="text-sm font-semibold text-slate-900">PublikEye</span>
-          </div>
+    <div>
+      <header className="flex items-center justify-between gap-2 border-b pb-4">
+        <Link href="/" className="flex w-10 shrink-0 items-center gap-2 sm:w-40">
+          <Image src="/logo.jpg" alt="PublikEye" width={40} height={40} className="rounded-lg" />
+          <span className="hidden text-sm font-semibold text-slate-900 sm:inline">PublikEye</span>
+        </Link>
 
-          {/* Title (center) */}
-          <h1 className="text-2xl font-bold text-slate-900 flex-1 text-center">
-            Transparency Matters
-          </h1>
+        <h1 className="truncate text-center text-lg font-bold text-slate-900 sm:text-2xl">
+          Transparency Matters
+        </h1>
 
-          {/* Avatar (top right) */}
-          <div className="w-32 flex justify-end">
-            <div className="w-10 h-10 bg-gradient-to-br from-teal-400 to-blue-600 rounded-full flex items-center justify-center text-white">
-              <User size={20} />
-            </div>
-          </div>
+        <div className="flex w-10 shrink-0 justify-end sm:w-40">
+          <Link
+            href={user ? "/profile" : "/login"}
+            aria-label={user ? "Your profile" : "Sign in"}
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-teal-400 to-blue-600 text-sm font-bold text-white"
+          >
+            {initials ?? <User size={20} />}
+          </Link>
         </div>
       </header>
 
       {/* Welcome Section */}
-      <section className="bg-gradient-to-r from-teal-50 to-blue-50 border-b">
-        <div className="container mx-auto max-w-4xl px-4 py-12 text-center">
-          <h2 className="text-3xl font-bold text-slate-900 mb-4">
+      <section className="-mx-4 border-b bg-gradient-to-r from-teal-50 to-blue-50 px-4 sm:-mx-6 sm:px-6">
+        <div className="mx-auto max-w-4xl py-10 text-center sm:py-12">
+          <h2 className="mb-4 text-2xl font-bold text-slate-900 sm:text-3xl">
             Welcome to PublikEye
           </h2>
-          <p className="text-lg text-slate-700 leading-relaxed max-w-2xl mx-auto">
+          <p className="mx-auto max-w-2xl leading-relaxed text-slate-700 sm:text-lg">
             We believe in <span className="font-semibold">open democracy</span> and <span className="font-semibold">accountability</span>.
             PublikEye tracks how state resources and public funds are used by members of parliament.
             All information here is <span className="font-semibold">publicly available</span>—we simply bring it together in one place,
@@ -91,9 +89,9 @@ export default function HomePage() {
       </section>
 
       {/* Categories Grid */}
-      <section className="container mx-auto max-w-6xl px-4 py-16">
-        <h3 className="text-xl font-semibold text-slate-900 mb-8">Explore Data</h3>
-        <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-4">
+      <section className="py-10 sm:py-14">
+        <h3 className="mb-6 text-xl font-semibold text-slate-900">Explore Data</h3>
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-5">
           {categories.map((cat) => {
             const Icon = cat.icon;
             return (
@@ -118,8 +116,8 @@ export default function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t bg-slate-50 mt-16">
-        <div className="container mx-auto max-w-6xl px-4 py-8 text-center text-sm text-slate-600">
+      <footer className="-mx-4 mt-8 border-t bg-slate-50 px-4 sm:-mx-6 sm:px-6">
+        <div className="py-8 text-center text-sm text-slate-600">
           <p>PublikEye — Transparency for accountable governance</p>
         </div>
       </footer>
