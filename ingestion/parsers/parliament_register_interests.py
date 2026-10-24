@@ -123,14 +123,11 @@ class ParliamentRegisterInterestsParser(BaseParser):
 
             # Extract ZAR
             value_zar = None
-            val_match = re.search(r'R\s*([\d\s]+)(?:\s|$)', line)
+            val_match = re.search(r'R\s*(\d[\d ,]*(?:\.\d{1,2})?)(?:\s|$)', line)
             if val_match:
-                try:
-                    clean_val = val_match.group(1).replace(' ', '').strip()
-                    if clean_val and clean_val.isdigit():
-                        value_zar = Decimal(clean_val)
-                except Exception:
-                    pass
+                clean_val = val_match.group(1).replace(' ', '').replace(',', '')
+                if re.fullmatch(r'\d+(?:\.\d{1,2})?', clean_val):
+                    value_zar = Decimal(clean_val)
 
             # Safer Continuation logic: only merge if line is short and lacks a value
             if last_disclosure and not value_zar and len(line) < 40:
