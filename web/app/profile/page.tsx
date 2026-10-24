@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
@@ -91,12 +92,17 @@ export default function ProfilePage() {
         </button>
       </form>
 
-      <button
-        onClick={async () => { await signOut(); router.replace('/'); }}
-        className="w-full rounded-lg border py-2.5 font-medium text-slate-700 hover:bg-slate-50"
-      >
-        Sign out
-      </button>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <Link href="/" className="w-full rounded-lg bg-teal-600 py-2.5 text-center font-medium text-white hover:bg-teal-700">
+          Continue to PublikEye
+        </Link>
+        <button
+          onClick={async () => { await signOut(); router.replace('/'); }}
+          className="w-full rounded-lg border py-2.5 font-medium text-slate-700 hover:bg-slate-50"
+        >
+          Sign out
+        </button>
+      </div>
     </div>
   );
 }
