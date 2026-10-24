@@ -27,13 +27,11 @@ load_dotenv()
 log = logging.getLogger("publikeye.ingestion")
 
 PARSERS: dict[str, type[BaseParser]] = {
-    ParliamentRegisterInterestsParser.source_id: (
-        ParliamentRegisterInterestsParser
-    ),
+    ParliamentRegisterInterestsParser.source_id: ParliamentRegisterInterestsParser,
     ParliamentTravelClaimsParser.source_id: ParliamentTravelClaimsParser,
+    SafliiJudgmentsParser.source_id: SafliiJudgmentsParser,
     PmgNaMembersParser.source_id: PmgNaMembersParser,
     NationalGovNcopMembersParser.source_id: NationalGovNcopMembersParser,
-    SafliiJudgmentsParser.source_id: SafliiJudgmentsParser,
 }
 
 
