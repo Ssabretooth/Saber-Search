@@ -92,7 +92,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const updateProfile = async (fields: Pick<Profile, 'first_name' | 'last_name' | 'phone'>) => {
     if (!user) throw new Error('Not signed in');
     const { error } = await (supabase.from('users') as any).update(fields).eq('id', user.id);
-    if (error) throw error;
+    if (error) throw new Error(error.message);
     setProfile((p) => (p ? { ...p, ...fields } : p));
   };
 
