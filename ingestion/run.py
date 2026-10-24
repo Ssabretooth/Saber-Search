@@ -18,6 +18,8 @@ from .parsers.parliament_register_interests import (
     ParliamentRegisterInterestsParser,
 )
 from .parsers.parliament_travel_claims import ParliamentTravelClaimsParser
+from .parsers.pmg_na_members import PmgNaMembersParser
+from .parsers.nationalgov_ncop_members import NationalGovNcopMembersParser
 from .parsers.saflii_judgments import SafliiJudgmentsParser
 from .writer import SupabaseWriter
 
@@ -29,6 +31,8 @@ PARSERS: dict[str, type[BaseParser]] = {
         ParliamentRegisterInterestsParser
     ),
     ParliamentTravelClaimsParser.source_id: ParliamentTravelClaimsParser,
+    PmgNaMembersParser.source_id: PmgNaMembersParser,
+    NationalGovNcopMembersParser.source_id: NationalGovNcopMembersParser,
     SafliiJudgmentsParser.source_id: SafliiJudgmentsParser,
 }
 
