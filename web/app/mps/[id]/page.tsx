@@ -9,16 +9,16 @@ import { SpendTable } from "@/components/SpendTable";
 import { JudicialTable } from "@/components/JudicialTable";
 import type {
   DisclosurePublic,
-  Flag,
+  FlagPublic,
   JudicialPublic,
-  MPProfile,
+  MpPublic,
   SourceDocument,
   SpendingPublic,
 } from "@/lib/types/database";
 
-type WithSource<T> = T & { source?: SourceDocument };
+export const dynamic = "force-dynamic";
 
-export const dynamic = 'force-dynamic';
+type WithSource<T> = T & { source?: SourceDocument };
 
 export default async function MPProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const supabase = getSupabase();
@@ -28,29 +28,28 @@ export default async function MPProfilePage({ params }: { params: Promise<{ id: 
     .from("v_mps_public")
     .select("*")
     .eq("id", id)
-    .maybeSingle<MPProfile>();
+    .maybeSingle();
   if (mpError) throw new Error(`Failed to load MP ${id}: ${mpError.message}`);
   if (!mp) notFound();
 
   const [flagsRes, disclosuresRes, spendRes, judicialRes] = await Promise.all([
-    supabase.from("v_flags_public").select("*").eq("subject_id", id).returns<Flag[]>(),
+    supabase.from("v_flags_public").select("*").eq("subject_id", id),
     supabase
       .from("v_disclosures_public")
       .select("*")
       .eq("mp_id", id)
-      .order("extracted_at", { ascending: false })
-      .returns<DisclosurePublic[]>(),
-    supabase.from("v_spending_public").select("*").eq("mp_id", id).returns<SpendingPublic[]>(),
-    supabase.from("v_judicial_public").select("*").eq("mp_id", id).returns<JudicialPublic[]>(),
+      .order("extracted_at", { ascending: false }),
+    supabase.from("v_spending_public").select("*").eq("mp_id", id),
+    supabase.from("v_judicial_public").select("*").eq("mp_id", id),
   ]);
 
   for (const res of [flagsRes, disclosuresRes, spendRes, judicialRes]) {
-    if (res.error) throw new Error(`Failed to load MP ${id} records: ${res.error.message}`);
+    if (res.error) throw new Error(`Failed to load records for MP ${id}: ${res.error.message}`);
   }
-  const flags = flagsRes.data ?? [];
-  const disclosures = disclosuresRes.data ?? [];
-  const spend = spendRes.data ?? [];
-  const judicial = judicialRes.data ?? [];
+  const flags: FlagPublic[] = flagsRes.data ?? [];
+  const disclosures: DisclosurePublic[] = disclosuresRes.data ?? [];
+  const spend: SpendingPublic[] = spendRes.data ?? [];
+  const judicial: JudicialPublic[] = judicialRes.data ?? [];
 
   const sourceIds = [
     ...new Set([...flags, ...disclosures, ...spend, ...judicial].map((r) => r.source_document_id)),
@@ -60,13 +59,14 @@ export default async function MPProfilePage({ params }: { params: Promise<{ id: 
         .from("v_sources_public")
         .select("id, publisher, title, url, published_at, licence_note")
         .in("id", sourceIds)
-        .returns<SourceDocument[]>()
-    : { data: [] as SourceDocument[], error: null };
+    : { data: [], error: null };
   if (sourcesError) throw new Error(`Failed to load sources for MP ${id}: ${sourcesError.message}`);
-  const sourceById = new Map((sources ?? []).map((s) => [s.id, s]));
+  const sourceById = new Map<string, SourceDocument>((sources ?? []).map((s) => [s.id, s]));
 
   const withSource = <T extends { source_document_id: string }>(rows: T[]): WithSource<T>[] =>
     rows.map((r) => ({ ...r, source: sourceById.get(r.source_document_id) }));
+
+  const profile: MpPublic = mp;
 
   return (
     <main className="container mx-auto max-w-5xl space-y-8 px-4 py-10">
@@ -80,16 +80,16 @@ export default async function MPProfilePage({ params }: { params: Promise<{ id: 
       </Alert>
 
       <header className="space-y-2 border-b pb-6">
-        <h1 className="text-3xl font-bold tracking-tight">{mp.known_as ?? mp.full_name}</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{profile.known_as ?? profile.full_name}</h1>
         <div className="flex flex-wrap gap-4 text-sm text-gray-600">
-          {mp.party && <p className="font-medium">{mp.party}</p>}
-          {mp.constituency && <p>• {mp.constituency}</p>}
-          {mp.portfolio && <p>• {mp.portfolio}</p>}
-          <p>• Chamber: {mp.chamber.toUpperCase()}</p>
+          {profile.party && <p className="font-medium">{profile.party}</p>}
+          {profile.constituency && <p>• {profile.constituency}</p>}
+          {profile.portfolio && <p>• {profile.portfolio}</p>}
+          <p>• Chamber: {profile.chamber.toUpperCase()}</p>
         </div>
-        {mp.official_profile_url && (
+        {profile.official_profile_url && (
           <a
-            href={mp.official_profile_url}
+            href={profile.official_profile_url}
             target="_blank"
             rel="noreferrer"
             className="flex items-center gap-1 text-sm text-blue-600 hover:underline"

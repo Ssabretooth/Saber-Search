@@ -1,15 +1,7 @@
 import { SourceCitation } from "@/components/SourceCitation";
-import type { SourceDocument } from "@/lib/types/database";
+import type { SourceDocument, SpendingPublic } from "@/lib/types/database";
 
-type Row = {
-  id: string;
-  spend_type: string;
-  amount_zar: number;
-  period_start: string;
-  period_end: string;
-  department: string | null;
-  source?: SourceDocument;
-};
+type Row = SpendingPublic & { source?: SourceDocument };
 
 export function SpendTable({ rows }: { rows: Row[] }) {
   if (rows.length === 0) return <p className="text-sm text-slate-500">No records.</p>;

@@ -1,19 +1,17 @@
 import Link from "next/link";
 import { getSupabase } from "@/lib/supabase";
-import type { MPProfile } from "@/lib/types/database";
+import type { MpPublic } from "@/lib/types/database";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const supabase = getSupabase();
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from("v_mps_public")
-    .select("id, full_name, known_as, party, chamber")
-    .order("full_name")
-    .returns<Pick<MPProfile, "id" | "full_name" | "known_as" | "party" | "chamber">[]>();
+    .select("id, full_name, known_as, party")
+    .order("full_name");
 
   if (error) throw new Error(`Failed to load MPs: ${error.message}`);
-  const mps = data ?? [];
+  const mps: Pick<MpPublic, "id" | "full_name" | "known_as" | "party">[] = data ?? [];
 
   return (
     <section className="space-y-6">

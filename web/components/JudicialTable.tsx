@@ -1,15 +1,8 @@
+import { JudicialBadge } from "@/components/JudicialBadge";
 import { SourceCitation } from "@/components/SourceCitation";
-import type { SourceDocument } from "@/lib/types/database";
+import type { JudicialPublic, SourceDocument } from "@/lib/types/database";
 
-type Row = {
-  id: string;
-  status: string;
-  case_number: string | null;
-  court: string | null;
-  summary_neutral: string | null;
-  status_as_of: string;
-  source?: SourceDocument;
-};
+type Row = JudicialPublic & { source?: SourceDocument };
 
 export function JudicialTable({ rows }: { rows: Row[] }) {
   if (rows.length === 0) return <p className="text-sm text-slate-500">No records.</p>;
@@ -28,7 +21,7 @@ export function JudicialTable({ rows }: { rows: Row[] }) {
       <tbody>
         {rows.map((r) => (
           <tr key={r.id} className="border-b">
-            <td className="p-2">{r.status}</td>
+            <td className="p-2"><JudicialBadge status={r.status} /></td>
             <td className="p-2">{r.case_number ?? "—"}</td>
             <td className="p-2">{r.court ?? "—"}</td>
             <td className="p-2">{r.summary_neutral ?? "—"}</td>

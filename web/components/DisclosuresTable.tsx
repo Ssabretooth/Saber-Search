@@ -1,16 +1,7 @@
 import { SourceCitation } from "@/components/SourceCitation";
-import type { SourceDocument } from "@/lib/types/database";
+import type { DisclosurePublic, SourceDocument } from "@/lib/types/database";
 
-type Row = {
-  id: string;
-  category: string;
-  description: string | null;
-  counterparty: string | null;
-  value_zar: number | null;
-  period_start: string | null;
-  period_end: string | null;
-  source?: SourceDocument;
-};
+type Row = DisclosurePublic & { source?: SourceDocument };
 
 export function DisclosuresTable({ rows }: { rows: Row[] }) {
   if (rows.length === 0) return <p className="text-sm text-slate-500">No records.</p>;

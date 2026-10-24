@@ -112,33 +112,22 @@ export type SourcePublic = {
   licence_note: string | null;
 };
 
-export type MPProfile = MpPublic;
-
 export type SourceDocument = Pick<
   SourcePublic,
   "id" | "publisher" | "title" | "url" | "published_at" | "licence_note"
 >;
 
-export type Disclosure = DisclosurePublic & {
-  source_document?: SourceDocument;
-};
-
-export type Flag = Pick<
-  FlagPublic,
-  "id" | "subject_id" | "flag_type" | "rule_id" | "rule_version" | "public_text" | "source_document_id"
-> & {
-  source_document?: SourceDocument;
-};
-
 export type Database = {
   public: {
+    Tables: Record<string, never>;
     Views: {
-      v_mps_public: { Row: MpPublic };
-      v_disclosures_public: { Row: DisclosurePublic };
-      v_spending_public: { Row: SpendingPublic };
-      v_judicial_public: { Row: JudicialPublic };
-      v_flags_public: { Row: FlagPublic };
-      v_sources_public: { Row: SourcePublic };
+      v_mps_public: { Row: MpPublic; Relationships: [] };
+      v_disclosures_public: { Row: DisclosurePublic; Relationships: [] };
+      v_spending_public: { Row: SpendingPublic; Relationships: [] };
+      v_judicial_public: { Row: JudicialPublic; Relationships: [] };
+      v_flags_public: { Row: FlagPublic; Relationships: [] };
+      v_sources_public: { Row: SourcePublic; Relationships: [] };
     };
+    Functions: Record<string, never>;
   };
 };
