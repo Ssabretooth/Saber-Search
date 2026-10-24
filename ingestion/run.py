@@ -13,7 +13,7 @@ from .errors import (
     SourceGateError, SourceNotClearedError,
 )
 from .http_client import fetch
-from .parsers.base import sha256_hex
+from .parsers.base import BaseParser, sha256_hex
 from .parsers.parliament_register_interests import (
     ParliamentRegisterInterestsParser,
 )
@@ -24,7 +24,7 @@ from .writer import SupabaseWriter
 load_dotenv()
 log = logging.getLogger("publikeye.ingestion")
 
-PARSERS = {
+PARSERS: dict[str, type[BaseParser]] = {
     ParliamentRegisterInterestsParser.source_id: (
         ParliamentRegisterInterestsParser
     ),

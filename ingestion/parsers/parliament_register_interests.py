@@ -4,7 +4,7 @@ from decimal import Decimal
 from pypdf import PdfReader
 
 from ..errors import ParserSpecGap
-from ..models import ParsedDocument, MPSeed, DisclosureRow
+from ..models import DisclosureCategory, ParsedDocument, MPSeed, DisclosureRow
 from .base import PARSER_VERSION_PREFIX, BaseParser
 
 
@@ -43,7 +43,7 @@ class ParliamentRegisterInterestsParser(BaseParser):
         disclosures = []
 
         current_mp = None
-        current_section = None
+        current_section: DisclosureCategory | None = None
         skip_section = False
         last_disclosure = None
 
@@ -83,7 +83,7 @@ class ParliamentRegisterInterestsParser(BaseParser):
                 continue
 
             # Section Matching
-            new_section = None
+            new_section: DisclosureCategory | None = None
             if upper_line.startswith("1. SHARES"): new_section = "shareholding"
             elif upper_line.startswith("2. REMUNERATED"): new_section = "paid_employment"
             elif upper_line.startswith("3. DIRECTORSHIPS"): new_section = "directorship"
@@ -131,7 +131,7 @@ class ParliamentRegisterInterestsParser(BaseParser):
 
             # Safer Continuation logic: only merge if line is short and lacks a value
             if last_disclosure and not value_zar and len(line) < 40:
-                last_disclosure.description += f" {line}"
+                last_disclosure.description = f"{last_disclosure.description or ''} {line}"
                 continue
 
             disc = DisclosureRow(

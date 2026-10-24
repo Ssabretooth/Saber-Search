@@ -1,3 +1,5 @@
+from typing import cast
+
 from supabase import Client, create_client
 
 from .config import ClearedSource
@@ -33,7 +35,7 @@ class SupabaseWriter:
             raise PublikEyeError(
                 "source_documents upsert returned no rows"
             )
-        return res.data[0]["id"]
+        return cast(dict[str, str], res.data[0])["id"]
 
     def upsert_facts(
         self, *, table: str, rows: list[dict], conflict_cols: str,
@@ -76,7 +78,7 @@ class SupabaseWriter:
     def get_mps_by_name(self) -> dict[str, str]:
         res = self.client.table("mps").select("id, full_name").execute()
         by_name: dict[str, str] = {}
-        for r in res.data or []:
+        for r in cast(list[dict[str, str]], res.data or []):
             key = r["full_name"].strip().lower()
             if key in by_name:
                 raise PublikEyeError(f"ambiguous MP name: {key!r}")

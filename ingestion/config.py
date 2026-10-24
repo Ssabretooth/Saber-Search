@@ -137,8 +137,8 @@ def load_cleared_sources(
             f"{path} has no sources. Complete Phase 0 and re-run."
         )
     cleared: dict[str, ClearedSource] = {}
-    for idx, e in enumerate(entries):
-        cs = _check(e, idx)
+    for idx, entry in enumerate(entries):
+        cs = _check(entry, idx)
         if cs.id in cleared:
             raise SourceNotClearedError(
                 f"duplicate source id: {cs.id}"
