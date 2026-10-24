@@ -22,23 +22,42 @@
   first_fetch_sha256: "ce48d84310960119e23da1b4177aa8f903d3c2bca6ca139d5b3bdbdb74d54659"
   notes: "for transparancy purposes"
 
-- id: parliament_member_list
-  publisher: Parliament of South Africa
-  title: National Assembly and NCOP member lists
-  candidate_domain: parliament.gov.za
-  discovery_hint: "current NA and NCOP member lists; record chamber and term."
-  url: ""
-  format: ""
-  tier: tier1_official
-  republication_of: ""
-  licence_note: ""
-  robots_ok: null
+- id: pmg_na_members
+  publisher: Parliamentary Monitoring Group (PMG)
+  title: Members of Parliament - National Assembly
+  url: "https://pmg.org.za/members/"
+  format: html
+  tier: tier2_indexed_republication
+  republication_of: parliament_na_members
+  licence_note: "Reproduction permitted with attribution (PMG terms)"
+  candidate_domain: pmg.org.za
+  default_chamber: na
+  verified: true
+  robots_ok: true
+  verified_by: "Lucky Sandleni"
+  verified_at: "2026-10-24"
+  first_fetch_sha256: "3c9fefc28383855896a08729ea92a34882457cc7a9ec11a373eddca541e5b907"
   rate_limit_rps: 0.5
   contact_email: transparency@publikeye.org
-  verified: false
-  verified_by: ""
-  verified_at: ""
-  first_fetch_sha256: ""
+  notes: ""
+
+- id: nationalgov_ncop_members
+  publisher: National Government of South Africa
+  title: National Council of Provinces (NCOP) - Permanent Delegates
+  url: "https://nationalgovernment.co.za/units/management/2/national-council-of-provinces-ncop"
+  format: html
+  tier: tier2_indexed_republication
+  republication_of: parliament_ncop_members
+  licence_note: "Government information, free to reproduce"
+  candidate_domain: nationalgovernment.co.za
+  default_chamber: ncop
+  verified: true
+  robots_ok: true
+  verified_by: "Lucky Sandleni"
+  verified_at: "2026-10-24"
+  first_fetch_sha256: "e65eccf33bfa130cb423434d501f0ee5509a87b20ec784f6b3a79516e3a578b5"
+  rate_limit_rps: 0.5
+  contact_email: transparency@publikeye.org
   notes: ""
 
 - id: pmg_committee_transcripts
