@@ -1,17 +1,41 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/lib/auth-context';
+import { getSupabase } from '@/lib/supabase';
 
 export default function AuthCallbackPage() {
   const router = useRouter();
-  const { user, loading } = useAuth();
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    if (loading) return;
-    router.replace(user ? '/profile' : '/login');
-  }, [loading, user, router]);
+    const url = new URL(window.location.href);
+    const providerError = url.searchParams.get('error_description') ?? url.searchParams.get('error');
+    if (providerError) {
+      setError(providerError);
+      return;
+    }
+    if (!url.searchParams.get('code')) {
+      router.replace('/login');
+      return;
+    }
+    getSupabase()
+      .auth.exchangeCodeForSession(url.href)
+      .then(({ error }) => {
+        if (error) setError(error.message);
+        else router.replace('/profile');
+      });
+  }, [router]);
+
+  if (error) {
+    return (
+      <div className="mx-auto max-w-md space-y-4 p-8 text-center">
+        <p className="text-red-700">Sign-in failed: {error}</p>
+        <Link href="/login" className="font-medium text-teal-600 hover:underline">Back to sign in</Link>
+      </div>
+    );
+  }
 
   return <p className="p-8 text-center text-slate-600">Signing you in…</p>;
 }

@@ -44,7 +44,7 @@ const categories = [
 ];
 
 export default function HomePage() {
-  const { user, profile } = useAuth();
+  const { user, profile, loading } = useAuth();
   const initials = profile?.first_name && profile?.last_name
     ? `${profile.first_name[0]}${profile.last_name[0]}`.toUpperCase()
     : user?.email?.[0]?.toUpperCase();
@@ -85,9 +85,21 @@ export default function HomePage() {
             respecting privacy while promoting transparency.
             Explore, learn, and stay informed about how your government works.
           </p>
+          {!loading && !user && (
+            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <Link href="/login" className="rounded-lg bg-teal-600 px-6 py-2.5 font-medium text-white hover:bg-teal-700">
+                Sign in
+              </Link>
+              <Link href="/signup" className="rounded-lg border bg-white px-6 py-2.5 font-medium text-slate-900 hover:bg-slate-50">
+                Create an account
+              </Link>
+            </div>
+          )}
         </div>
       </section>
 
+      {user && (
+      <>
       {/* Categories Grid */}
       <section className="py-10 sm:py-14">
         <h3 className="mb-6 text-xl font-semibold text-slate-900">Explore Data</h3>
@@ -121,6 +133,8 @@ export default function HomePage() {
           <p>PublikEye — Transparency for accountable governance</p>
         </div>
       </footer>
+      </>
+      )}
     </div>
   );
 }
