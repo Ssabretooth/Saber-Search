@@ -34,12 +34,15 @@ export default async function JudicialPage() {
 
       <DataTable
         headers={["Status", "Case Number", "Court", "Summary"]}
-        rows={data?.map((row) => [
-          <span key="status" className="px-2 py-1 bg-amber-100 text-amber-700 rounded text-xs font-medium capitalize">{row.status}</span>,
-          row.case_number || "—",
-          row.court || "—",
-          row.summary_neutral ? row.summary_neutral.substring(0, 50) + "..." : "—"
-        ]) || []}
+        rows={data?.map((row) => {
+          const summary = row.summary_neutral ? String(row.summary_neutral).substring(0, 50) + "..." : "—";
+          return [
+            <span key="status" className="px-2 py-1 bg-amber-100 text-amber-700 rounded text-xs font-medium capitalize">{row.status}</span>,
+            row.case_number || "—",
+            row.court || "—",
+            summary
+          ];
+        }) || []}
       />
     </div>
   );
