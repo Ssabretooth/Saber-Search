@@ -18,11 +18,14 @@ import type {
 
 export const dynamic = "force-dynamic";
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 type WithSource<T> = T & { source?: SourceDocument };
 
 export default async function MPProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const supabase = getSupabase();
   const { id } = await params;
+  if (!UUID_RE.test(id)) notFound();
 
   const { data: mp, error: mpError } = await supabase
     .from("v_mps_public")
