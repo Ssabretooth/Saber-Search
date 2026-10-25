@@ -46,7 +46,7 @@ sources:
     republication_of: parliament_na_members
     licence_note: "Reproduction permitted with attribution (PMG terms)"
     default_chamber: "na"
-    verified: false
+    verified: true
     robots_ok: true
     verified_by: "Lucky Sandleni"
     verified_at: "2026-10-24"
