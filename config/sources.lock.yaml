@@ -198,3 +198,21 @@ sources:
     first_fetch_sha256: "86248fbf3482c2c8ba5e65ff4c5d809bf2d0d1aea92c40d46adbb26bd7191c85"
     rate_limit_rps: 0.5
     contact_email: transparency@publikeye.org
+
+  - id: "jhb_councillors"
+    publisher: "City of Johannesburg"
+    title: "JHB Councillors Contact Details PR-Ward and Region"
+    candidate_domain: "joburg.org.za"
+    url: "https://joburg.org.za/about_/government/Documents/COUNCILLORS_CONTACT_DETAILS_PR-WARD_AND_REGION.pdf"
+    format: "pdf"
+    tier: "tier1_official"
+    republication_of: ""
+    licence_note: "Public document"
+    default_chamber: "local"
+    verified: true
+    robots_ok: true
+    verified_by: "Lucky Sandleni"
+    verified_at: "2026-10-26"
+    first_fetch_sha256: "74efa4e2fb132f34b589efd06f66aefae04d0ef58b2741dd30ea3eaf9b2286cb"
+    rate_limit_rps: 0.5
+    contact_email: transparency@publikeye.org
