@@ -3,10 +3,17 @@
 import { useState } from "react";
 import Link from "next/link";
 import { UserCircle, ChevronDown } from "lucide-react";
-import { MpPublic } from "@/lib/types/database";
+import { MpPublic, MunicipalityPublic } from "@/lib/types/database";
 import { PartyBadge } from "@/components/PartyBadge";
+import { LocalGovernment } from "./LocalGovernment";
 
-export function MembersDirectory({ mps }: { mps: MpPublic[] }) {
+export function MembersDirectory({
+  mps,
+  municipalities,
+}: {
+  mps: MpPublic[];
+  municipalities: MunicipalityPublic[];
+}) {
   const [chamber, setChamber] = useState<"na" | "ncop" | "local" | null>(null);
   const [openGroups, setOpenGroups] = useState<Set<string>>(new Set());
 
@@ -23,12 +30,6 @@ export function MembersDirectory({ mps }: { mps: MpPublic[] }) {
   const ncopGrouped = ncopMps.reduce((acc, mp) => {
     const province = mp.constituency || "Unassigned Province";
     (acc[province] ??= []).push(mp);
-    return acc;
-  }, {} as Record<string, MpPublic[]>);
-
-  const localGrouped = localMps.reduce((acc, mp) => {
-    const municipality = mp.constituency || "Unassigned Municipality";
-    (acc[municipality] ??= []).push(mp);
     return acc;
   }, {} as Record<string, MpPublic[]>);
 
@@ -54,8 +55,20 @@ export function MembersDirectory({ mps }: { mps: MpPublic[] }) {
     );
   }
 
-  const groupedData = chamber === "na" ? naGrouped : chamber === "ncop" ? ncopGrouped : localGrouped;
-  const chamberTitle = chamber === "na" ? "National Assembly" : chamber === "ncop" ? "National Council of Provinces" : "Local Government";
+  if (chamber === "local") {
+    return (
+      <div className="space-y-6">
+        <button onClick={() => setChamber(null)} className="text-sm text-gray-500 hover:text-black">
+          ← Back to Chambers
+        </button>
+        <h2 className="text-2xl font-bold border-l-4 border-green-700 pl-3">Local Government</h2>
+        <LocalGovernment municipalities={municipalities} councillors={localMps} />
+      </div>
+    );
+  }
+
+  const groupedData = chamber === "na" ? naGrouped : ncopGrouped;
+  const chamberTitle = chamber === "na" ? "National Assembly" : "National Council of Provinces";
 
   const toggle = (name: string) =>
     setOpenGroups((prev) => {

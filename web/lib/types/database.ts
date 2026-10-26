@@ -47,6 +47,17 @@ export type MpPublic = {
   official_profile_url: string | null;
 };
 
+export type MunicipalityPublic = {
+  id: string;
+  demarcation_code: string;
+  name: string;
+  long_name: string | null;
+  province: string | null;
+  category: string | null;
+  population: number | null;
+  url: string | null;
+};
+
 export type DisclosurePublic = {
   id: string;
   mp_id: string;
