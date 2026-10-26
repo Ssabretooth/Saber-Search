@@ -3,17 +3,14 @@ import { AlertTriangle, ExternalLink } from "lucide-react";
 import { getSupabase } from "@/lib/supabase";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { FlagBadge } from "@/components/FlagBadge";
+import { PartyBadge } from "@/components/PartyBadge";
 import { SourceCitation } from "@/components/SourceCitation";
 import { DisclosuresTable } from "@/components/DisclosuresTable";
-import { SpendTable } from "@/components/SpendTable";
-import { JudicialTable } from "@/components/JudicialTable";
 import type {
   DisclosurePublic,
   FlagPublic,
-  JudicialPublic,
   MpPublic,
   SourceDocument,
-  SpendingPublic,
 } from "@/lib/types/database";
 
 export const dynamic = "force-dynamic";
@@ -35,27 +32,25 @@ export default async function MPProfilePage({ params }: { params: Promise<{ id: 
   if (mpError) throw new Error(`Failed to load MP ${id}: ${mpError.message}`);
   if (!mp) notFound();
 
-  const [flagsRes, disclosuresRes, spendRes, judicialRes] = await Promise.all([
+  const [flagsRes, disclosuresRes] = await Promise.all([
     supabase.from("v_flags_public").select("*").eq("subject_id", id),
     supabase
       .from("v_disclosures_public")
       .select("*")
       .eq("mp_id", id)
       .order("extracted_at", { ascending: false }),
-    supabase.from("v_spending_public").select("*").eq("mp_id", id),
-    supabase.from("v_judicial_public").select("*").eq("mp_id", id),
   ]);
 
-  for (const res of [flagsRes, disclosuresRes, spendRes, judicialRes]) {
+  for (const res of [flagsRes, disclosuresRes]) {
     if (res.error) throw new Error(`Failed to load records for MP ${id}: ${res.error.message}`);
   }
   const flags: FlagPublic[] = flagsRes.data ?? [];
+  const procurementFlags = flags.filter((f) => f.flag_type === "procurement_relationship");
+  const otherFlags = flags.filter((f) => f.flag_type !== "procurement_relationship");
   const disclosures: DisclosurePublic[] = disclosuresRes.data ?? [];
-  const spend: SpendingPublic[] = spendRes.data ?? [];
-  const judicial: JudicialPublic[] = judicialRes.data ?? [];
 
   const sourceIds = [
-    ...new Set([...flags, ...disclosures, ...spend, ...judicial].map((r) => r.source_document_id)),
+    ...new Set([...flags, ...disclosures].map((r) => r.source_document_id)),
   ];
   const { data: sources, error: sourcesError } = sourceIds.length
     ? await supabase
@@ -83,9 +78,11 @@ export default async function MPProfilePage({ params }: { params: Promise<{ id: 
       </Alert>
 
       <header className="space-y-2 border-b pb-6">
-        <h1 className="text-3xl font-bold tracking-tight">{profile.known_as ?? profile.full_name}</h1>
+        <div className="flex flex-wrap items-center gap-3">
+          <h1 className="text-3xl font-bold tracking-tight">{profile.known_as ?? profile.full_name}</h1>
+          <PartyBadge party={profile.party} />
+        </div>
         <div className="flex flex-wrap gap-4 text-sm text-gray-600">
-          {profile.party && <p className="font-medium">{profile.party}</p>}
           {profile.constituency && <p>• {profile.constituency}</p>}
           {profile.portfolio && <p>• {profile.portfolio}</p>}
           <p>• Chamber: {profile.chamber.toUpperCase()}</p>
@@ -103,10 +100,38 @@ export default async function MPProfilePage({ params }: { params: Promise<{ id: 
       </header>
 
       <section className="space-y-4">
-        <h2 className="text-xl font-semibold tracking-tight">Active Flags</h2>
-        {flags.length > 0 ? (
+        <h2 className="flex items-center gap-2 text-xl font-semibold tracking-tight">
+          Follow the Tender
+          {procurementFlags.length > 0 && (
+            <span className="rounded-full bg-red-100 px-2 py-1 text-xs text-red-800">
+              {procurementFlags.length}
+            </span>
+          )}
+        </h2>
+        {procurementFlags.length > 0 ? (
           <ul className="flex flex-col gap-3">
-            {withSource(flags).map((f) => (
+            {withSource(procurementFlags).map((f) => (
+              <li key={f.id} className="flex flex-col gap-2 rounded-md border border-red-200 bg-white p-4 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <FlagBadge flagType={f.flag_type} />
+                  <SourceCitation source={f.source} />
+                </div>
+                <p className="text-sm font-medium text-gray-900">{f.public_text}</p>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="rounded-md border border-dashed bg-gray-50 p-4 text-sm text-gray-500">
+            No procurement relationships detected for this Member.
+          </p>
+        )}
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-xl font-semibold tracking-tight">Other Flags</h2>
+        {otherFlags.length > 0 ? (
+          <ul className="flex flex-col gap-3">
+            {withSource(otherFlags).map((f) => (
               <li
                 key={f.id}
                 className="flex items-center gap-3 rounded-md border bg-white p-3 shadow-sm"
@@ -119,7 +144,7 @@ export default async function MPProfilePage({ params }: { params: Promise<{ id: 
           </ul>
         ) : (
           <p className="rounded-md border border-dashed bg-gray-50 p-4 text-sm text-gray-500">
-            No active flags detected for this Member.
+            No other flags detected for this Member.
           </p>
         )}
       </section>
@@ -127,16 +152,6 @@ export default async function MPProfilePage({ params }: { params: Promise<{ id: 
       <section className="space-y-4">
         <h2 className="text-xl font-semibold tracking-tight">Financial Disclosures</h2>
         <DisclosuresTable rows={withSource(disclosures)} />
-      </section>
-
-      <section className="space-y-4">
-        <h2 className="text-xl font-semibold tracking-tight">State Spending</h2>
-        <SpendTable rows={withSource(spend)} />
-      </section>
-
-      <section className="space-y-4">
-        <h2 className="text-xl font-semibold tracking-tight">Judicial Proceedings</h2>
-        <JudicialTable rows={withSource(judicial)} />
       </section>
     </main>
   );
