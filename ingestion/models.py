@@ -62,6 +62,16 @@ class JudicialRow(BaseModel):
     status_as_of: date
 
 
+class TenderRow(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    ocid: str = Field(min_length=1)
+    title: str = Field(min_length=1)
+    department: str | None = None
+    winning_company: str = Field(min_length=1)
+    amount_zar: Decimal | None = Field(default=None, ge=0)
+    award_date: date | None = None
+
+
 class ParsedDocument(BaseModel):
     model_config = ConfigDict(extra="forbid")
     source_id: str
@@ -70,3 +80,4 @@ class ParsedDocument(BaseModel):
     disclosures: list[DisclosureRow] = Field(default_factory=list)
     spending: list[SpendingRow] = Field(default_factory=list)
     judicial: list[JudicialRow] = Field(default_factory=list)
+    tenders: list[TenderRow] = Field(default_factory=list)

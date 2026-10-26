@@ -1,0 +1,18 @@
+{
+  "releases": [
+    {
+      "ocid": "ocds-test-001",
+      "tender": {
+        "title": "Supply of IT Equipment",
+        "value": { "amount": 500000.00 }
+      },
+      "buyer": { "name": "Department of Health" },
+      "awards": [
+        {
+          "date": "2026-10-15T00:00:00Z",
+          "suppliers": [ { "name": "Acme Holdings" } ]
+        }
+      ]
+    }
+  ]
+}

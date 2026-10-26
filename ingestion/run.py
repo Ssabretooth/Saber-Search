@@ -21,6 +21,7 @@ from .parsers.parliament_travel_claims import ParliamentTravelClaimsParser
 from .parsers.parliament_na_members import ParliamentNaMembersParser
 from .parsers.nationalgov_ncop_members import NationalGovNcopMembersParser
 from .parsers.saflii_judgments import SafliiJudgmentsParser
+from .parsers.treasury_etenders import TreasuryEtendersParser
 from .writer import SupabaseWriter
 
 load_dotenv()
@@ -32,7 +33,56 @@ PARSERS: dict[str, type[BaseParser]] = {
     SafliiJudgmentsParser.source_id: SafliiJudgmentsParser,
     ParliamentNaMembersParser.source_id: ParliamentNaMembersParser,
     NationalGovNcopMembersParser.source_id: NationalGovNcopMembersParser,
+    TreasuryEtendersParser.source_id: TreasuryEtendersParser,
 }
+
+
+def _norm_company(name: str | None) -> str:
+    return " ".join((name or "").lower().split())
+
+
+def _cross_reference_tenders(writer: SupabaseWriter, source_doc_id: str) -> int:
+    dirs = (
+        writer.client.table("financial_disclosures")
+        .select("mp_id, counterparty")
+        .eq("category", "directorship")
+        .execute().data or []
+    )
+    tenders = (
+        writer.client.table("tenders").select("id, ocid, winning_company").execute().data or []
+    )
+    existing = (
+        writer.client.table("review_flags")
+        .select("subject_id, inputs")
+        .eq("flag_type", "procurement_relationship")
+        .execute().data or []
+    )
+    seen = {(f["subject_id"], f["inputs"].get("tender_id")) for f in existing}
+
+    by_company: dict[str, list[dict]] = {}
+    for t in tenders:
+        by_company.setdefault(_norm_company(t["winning_company"]), []).append(t)
+
+    flags = []
+    for d in dirs:
+        key = _norm_company(d.get("counterparty"))
+        for t in by_company.get(key, []):
+            if (d["mp_id"], t["id"]) in seen:
+                continue
+            seen.add((d["mp_id"], t["id"]))
+            flags.append({
+                "subject_type": "mp", "subject_id": d["mp_id"],
+                "flag_type": "procurement_relationship",
+                "rule_id": "etenders_match_v1", "rule_version": "1.0",
+                "inputs": {"tender_id": t["id"], "ocid": t["ocid"], "company": t["winning_company"]},
+                "computed_value": None, "threshold": None,
+                "public_text": f"Declared directorship in {t['winning_company']}, which was awarded a government tender.",
+                "source_document_id": source_doc_id, "status": "draft",
+            })
+
+    if flags:
+        writer.client.table("review_flags").insert(flags).execute()
+    return len(flags)
 
 
 def _row_hash(*parts) -> str:
@@ -261,9 +311,15 @@ def run(source_id: str) -> int:
         conflict_cols="source_document_id,row_hash",
     )
 
+    n_tenders = writer.upsert_facts(
+        table="tenders", rows=[t.model_dump(mode="json") for t in doc.tenders],
+        conflict_cols="ocid",
+    )
+    n_flags = _cross_reference_tenders(writer, source_doc_id)
+
     log.info(
-        "done: source_doc=%s mps=%d disclosures=%d spending=%d judicial=%d",
-        source_doc_id, len(doc.mps), n_disc, n_spend, n_jud,
+        "done: source_doc=%s mps=%d disclosures=%d spending=%d judicial=%d tenders=%d new_flags=%d",
+        source_doc_id, len(doc.mps), n_disc, n_spend, n_jud, n_tenders, n_flags,
     )
     return 0
 
