@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { User, FileText, TrendingUp, Gavel, AlertCircle } from "lucide-react";
+import { User, FileText, Search, AlertCircle } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
 const categories = [
@@ -18,30 +18,24 @@ const categories = [
     title: "Financial Disclosures",
     description: "Track declared interests and assets",
     icon: FileText,
-    href: "/disclosures",
+    href: "/members",
   },
   {
-    id: "spending",
-    title: "State Spending",
-    description: "Government expenditure allocation",
-    icon: TrendingUp,
-    href: "/spending",
-  },
-  {
-    id: "judicial",
-    title: "Judicial Proceedings",
-    description: "Legal matters and court cases",
-    icon: Gavel,
-    href: "/judicial",
+    id: "tenders",
+    title: "Follow the Tender",
+    description: "Government contracts linked to declared interests",
+    icon: Search,
+    href: "/members",
   },
   {
     id: "flags",
     title: "Alerts & Flags",
     description: "Notable patterns and observations",
     icon: AlertCircle,
-    href: "/flags",
+    href: "/members",
   },
 ];
+
 
 export default function HomePage() {
   const { user, profile, loading } = useAuth();
@@ -103,7 +97,7 @@ export default function HomePage() {
       {/* Categories Grid */}
       <section className="py-10 sm:py-14">
         <h3 className="mb-6 text-xl font-semibold text-slate-900">Explore Data</h3>
-        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-5">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
           {categories.map((cat) => {
             const Icon = cat.icon;
             return (
