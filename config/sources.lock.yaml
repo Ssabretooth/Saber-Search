@@ -53,3 +53,130 @@ sources:
     first_fetch_sha256: "3c9fefc28383855896a08729ea92a34882457cc7a9ec11a373eddca541e5b907"
     rate_limit_rps: 0.5
     contact_email: transparency@publikeye.org
+
+
+  - id: "treasury_etenders_01012026"
+    publisher: "National Treasury of South Africa"
+    title: "OCDS eTenders Bulk Release (01012026)"
+    candidate_domain: "etenders.gov.za"
+    url: "https://ocds-api.etenders.gov.za/api/OCDSReleases?PageNumber=1&PageSize=1000&dateFrom=2026-01-01&dateTo=2026-01-01"
+    format: "json"
+    tier: "tier1_official"
+    republication_of: ""
+    licence_note: "Open Data (Creative Commons)"
+    default_chamber: "na"
+    verified: true
+    robots_ok: true
+    verified_by: "Lucky Sandleni"
+    verified_at: "2026-10-26"
+    first_fetch_sha256: "32d9bf328bc8d2e5e88fe24c367dab6cac13a232379ecd37be48eec8c7c067be"
+    rate_limit_rps: 0.1
+    contact_email: transparency@publikeye.org
+
+  - id: "treasury_etenders_01022026"
+    publisher: "National Treasury of South Africa"
+    title: "OCDS eTenders Bulk Release (01022026)"
+    candidate_domain: "etenders.gov.za"
+    url: "https://ocds-api.etenders.gov.za/api/OCDSReleases?PageNumber=1&PageSize=1000&dateFrom=2026-01-02&dateTo=2026-01-02"
+    format: "json"
+    tier: "tier1_official"
+    republication_of: ""
+    licence_note: "Open Data (Creative Commons)"
+    default_chamber: "na"
+    verified: true
+    robots_ok: true
+    verified_by: "Lucky Sandleni"
+    verified_at: "2026-10-26"
+    first_fetch_sha256: "c0fac5e04b52396167f7fdd920db4ad2b5894bbeaac4bad80a7204efbccd6a5f"
+    rate_limit_rps: 0.1
+    contact_email: transparency@publikeye.org
+
+  - id: "treasury_etenders_01032026"
+    publisher: "National Treasury of South Africa"
+    title: "OCDS eTenders Bulk Release (01032026)"
+    candidate_domain: "etenders.gov.za"
+    url: "https://ocds-api.etenders.gov.za/api/OCDSReleases?PageNumber=1&PageSize=1000&dateFrom=2026-01-03&dateTo=2026-01-03"
+    format: "json"
+    tier: "tier1_official"
+    republication_of: ""
+    licence_note: "Open Data (Creative Commons)"
+    default_chamber: "na"
+    verified: true
+    robots_ok: true
+    verified_by: "Lucky Sandleni"
+    verified_at: "2026-10-26"
+    first_fetch_sha256: "53bbbc6c413de83dff75c358806893834b5181cb1b9b4b4e66906a64efe15ec8"
+    rate_limit_rps: 0.1
+    contact_email: transparency@publikeye.org
+
+  - id: "treasury_etenders_01042026"
+    publisher: "National Treasury of South Africa"
+    title: "OCDS eTenders Bulk Release (01042026)"
+    candidate_domain: "etenders.gov.za"
+    url: "https://ocds-api.etenders.gov.za/api/OCDSReleases?PageNumber=1&PageSize=1000&dateFrom=2026-01-04&dateTo=2026-01-04"
+    format: "json"
+    tier: "tier1_official"
+    republication_of: ""
+    licence_note: "Open Data (Creative Commons)"
+    default_chamber: "na"
+    verified: true
+    robots_ok: true
+    verified_by: "Lucky Sandleni"
+    verified_at: "2026-10-26"
+    first_fetch_sha256: "3a97875d8032dcd387421fbc2c3fa37c3e78341df67ce40063d67037cee2d06e"
+    rate_limit_rps: 0.1
+    contact_email: transparency@publikeye.org
+
+  - id: "treasury_etenders_01052026"
+    publisher: "National Treasury of South Africa"
+    title: "OCDS eTenders Bulk Release (01052026)"
+    candidate_domain: "etenders.gov.za"
+    url: "https://ocds-api.etenders.gov.za/api/OCDSReleases?PageNumber=1&PageSize=1000&dateFrom=2026-01-05&dateTo=2026-01-05"
+    format: "json"
+    tier: "tier1_official"
+    republication_of: ""
+    licence_note: "Open Data (Creative Commons)"
+    default_chamber: "na"
+    verified: true
+    robots_ok: true
+    verified_by: "Lucky Sandleni"
+    verified_at: "2026-10-26"
+    first_fetch_sha256: "278cee1e380fa342056e44024a8018247e8ebf34c092fc47a53e54d1b57dfcbf"
+    rate_limit_rps: 0.1
+    contact_email: transparency@publikeye.org
+
+  - id: "treasury_etenders_01062026"
+    publisher: "National Treasury of South Africa"
+    title: "OCDS eTenders Bulk Release (01062026)"
+    candidate_domain: "etenders.gov.za"
+    url: "https://ocds-api.etenders.gov.za/api/OCDSReleases?PageNumber=1&PageSize=1000&dateFrom=2026-01-06&dateTo=2026-01-06"
+    format: "json"
+    tier: "tier1_official"
+    republication_of: ""
+    licence_note: "Open Data (Creative Commons)"
+    default_chamber: "na"
+    verified: true
+    robots_ok: true
+    verified_by: "Lucky Sandleni"
+    verified_at: "2026-10-26"
+    first_fetch_sha256: "260ff29cf6bd79d963b3fa0fee96ee9cd663f66848d8776e63b24ba9e2add492"
+    rate_limit_rps: 0.1
+    contact_email: transparency@publikeye.org
+
+  - id: "treasury_etenders_01072026"
+    publisher: "National Treasury of South Africa"
+    title: "OCDS eTenders Bulk Release (01072026)"
+    candidate_domain: "etenders.gov.za"
+    url: "https://ocds-api.etenders.gov.za/api/OCDSReleases?PageNumber=1&PageSize=1000&dateFrom=2026-01-07&dateTo=2026-01-07"
+    format: "json"
+    tier: "tier1_official"
+    republication_of: ""
+    licence_note: "Open Data (Creative Commons)"
+    default_chamber: "na"
+    verified: true
+    robots_ok: true
+    verified_by: "Lucky Sandleni"
+    verified_at: "2026-10-26"
+    first_fetch_sha256: "db2a1b104e63f4303d14cec186856d959dc7d1a62af15608a34d77851c9d43a6"
+    rate_limit_rps: 0.1
+    contact_email: transparency@publikeye.org

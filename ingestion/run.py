@@ -3,6 +3,7 @@ import collections
 import hashlib
 import logging
 import os
+import re
 import sys
 
 from dotenv import load_dotenv
@@ -38,14 +39,17 @@ PARSERS: dict[str, type[BaseParser]] = {
 
 
 def _norm_company(name: str | None) -> str:
-    return " ".join((name or "").lower().split())
+    if not name:
+        return ""
+    name = re.sub(r"\b(pty|ltd|limited|holdings|inc|cc|incorporated)\b", "", name.lower())
+    name = re.sub(r"[^\w\s]", "", name)
+    return " ".join(name.split())
 
 
 def _cross_reference_tenders(writer: SupabaseWriter, source_doc_id: str) -> int:
     dirs = (
         writer.client.table("financial_disclosures")
-        .select("mp_id, counterparty")
-        .eq("category", "directorship")
+        .select("mp_id, counterparty, category, description")
         .execute().data or []
     )
     tenders = (
@@ -59,14 +63,15 @@ def _cross_reference_tenders(writer: SupabaseWriter, source_doc_id: str) -> int:
     )
     seen = {(f["subject_id"], f["inputs"].get("tender_id")) for f in existing}
 
-    by_company: dict[str, list[dict]] = {}
-    for t in tenders:
-        by_company.setdefault(_norm_company(t["winning_company"]), []).append(t)
-
     flags = []
     for d in dirs:
-        key = _norm_company(d.get("counterparty"))
-        for t in by_company.get(key, []):
+        text = _norm_company(d.get("counterparty") or d.get("description"))
+        if len(text) < 4:
+            continue
+        for t in tenders:
+            win_co = _norm_company(t["winning_company"])
+            if len(win_co) < 4 or not re.search(r"\b" + re.escape(win_co) + r"\b", text):
+                continue
             if (d["mp_id"], t["id"]) in seen:
                 continue
             seen.add((d["mp_id"], t["id"]))
@@ -76,7 +81,7 @@ def _cross_reference_tenders(writer: SupabaseWriter, source_doc_id: str) -> int:
                 "rule_id": "etenders_match_v1", "rule_version": "1.0",
                 "inputs": {"tender_id": t["id"], "ocid": t["ocid"], "company": t["winning_company"]},
                 "computed_value": None, "threshold": None,
-                "public_text": f"Declared directorship in {t['winning_company']}, which was awarded a government tender.",
+                "public_text": f"Declared {d['category']} involving {t['winning_company']}, which was awarded a government tender.",
                 "source_document_id": source_doc_id, "status": "draft",
             })
 
