@@ -5,7 +5,6 @@ import Link from "next/link";
 import { UserCircle, ChevronDown } from "lucide-react";
 import { MpPublic } from "@/lib/types/database";
 import { PartyBadge } from "@/components/PartyBadge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function MembersDirectory({ mps }: { mps: MpPublic[] }) {
   const [chamber, setChamber] = useState<"na" | "ncop" | "local" | null>(null);
