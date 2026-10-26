@@ -22,7 +22,8 @@ class MPSeed(BaseModel):
     model_config = ConfigDict(extra="forbid")
     full_name: str = Field(min_length=2, max_length=200)
     known_as: str | None = None
-    chamber: Literal["na", "ncop"]
+    chamber: Literal["na", "ncop", "local"]
+    government_level: Literal["national", "provincial", "local"] = "national"
     party: str | None = None
     constituency: str | None = None
     portfolio: str | None = None

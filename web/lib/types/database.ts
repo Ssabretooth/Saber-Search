@@ -30,13 +30,15 @@ export type SpendType =
   | "constituency_allowance"
   | "other";
 
-export type Chamber = "na" | "ncop";
+export type Chamber = "na" | "ncop" | "local";
+export type GovernmentLevel = "national" | "provincial" | "local";
 
 export type MpPublic = {
   id: string;
   full_name: string;
   known_as: string | null;
   chamber: Chamber;
+  government_level: GovernmentLevel;
   party: string | null;
   constituency: string | null;
   portfolio: string | null;

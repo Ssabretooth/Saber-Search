@@ -8,11 +8,12 @@ import { PartyBadge } from "@/components/PartyBadge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function MembersDirectory({ mps }: { mps: MpPublic[] }) {
-  const [chamber, setChamber] = useState<"na" | "ncop" | null>(null);
+  const [chamber, setChamber] = useState<"na" | "ncop" | "local" | null>(null);
   const [openGroups, setOpenGroups] = useState<Set<string>>(new Set());
 
   const naMps = mps.filter((m) => m.chamber === "na");
   const ncopMps = mps.filter((m) => m.chamber === "ncop");
+  const localMps = mps.filter((m) => m.chamber === "local");
 
   const naGrouped = naMps.reduce((acc, mp) => {
     const party = mp.party || "Unknown / Independent";
@@ -26,33 +27,36 @@ export function MembersDirectory({ mps }: { mps: MpPublic[] }) {
     return acc;
   }, {} as Record<string, MpPublic[]>);
 
+  const localGrouped = localMps.reduce((acc, mp) => {
+    const municipality = mp.constituency || "Unassigned Municipality";
+    (acc[municipality] ??= []).push(mp);
+    return acc;
+  }, {} as Record<string, MpPublic[]>);
+
   if (!chamber) {
     return (
-      <div className="grid md:grid-cols-2 gap-6">
-        <Card className="cursor-pointer hover:border-green-500 transition-colors" onClick={() => setChamber("na")}>
-          <CardHeader>
-            <CardTitle className="text-2xl">National Assembly</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-4xl font-bold text-green-700">{naMps.length}</p>
-            <p className="text-sm text-gray-500 mt-1">Main legislative chamber</p>
-          </CardContent>
-        </Card>
-        <Card className="cursor-pointer hover:border-green-500 transition-colors" onClick={() => setChamber("ncop")}>
-          <CardHeader>
-            <CardTitle className="text-2xl">National Council of Provinces</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-4xl font-bold text-green-700">{ncopMps.length}</p>
-            <p className="text-sm text-gray-500 mt-1">Provincial representation</p>
-          </CardContent>
-        </Card>
+      <div className="grid md:grid-cols-3 gap-6">
+        <div className="cursor-pointer border rounded-xl p-6 bg-white shadow-sm hover:border-green-500 transition-colors" onClick={() => setChamber("na")}>
+          <h2 className="text-2xl font-semibold mb-2">National Assembly</h2>
+          <p className="text-4xl font-bold text-green-700">{naMps.length}</p>
+          <p className="text-sm text-gray-500 mt-1">Main legislative chamber</p>
+        </div>
+        <div className="cursor-pointer border rounded-xl p-6 bg-white shadow-sm hover:border-green-500 transition-colors" onClick={() => setChamber("ncop")}>
+          <h2 className="text-2xl font-semibold mb-2">National Council of Provinces</h2>
+          <p className="text-4xl font-bold text-green-700">{ncopMps.length}</p>
+          <p className="text-sm text-gray-500 mt-1">Provincial representation</p>
+        </div>
+        <div className="cursor-pointer border rounded-xl p-6 bg-white shadow-sm hover:border-green-500 transition-colors" onClick={() => setChamber("local")}>
+          <h2 className="text-2xl font-semibold mb-2">Local Government</h2>
+          <p className="text-4xl font-bold text-green-700">{localMps.length}</p>
+          <p className="text-sm text-gray-500 mt-1">Mayors & Councilors</p>
+        </div>
       </div>
     );
   }
 
-  const groupedData = chamber === "na" ? naGrouped : ncopGrouped;
-  const chamberTitle = chamber === "na" ? "National Assembly" : "National Council of Provinces";
+  const groupedData = chamber === "na" ? naGrouped : chamber === "ncop" ? ncopGrouped : localGrouped;
+  const chamberTitle = chamber === "na" ? "National Assembly" : chamber === "ncop" ? "National Council of Provinces" : "Local Government";
 
   const toggle = (name: string) =>
     setOpenGroups((prev) => {
