@@ -60,7 +60,7 @@ def test_parser_spec_gap_returns_5(mock_parsers, mock_get_source, mock_writer_cl
     parser.parser_version = "v1"
     parser.parse.side_effect = ParserSpecGap("mocked gap")
     mock_parsers.__contains__.return_value = True
-    mock_parsers.__getitem__.return_value = lambda: parser
+    mock_parsers.get.return_value = lambda: parser
 
     assert run("test") == 5
     writer.quarantine.assert_called_once()
@@ -88,7 +88,7 @@ def test_unknown_mp_raises_before_write(mock_parsers, mock_get_source, mock_writ
         disclosures=[DisclosureRow(mp_full_name="Unknown MP Beta", category="other")]
     )
     mock_parsers.__contains__.return_value = True
-    mock_parsers.__getitem__.return_value = lambda: parser
+    mock_parsers.get.return_value = lambda: parser
 
     assert run("test") == 5
     writer.quarantine.assert_called_once()

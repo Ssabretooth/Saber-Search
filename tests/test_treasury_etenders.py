@@ -23,6 +23,17 @@ def test_treasury_etenders_parses_ocds_release():
     assert t.award_date == date(2026, 10, 15)
 
 
+def test_treasury_etenders_parses_pascalcase_api_shape():
+    data = {"Releases": [{
+        "ocid": "ocds-x", "tender": {"title": "T"}, "buyer": {"name": "B"},
+        "awards": [{"suppliers": [{"Name": "Acme Holdings"}]}],
+    }]}
+    doc = TreasuryEtendersParser().parse(
+        content=json.dumps(data).encode(), content_type="application/json", fetched_url="local",
+    )
+    assert [t.winning_company for t in doc.tenders] == ["Acme Holdings"]
+
+
 def test_treasury_etenders_skips_release_without_supplier():
     data = {"releases": [{"ocid": "x", "tender": {"title": "T"}, "awards": [{"suppliers": []}]}]}
     doc = TreasuryEtendersParser().parse(

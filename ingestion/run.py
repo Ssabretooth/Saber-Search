@@ -196,10 +196,16 @@ def run(source_id: str) -> int:
         return 2
 
     # 2. Parser lookup.
-    if source_id not in PARSERS:
-        log.error("SPEC_GAP: no parser for %r", source_id)
-        return 3
-    parser = PARSERS[source_id]()
+    # The gate has already verified this source_id exists in the lockfile.
+    # Now we just need to find the right parser for it.
+    parser_cls = PARSERS.get(source_id)
+    if not parser_cls:
+        if source_id.startswith("treasury_etenders_"):
+            parser_cls = TreasuryEtendersParser
+        else:
+            log.error("SPEC_GAP: no parser for %r", source_id)
+            return 3
+    parser = parser_cls()
 
     # 3. Writer construction.
     try:

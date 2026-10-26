@@ -20,19 +20,21 @@ class TreasuryEtendersParser(BaseParser):
             raise ParserSpecGap(f"Invalid JSON: {e}")
 
         tenders = []
-        for r in data.get("releases", []):
+        for r in data.get("Releases") or data.get("releases") or []:
             try:
                 awards = r.get("awards", [])
                 if not awards or not awards[0].get("suppliers"):
                     continue
-                winning_company = awards[0]["suppliers"][0].get("name")
+                winning_company = awards[0]["suppliers"][0].get("name") or awards[0]["suppliers"][0].get("Name")
                 if not winning_company:
                     continue
 
                 tender_obj = r.get("tender", {})
-                amount = tender_obj.get("value", {}).get("amount")
+                amount = (awards[0].get("value") or {}).get("amount")
+                if amount is None:
+                    amount = (tender_obj.get("value") or {}).get("amount")
                 award_date = None
-                award_date_str = awards[0].get("date")
+                award_date_str = awards[0].get("date") or r.get("date")
                 if award_date_str:
                     try:
                         award_date = datetime.fromisoformat(award_date_str.replace("Z", "+00:00")).date()
