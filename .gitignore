@@ -13,3 +13,6 @@ supabase/.branches/
 supabase/.temp/
 *.tsbuildinfo
 publikeye_ingestion.egg-info/
+
+# Local ingestion cache (developer machine only)
+data/

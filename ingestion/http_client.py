@@ -1,3 +1,5 @@
+import hashlib
+import os
 import time
 import urllib.robotparser
 from dataclasses import dataclass
@@ -38,6 +40,21 @@ def _robots_allows(client: httpx.Client, url: str, ua: str) -> bool:
 
 
 def fetch(source: ClearedSource, *, retries: int = 4) -> FetchResult:
+    cache_path = os.path.join("data", "etenders", f"{source.id}.json")
+    if os.path.exists(cache_path):
+        with open(cache_path, "rb") as f:
+            content = f.read()
+        digest = hashlib.sha256(content).hexdigest()
+        if digest != source.first_fetch_sha256:
+            raise SourceGateError(
+                f"local cache hash mismatch for {source.id}: "
+                f"expected {source.first_fetch_sha256}, got {digest}"
+            )
+        return FetchResult(
+            url=source.url, status=200, content=content,
+            content_type="application/json",
+        )
+
     ua = USER_AGENT_TMPL.format(email=source.contact_email)
     headers = {"User-Agent": ua, "Accept": "*/*"}
     interval = 1.0 / source.rate_limit_rps

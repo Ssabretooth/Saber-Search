@@ -30,6 +30,7 @@ class ClearedSource:
     rate_limit_rps: float
     republication_of: str | None
     default_chamber: str
+    first_fetch_sha256: str
 
 
 def _check(entry: dict, idx: int) -> ClearedSource:
@@ -114,6 +115,7 @@ def _check(entry: dict, idx: int) -> ClearedSource:
         contact_email=contact, rate_limit_rps=rps,
         republication_of=entry.get("republication_of") or None,
         default_chamber=entry.get("default_chamber", "na"),
+        first_fetch_sha256=sha,
     )
 
 

@@ -12,6 +12,7 @@ def mock_source():
         format="pdf", tier="tier1_official", licence_note="licence",
         contact_email="test@example.org", rate_limit_rps=0.5, republication_of=None,
         default_chamber="na",
+        first_fetch_sha256="0"*64,
     )
 
 @patch("ingestion.run.fetch")
