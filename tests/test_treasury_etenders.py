@@ -44,4 +44,6 @@ def test_treasury_etenders_skips_release_without_supplier():
 
 def test_norm_company_is_case_and_whitespace_insensitive():
     assert _norm_company("  Acme   Holdings ") == _norm_company("acme holdings")
-    assert _norm_company("Acme Holdings") != _norm_company("Acme Holdings Ltd")
+    assert _norm_company("Acme Holdings Ltd") == _norm_company("Acme Holdings")
+    assert _norm_company("Acme (Pty) Ltd") == "acme"
+    assert _norm_company("Acme Holdings") != _norm_company("Beta Holdings")

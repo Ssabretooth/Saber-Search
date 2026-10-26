@@ -46,10 +46,24 @@ def _norm_company(name: str | None) -> str:
     return " ".join(name.split())
 
 
+LISTED_COMPANIES = frozenset(_norm_company(n) for n in (
+    "Vodacom", "MTN", "Sasol", "Telkom", "Sanlam", "Standard Bank", "Absa", "FNB",
+    "First National Bank", "Nedbank", "Capitec", "Discovery", "Shoprite", "Woolworths",
+    "Pick n Pay", "Spar", "Mr Price", "Anglo American", "BHP", "Impala Platinum",
+    "Sibanye", "Gold Fields", "Remgro", "Bidvest", "Aspen", "Naspers", "Prosus",
+    "MultiChoice", "Tiger Brands", "Barloworld",
+))
+
+
+def _mentions(text: str, phrase: str) -> bool:
+    return bool(phrase) and re.search(r"\b" + re.escape(phrase) + r"\b", text) is not None
+
+
 def _cross_reference_tenders(writer: SupabaseWriter, source_doc_id: str) -> int:
     dirs = (
         writer.client.table("financial_disclosures")
         .select("mp_id, counterparty, category, description")
+        .in_("category", ["directorship", "consultancy"])
         .execute().data or []
     )
     tenders = (
@@ -66,11 +80,13 @@ def _cross_reference_tenders(writer: SupabaseWriter, source_doc_id: str) -> int:
     flags = []
     for d in dirs:
         text = _norm_company(d.get("counterparty") or d.get("description"))
-        if len(text) < 4:
+        if len(text) < 4 or "deregistered" in text or "dormant" in text:
             continue
         for t in tenders:
             win_co = _norm_company(t["winning_company"])
-            if len(win_co) < 4 or not re.search(r"\b" + re.escape(win_co) + r"\b", text):
+            if len(win_co) < 4 or not _mentions(text, win_co):
+                continue
+            if any(_mentions(win_co, listed) for listed in LISTED_COMPANIES):
                 continue
             if (d["mp_id"], t["id"]) in seen:
                 continue
@@ -81,7 +97,7 @@ def _cross_reference_tenders(writer: SupabaseWriter, source_doc_id: str) -> int:
                 "rule_id": "etenders_match_v1", "rule_version": "1.0",
                 "inputs": {"tender_id": t["id"], "ocid": t["ocid"], "company": t["winning_company"]},
                 "computed_value": None, "threshold": None,
-                "public_text": f"Declared {d['category']} involving {t['winning_company']}, which was awarded a government tender.",
+                "public_text": f"Disclosed {d['category']} in a company matching a tender award (OCID: {t['ocid']}). Awaiting human review.",
                 "source_document_id": source_doc_id, "status": "draft",
             })
 

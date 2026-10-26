@@ -15,6 +15,7 @@ def _writer(disclosures, tenders, existing_flags):
                 "tenders": tenders,
                 "review_flags": existing_flags,
             }[name]
+            query.select.return_value.execute.return_value.data = data
             query.select.return_value.eq.return_value.execute.return_value.data = data
             query.select.return_value.execute.return_value.data = data
             tables[name] = query
@@ -26,7 +27,7 @@ def _writer(disclosures, tenders, existing_flags):
 
 def test_cross_reference_inserts_draft_flag_for_matching_directorship():
     writer, tables = _writer(
-        disclosures=[{"mp_id": "mp-1", "counterparty": "Acme Holdings"}],
+        disclosures=[{"mp_id": "mp-1", "counterparty": "Acme Holdings", "category": "directorship"}],
         tenders=[{"id": "t-1", "ocid": "ocds-1", "winning_company": "ACME HOLDINGS"}],
         existing_flags=[],
     )
@@ -44,7 +45,7 @@ def test_cross_reference_inserts_draft_flag_for_matching_directorship():
 
 def test_cross_reference_skips_existing_flag():
     writer, tables = _writer(
-        disclosures=[{"mp_id": "mp-1", "counterparty": "Acme Holdings"}],
+        disclosures=[{"mp_id": "mp-1", "counterparty": "Acme Holdings", "category": "directorship"}],
         tenders=[{"id": "t-1", "ocid": "ocds-1", "winning_company": "ACME HOLDINGS"}],
         existing_flags=[{"subject_id": "mp-1", "inputs": {"tender_id": "t-1"}}],
     )
@@ -54,6 +55,7 @@ def test_cross_reference_skips_existing_flag():
 
 
 def test_name_normalisation():
-    assert _norm_company("  Acme   Holdings ") == "acme holdings"
-    assert _norm_company("ACME HOLDINGS") == "acme holdings"
-    assert _norm_company("Acme Holdings Ltd") != _norm_company("Acme Holdings")
+    assert _norm_company("  Acme   Holdings ") == "acme"
+    assert _norm_company("ACME HOLDINGS") == "acme"
+    assert _norm_company("Acme Holdings Ltd") == _norm_company("Acme Holdings")
+    assert _norm_company("Acme Holdings") != _norm_company("Beta Holdings")
