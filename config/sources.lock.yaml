@@ -180,3 +180,21 @@ sources:
     first_fetch_sha256: "db2a1b104e63f4303d14cec186856d959dc7d1a62af15608a34d77851c9d43a6"
     rate_limit_rps: 0.1
     contact_email: transparency@publikeye.org
+
+  - id: "treasury_municipalities"
+    publisher: "National Treasury of South Africa"
+    title: "Municipalities Directory"
+    candidate_domain: "amazonaws.com"
+    url: "https://munimoney-media.s3.eu-west-1.amazonaws.com/munimoney-media/media/bulk_downloads/municipal_staff_contacts/municipal_staff_contacts_2026-07-20_12-08-37.csv"
+    format: "csv"
+    tier: "tier1_official"
+    republication_of: ""
+    licence_note: "Open Data (Creative Commons)"
+    default_chamber: "local"
+    verified: true
+    robots_ok: true
+    verified_by: "Lucky Sandleni"
+    verified_at: "2026-10-26"
+    first_fetch_sha256: "86248fbf3482c2c8ba5e65ff4c5d809bf2d0d1aea92c40d46adbb26bd7191c85"
+    rate_limit_rps: 0.5
+    contact_email: transparency@publikeye.org

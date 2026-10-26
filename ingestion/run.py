@@ -23,6 +23,7 @@ from .parsers.parliament_na_members import ParliamentNaMembersParser
 from .parsers.nationalgov_ncop_members import NationalGovNcopMembersParser
 from .parsers.saflii_judgments import SafliiJudgmentsParser
 from .parsers.treasury_etenders import TreasuryEtendersParser
+from .parsers.treasury_municipalities import TreasuryMunicipalitiesParser
 from .writer import SupabaseWriter
 
 load_dotenv()
@@ -35,6 +36,7 @@ PARSERS: dict[str, type[BaseParser]] = {
     ParliamentNaMembersParser.source_id: ParliamentNaMembersParser,
     NationalGovNcopMembersParser.source_id: NationalGovNcopMembersParser,
     TreasuryEtendersParser.source_id: TreasuryEtendersParser,
+    TreasuryMunicipalitiesParser.source_id: TreasuryMunicipalitiesParser,
 }
 
 
@@ -344,9 +346,17 @@ def run(source_id: str) -> int:
     )
     n_flags = _cross_reference_tenders(writer, source_doc_id)
 
+    n_muni = 0
+    if doc.municipalities:
+        n_muni = writer.upsert_facts(
+            table="municipalities",
+            rows=[m.model_dump(mode="json") for m in doc.municipalities],
+            conflict_cols="demarcation_code",
+        )
+
     log.info(
-        "done: source_doc=%s mps=%d disclosures=%d spending=%d judicial=%d tenders=%d new_flags=%d",
-        source_doc_id, len(doc.mps), n_disc, n_spend, n_jud, n_tenders, n_flags,
+        "done: source_doc=%s mps=%d disclosures=%d spending=%d judicial=%d tenders=%d municipalities=%d new_flags=%d",
+        source_doc_id, len(doc.mps), n_disc, n_spend, n_jud, n_tenders, n_muni, n_flags,
     )
     return 0
 

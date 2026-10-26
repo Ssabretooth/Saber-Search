@@ -73,11 +73,23 @@ class TenderRow(BaseModel):
     award_date: date | None = None
 
 
+class MunicipalitySeed(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    demarcation_code: str
+    name: str
+    long_name: str | None = None
+    province: str | None = None
+    category: str | None = None
+    population: int | None = None
+    url: str | None = None
+
+
 class ParsedDocument(BaseModel):
     model_config = ConfigDict(extra="forbid")
     source_id: str
     published_at: date | None = None
     mps: list[MPSeed] = Field(default_factory=list)
+    municipalities: list[MunicipalitySeed] = Field(default_factory=list)
     disclosures: list[DisclosureRow] = Field(default_factory=list)
     spending: list[SpendingRow] = Field(default_factory=list)
     judicial: list[JudicialRow] = Field(default_factory=list)
