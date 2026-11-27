@@ -99,11 +99,20 @@ def is_match(tender_name: str, disclosure_name: str) -> tuple[bool, str]:
 # ── load data ─────────────────────────────────────────────────────────────────
 
 print("Loading tenders…")
-tenders_raw = (
-    sb.table("tenders")
-    .select("id, ocid, title, winning_company, amount_zar, award_date, department")
-    .execute()
-).data or []
+tenders_raw: list[dict] = []
+PAGE = 1000
+offset = 0
+while True:
+    batch = (
+        sb.table("tenders")
+        .select("id, ocid, title, winning_company, amount_zar, award_date, department")
+        .range(offset, offset + PAGE - 1)
+        .execute()
+    ).data or []
+    tenders_raw.extend(batch)
+    if len(batch) < PAGE:
+        break
+    offset += PAGE
 print(f"  {len(tenders_raw)} tenders")
 
 print("Loading disclosures with counterparties…")
