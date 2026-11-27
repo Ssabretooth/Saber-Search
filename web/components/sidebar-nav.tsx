@@ -15,6 +15,8 @@ import {
   MoreHorizontal,
   LogOut,
   ChevronRight,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
@@ -37,6 +39,16 @@ export function SidebarNav() {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const [collapsed, setCollapsed] = useState(() => {
+    try { return localStorage.getItem("sidebar-collapsed") === "1"; } catch { return false; }
+  });
+
+  const toggleCollapsed = () =>
+    setCollapsed((c) => {
+      const next = !c;
+      try { localStorage.setItem("sidebar-collapsed", next ? "1" : "0"); } catch {}
+      return next;
+    });
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -48,7 +60,6 @@ export function SidebarNav() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Don't render until auth state is known, and never render for guests
   if (loading || !user) return null;
 
   const initials =
@@ -61,20 +72,35 @@ export function SidebarNav() {
   return (
     <>
       {/* ── Desktop sidebar ── */}
-      <aside className="hidden md:flex h-screen w-52 shrink-0 flex-col border-r border-stone-200 bg-[#FAFAF7]">
-        {/* Logo */}
-        <div className="flex items-center gap-2.5 border-b border-stone-200 px-4 py-4">
-          <Link href="/" className="flex items-center gap-2.5">
-            <Image src="/logo.jpg" alt="PublikEye" width={26} height={26} className="rounded-md" />
-            <span className="text-sm font-semibold text-slate-900">PublikEye</span>
+      <aside
+        className={`hidden md:flex h-screen shrink-0 flex-col border-r border-stone-200 bg-[#FAFAF7] transition-all duration-200 ${
+          collapsed ? "w-14" : "w-52"
+        }`}
+      >
+        {/* Logo + collapse toggle */}
+        <div className="flex items-center border-b border-stone-200 px-3 py-4 gap-2">
+          <Link href="/" className="flex items-center gap-2.5 min-w-0">
+            <Image src="/logo.jpg" alt="PublikEye" width={26} height={26} className="rounded-md shrink-0" />
+            {!collapsed && (
+              <span className="text-sm font-semibold text-slate-900 truncate">PublikEye</span>
+            )}
           </Link>
+          <button
+            onClick={toggleCollapsed}
+            title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            className={`ml-auto shrink-0 rounded-md p-1 text-slate-400 hover:bg-stone-100 hover:text-slate-700 transition-colors ${collapsed ? "mx-auto" : ""}`}
+          >
+            {collapsed ? <PanelLeftOpen size={15} /> : <PanelLeftClose size={15} />}
+          </button>
         </div>
 
         {/* Nav */}
         <nav className="flex-1 overflow-y-auto px-2 py-4">
-          <p className="mb-1.5 px-2 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
-            Explore
-          </p>
+          {!collapsed && (
+            <p className="mb-1.5 px-2 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+              Explore
+            </p>
+          )}
           <ul className="space-y-0.5">
             {sections.map(({ href, label, icon: Icon }) => {
               const active = pathname === href;
@@ -82,15 +108,22 @@ export function SidebarNav() {
                 <li key={label}>
                   <Link
                     href={href}
+                    title={collapsed ? label : undefined}
                     className={`flex items-center gap-2.5 rounded-md px-2 py-2 text-sm transition-colors ${
+                      collapsed ? "justify-center" : ""
+                    } ${
                       active
                         ? "bg-teal-50 font-medium text-teal-700"
                         : "text-slate-600 hover:bg-stone-100 hover:text-slate-900"
                     }`}
                   >
                     <Icon size={15} className={active ? "text-teal-600" : "text-slate-400"} />
-                    {label}
-                    {active && <ChevronRight size={11} className="ml-auto text-teal-400" />}
+                    {!collapsed && (
+                      <>
+                        {label}
+                        {active && <ChevronRight size={11} className="ml-auto text-teal-400" />}
+                      </>
+                    )}
                   </Link>
                 </li>
               );
@@ -101,7 +134,7 @@ export function SidebarNav() {
         {/* Account footer */}
         <div className="border-t border-stone-200 p-2" ref={menuRef}>
           {menuOpen && (
-            <div className="mb-1 overflow-hidden rounded-lg border border-stone-200 bg-white shadow-lg">
+            <div className={`mb-1 overflow-hidden rounded-lg border border-stone-200 bg-white shadow-lg ${collapsed ? "absolute bottom-16 left-14 w-44 z-50" : ""}`}>
               {accountLinks.map(({ href, label, icon: Icon }) => (
                 <Link
                   key={href}
@@ -130,16 +163,21 @@ export function SidebarNav() {
 
           <button
             onClick={() => setMenuOpen((o) => !o)}
-            className="flex w-full items-center gap-2.5 rounded-md px-2 py-2 text-left transition-colors hover:bg-stone-100"
+            title={collapsed ? (fullName || user.email || "Account") : undefined}
+            className={`flex w-full items-center gap-2.5 rounded-md px-2 py-2 text-left transition-colors hover:bg-stone-100 ${collapsed ? "justify-center" : ""}`}
           >
             <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-teal-600 text-xs font-bold text-white">
               {initials}
             </span>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-xs font-medium text-slate-800">{fullName || user.email}</p>
-              {fullName && <p className="truncate text-[10px] text-slate-400">{user.email}</p>}
-            </div>
-            <MoreHorizontal size={14} className="shrink-0 text-slate-400" />
+            {!collapsed && (
+              <>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-xs font-medium text-slate-800">{fullName || user.email}</p>
+                  {fullName && <p className="truncate text-[10px] text-slate-400">{user.email}</p>}
+                </div>
+                <MoreHorizontal size={14} className="shrink-0 text-slate-400" />
+              </>
+            )}
           </button>
         </div>
       </aside>
@@ -205,7 +243,6 @@ export function SidebarNav() {
           )}
         </div>
       </nav>
-
     </>
   );
 }
