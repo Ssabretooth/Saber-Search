@@ -44,8 +44,9 @@ export default function TermsPage() {
           </p>
           <p className="mt-4">
             Errors, discrepancies, or outdated information may be reported to{" "}
-            <a href="mailto:transparency@publikeye.org" className="font-medium text-teal-600 hover:underline">
-              transparency@publikeye.org
+            {/* dormant: transparency@publikeye.org */}
+            <a href="mailto:luckynyambi@gmail.com" className="font-medium text-teal-600 hover:underline">
+              luckynyambi@gmail.com
             </a>
             . We review and correct promptly.
           </p>
@@ -110,8 +111,9 @@ export default function TermsPage() {
       <div className="mt-14 h-px bg-stone-200" />
       <p className="mt-6 text-xs text-slate-400">
         PublikEye is independently operated. For enquiries:{" "}
-        <a href="mailto:transparency@publikeye.org" className="text-teal-600 hover:underline">
-          transparency@publikeye.org
+        {/* dormant: transparency@publikeye.org */}
+        <a href="mailto:luckynyambi@gmail.com" className="text-teal-600 hover:underline">
+          luckynyambi@gmail.com
         </a>
       </p>
     </div>

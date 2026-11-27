@@ -100,8 +100,9 @@ export default function AboutPage() {
         <h2 className="mb-3 text-xs font-semibold uppercase tracking-widest text-slate-400">Contact</h2>
         <p className="text-sm text-slate-600">
           Data corrections, press enquiries, or correspondence:{" "}
-          <a href="mailto:transparency@publikeye.org" className="font-medium text-teal-600 hover:underline">
-            transparency@publikeye.org
+          {/* dormant: transparency@publikeye.org */}
+          <a href="mailto:luckynyambi@gmail.com" className="font-medium text-teal-600 hover:underline">
+            luckynyambi@gmail.com
           </a>
         </p>
       </div>
