@@ -23,7 +23,7 @@ import { useAuth } from "@/lib/auth-context";
 const sections = [
   { href: "/members",     label: "Parliament",        icon: Users },
   { href: "/disclosures", label: "Disclosures",       icon: FileText },
-  { href: "/members",     label: "Follow the Tender", icon: Search },
+  { href: "/tenders",     label: "Follow the Tender", icon: Search },
   { href: "/flags",       label: "Alerts & Flags",    icon: AlertCircle },
 ];
 
