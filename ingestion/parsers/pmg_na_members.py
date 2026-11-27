@@ -43,6 +43,10 @@ class PmgNaMembersParser(BaseParser):
             # Format for database
             full_name = f"{surname}, {title} {initials}"
             
+            # Skip entries with no party — indicates an adjacent-section capture (e.g. NCOP)
+            if not party:
+                continue
+
             # Deduplicate
             if full_name not in seen:
                 seen.add(full_name)

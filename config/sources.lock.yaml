@@ -198,6 +198,11 @@ sources:
     first_fetch_sha256: "86248fbf3482c2c8ba5e65ff4c5d809bf2d0d1aea92c40d46adbb26bd7191c85"
     rate_limit_rps: 0.5
     contact_email: transparency@publikeye.org
+    # DATA QUALITY NOTE: This staff-contacts CSV includes 35 dissolved/merged
+    # municipalities from pre-2016 demarcation changes, inflating count to 292.
+    # Replace with the official Municipal Money API when re-ingesting:
+    # https://municipaldata.treasury.gov.za/api/cubes/municipalities/facts?format=csv
+    # Verify row count = 257 (8 metro + 44 district + 205 local) before certifying.
 
   - id: "jhb_councillors"
     publisher: "City of Johannesburg"
