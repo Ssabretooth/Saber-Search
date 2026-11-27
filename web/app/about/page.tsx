@@ -9,14 +9,14 @@ export default function AboutPage() {
           On the Obligation of Transparency in a Constitutional Democracy
         </h1>
         <p className="text-sm leading-relaxed text-slate-500 italic">
-          A statement by Lucky Sandleni, founder of PublikEye
+          A statement by Lucky Sandleni, creator of PublikEye
         </p>
       </div>
 
       <div className="space-y-7 text-[15px] leading-[1.85] text-slate-700">
 
         <p>
-          Democracies do not fail in a single dramatic moment. They erode — quietly, incrementally —
+          Democracies do not fail in a single dramatic moment. They erode. Quietly, incrementally,
           through the accumulation of small concealments, of disclosures made in formats no ordinary
           citizen can navigate, of connections that exist in the public record yet remain, in
           practical terms, invisible. PublikEye was built from the conviction that this erosion is
@@ -28,7 +28,7 @@ export default function AboutPage() {
           who hold public office does not end with the act of disclosure. A member of parliament who
           files a register of interests in a scanned PDF, buried within a gazette that the average
           South African has no reason to know exists, has satisfied the letter of the law while
-          defeating its spirit entirely. Transparency is not an event. It is a condition — one that
+          defeating its spirit entirely. Transparency is not an event. It is a condition. One that
           must be actively maintained, actively made legible, and actively made findable.
         </p>
 
@@ -37,7 +37,7 @@ export default function AboutPage() {
           the right of access to information held by the state. Section 195 demands that public
           administration be governed by principles of transparency and accountability. These are not
           aspirational clauses. They are enforceable obligations. PublikEye is, in its essence, an
-          instrument for holding those obligations to account — not through litigation, but through
+          instrument for holding those obligations to account. Not through litigation, but through
           light.
         </p>
 
@@ -47,14 +47,14 @@ export default function AboutPage() {
           conceded must be public. If a connection between a declared interest and a government
           contract appears here, it appears because both the declaration and the contract are
           matters of public record. The platform adds nothing except the architecture to find them
-          together — which is, often, everything.
+          together. Which is, often, everything.
         </p>
 
         <p>
           I offer this work not as an act of opposition, but as an act of faith in the republic.
           The institutions of South African democracy are, on balance, ones worth defending. The
           people who serve within them are, in the majority, people of good faith. It is precisely
-          because I hold that view that I believe scrutiny is not a threat to good governance — it
+          because I hold that view that I believe scrutiny is not a threat to good governance. It
           is its precondition. Those with nothing to hide have nothing to fear from a platform that
           shows only what they have already declared.
         </p>
@@ -65,7 +65,7 @@ export default function AboutPage() {
         </blockquote>
 
         <p>
-          PublikEye was founded in October 2026 in South Africa. It is independently operated.
+          I created PublikEye in October 2026 in South Africa. It is independently operated.
           It accepts no funding from political parties, government entities, or organisations with
           a material interest in the data it surfaces. Its only obligation is to the accuracy of
           the public record and to the citizens who are entitled to read it.
@@ -81,11 +81,11 @@ export default function AboutPage() {
         <h2 className="mb-4 text-xs font-semibold uppercase tracking-widest text-slate-400">Data Sources</h2>
         <ul className="space-y-2 text-sm text-slate-600">
           {[
-            "Parliament of South Africa — Register of Members' Interests",
-            "Government Gazette — official proclamations and notices",
-            "National Treasury — procurement awards and expenditure data",
-            "SAFLII — judicial records and constitutional court decisions",
-            "Parliamentary Monitoring Group (PMG) — committee and Hansard archives",
+            "Parliament of South Africa - Register of Members' Interests",
+            "Government Gazette - official proclamations and notices",
+            "National Treasury - procurement awards and expenditure data",
+            "SAFLII - judicial records and constitutional court decisions",
+            "Parliamentary Monitoring Group (PMG) - committee and Hansard archives",
           ].map((src) => (
             <li key={src} className="flex items-start gap-3">
               <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-teal-500" />

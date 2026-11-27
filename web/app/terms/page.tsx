@@ -18,7 +18,7 @@ export default function TermsPage() {
           <h2 className="mb-3 text-xs font-semibold uppercase tracking-widest text-slate-400">Nature of the Platform</h2>
           <p>
             PublikEye is a public interest transparency platform. It aggregates, structures, and
-            presents information drawn exclusively from official government sources — the Register of
+            presents information drawn exclusively from official government sources: the Register of
             Members' Interests, the Government Gazette, National Treasury procurement records, and
             related statutory publications. No information displayed on this platform originates
             from PublikEye. We are, in the precise legal sense, a medium of access, not a source
@@ -38,8 +38,8 @@ export default function TermsPage() {
             While every reasonable measure is taken to ensure the accuracy and currency of the
             information presented, PublikEye does not warrant the completeness or correctness of
             any data displayed. Official government sources are the authoritative record. Users who
-            intend to act on information found here — whether in a journalistic, legal, academic,
-            or civic capacity — are encouraged to verify directly against the primary source, to
+            intend to act on information found here, whether in a journalistic, legal, academic,
+            or civic capacity, are encouraged to verify directly against the primary source, to
             which every material figure on this platform carries a link.
           </p>
           <p className="mt-4">
@@ -62,8 +62,8 @@ export default function TermsPage() {
           <p className="mt-4">
             Automated scraping, systematic harvesting of data for commercial resale, or any use
             that places undue technical burden on the platform is prohibited. Use that is designed
-            to harass, defame, or misrepresent individuals — by selectively citing or
-            decontextualising information displayed here — violates both these terms and the spirit
+            to harass, defame, or misrepresent individuals, by selectively citing or
+            decontextualising information displayed here, violates both these terms and the spirit
             of the platform's purpose.
           </p>
         </section>
@@ -78,8 +78,8 @@ export default function TermsPage() {
             their account and associated data at any time by writing to us.
           </p>
           <p className="mt-4">
-            The information displayed about public officials on this platform — their declared
-            interests, committee memberships, and connections to procurement records — constitutes
+            The information displayed about public officials on this platform, including their declared
+            interests, committee memberships, and connections to procurement records, constitutes
             information about the exercise of public power. It is not private information within
             the meaning of the Protection of Personal Information Act, 2013. Its publication is
             lawful, necessary, and proportionate to the legitimate aim of democratic accountability.
