@@ -204,6 +204,24 @@ sources:
     # https://municipaldata.treasury.gov.za/api/cubes/municipalities/facts?format=csv
     # Verify row count = 257 (8 metro + 44 district + 205 local) before certifying.
 
+  - id: "pa_pombola"
+    publisher: "Parliamentary Monitoring Group"
+    title: "People's Assembly - Pombola JSON (National Legislators)"
+    candidate_domain: "pa.org.za"
+    url: "https://pa.org.za/media_root/popolo_json/pombola.json"
+    format: "json"
+    tier: "tier2_indexed_republication"
+    republication_of: "parliament_na_members"
+    licence_note: "CC BY-SA 4.0 — Parliamentary Monitoring Group"
+    default_chamber: "na"
+    verified: true
+    robots_ok: true
+    verified_by: "Lucky Sandleni"
+    verified_at: "2026-11-27"
+    first_fetch_sha256: "b32f9bdba73336c6523beaf51053a73be0cfbd8ce7a765d0d50748ae95566f67"
+    rate_limit_rps: 0.2
+    contact_email: luckynyambi@gmail.com
+
   - id: "jhb_councillors"
     publisher: "City of Johannesburg"
     title: "JHB Councillors Contact Details PR-Ward and Region"

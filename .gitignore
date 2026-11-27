@@ -16,3 +16,4 @@ publikeye_ingestion.egg-info/
 
 # Local ingestion cache (developer machine only)
 data/
+.vercel

@@ -1,12 +1,12 @@
 """Parser for the People's Assembly Pombola JSON.
 
 Source: pa.org.za/media_root/popolo_json/pombola.json
-Format: Popolo/Pombola — persons, memberships, organizations.
-Cadence: regenerated daily by PMG; this is the same feed OpenSanctions ingests.
+Format: Pombola — persons array, with memberships nested inside each person.
+Cadence: regenerated daily by PMG.
 
-Only current national members are emitted (end_date null or future).
-Provincial legislators are skipped — their government_level is "provincial"
-but we only ingest chamber="na" and chamber="ncop" here.
+Emits current NA (core_organisation:70) and NCOP (core_organisation:71)
+members only. Party is resolved from the person's current Party-classified
+membership with no end_date.
 """
 
 import json
@@ -16,17 +16,18 @@ from ..errors import ParserSpecGap
 from ..models import MPSeed, ParsedDocument
 from .base import PARSER_VERSION_PREFIX, BaseParser
 
-# Organization name fragments → chamber code
-_CHAMBER_MAP = {
-    "national assembly": "na",
-    "national council of provinces": "ncop",
+NA_ORG_ID   = "core_organisation:70"
+NCOP_ORG_ID = "core_organisation:71"
+
+CHAMBER_BY_ORG = {
+    NA_ORG_ID:   "na",
+    NCOP_ORG_ID: "ncop",
 }
 
 
 def _parse_date(val: str | None) -> date | None:
     if not val:
         return None
-    # Pombola dates may be partial: "2024-06-" or "2024-06-01"
     clean = val.rstrip("-").strip()
     if not clean:
         return None
@@ -42,6 +43,8 @@ def _parse_date(val: str | None) -> date | None:
 
 
 def _is_current(end_raw: str | None) -> bool:
+    if not end_raw:
+        return True
     end = _parse_date(end_raw)
     return end is None or end >= date.today()
 
@@ -59,72 +62,49 @@ class PaPombolaParser(BaseParser):
         except json.JSONDecodeError as e:
             raise ParserSpecGap(f"invalid JSON: {e}") from e
 
-        # --- Index organizations ---
+        # Index organizations by id
         orgs: dict[str, dict] = {o["id"]: o for o in data.get("organizations", [])}
 
-        # Identify national legislature orgs
-        legislature_to_chamber: dict[str, str] = {}
-        for oid, org in orgs.items():
-            name_lower = (org.get("name") or "").lower()
-            for fragment, chamber in _CHAMBER_MAP.items():
-                if fragment in name_lower:
-                    legislature_to_chamber[oid] = chamber
-                    break
-
-        if not legislature_to_chamber:
-            raise ParserSpecGap("No National Assembly or NCOP organization found in Pombola data.")
-
-        # --- Index persons ---
-        persons: dict[str, str] = {
-            p["id"]: (p.get("name") or "").strip()
-            for p in data.get("persons", [])
-        }
-
-        # --- Process memberships ---
-        # A person may have one legislature membership and one party membership.
-        # Legislature membership: organization_id in legislature_to_chamber
-        # Party membership: on_behalf_of_id OR a separate membership to a party org
-
-        # Collect legislature memberships keyed by person_id
-        leg_memberships: dict[str, list[dict]] = {}
-        # Collect party name keyed by person_id (from on_behalf_of_id)
-        person_party: dict[str, str] = {}
-
-        for mem in data.get("memberships", []):
-            pid = mem.get("person_id")
-            oid = mem.get("organization_id")
-
-            if not pid or not oid:
-                continue
-
-            chamber = legislature_to_chamber.get(oid)
-            if chamber and _is_current(mem.get("end_date")):
-                leg_memberships.setdefault(pid, []).append({
-                    "chamber": chamber,
-                    "start_date": _parse_date(mem.get("start_date")),
-                    "end_date": _parse_date(mem.get("end_date")),
-                    "role": mem.get("role"),
-                    "on_behalf_of_id": mem.get("on_behalf_of_id"),
-                })
-
-            # Party from on_behalf_of_id on any membership
-            behalf = mem.get("on_behalf_of_id")
-            if behalf and behalf in orgs and pid not in person_party:
-                person_party[pid] = (orgs[behalf].get("name") or "").strip()
-
-        # --- Build MPSeed list ---
         mps: list[MPSeed] = []
         seen: set[tuple[str, str]] = set()
 
-        for pid, memberships in leg_memberships.items():
-            full_name = persons.get(pid, "").strip()
+        for person in data.get("persons", []):
+            memberships = person.get("memberships", [])
+            full_name = (person.get("name") or "").strip()
             if not full_name:
                 continue
 
-            party = person_party.get(pid)
-
+            # Find current legislative memberships (NA or NCOP)
+            leg_memberships: list[tuple[str, str | None, str | None]] = []
             for mem in memberships:
-                chamber = mem["chamber"]
+                oid = mem.get("organization_id", "")
+                chamber = CHAMBER_BY_ORG.get(oid)
+                if chamber and _is_current(mem.get("end_date")):
+                    leg_memberships.append((
+                        chamber,
+                        mem.get("start_date"),
+                        mem.get("end_date"),
+                    ))
+
+            if not leg_memberships:
+                continue
+
+            # Resolve current party: Party-classified membership with no end_date
+            party: str | None = None
+            for mem in memberships:
+                oid = mem.get("organization_id", "")
+                org = orgs.get(oid, {})
+                if org.get("classification") == "Party" and _is_current(mem.get("end_date")):
+                    party = (org.get("name") or "").strip() or None
+                    # Prefer the most recent party (last one wins if multiple current)
+
+            # Emit one MPSeed per chamber (deduplicated)
+            chambers_seen: set[str] = set()
+            for chamber, start_raw, end_raw in leg_memberships:
+                if chamber in chambers_seen:
+                    continue
+                chambers_seen.add(chamber)
+
                 key = (full_name.lower(), chamber)
                 if key in seen:
                     continue
@@ -133,9 +113,9 @@ class PaPombolaParser(BaseParser):
                 mps.append(MPSeed(
                     full_name=full_name,
                     chamber=chamber,
-                    party=party or None,
-                    term_start=mem["start_date"],
-                    term_end=mem["end_date"],
+                    party=party,
+                    term_start=_parse_date(start_raw),
+                    term_end=_parse_date(end_raw),
                     government_level="national",
                 ))
 
