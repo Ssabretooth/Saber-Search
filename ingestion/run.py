@@ -26,6 +26,7 @@ from .parsers.jhb_councillors import JhbCouncillorsParser
 from .parsers.treasury_etenders import TreasuryEtendersParser
 from .parsers.treasury_municipalities import TreasuryMunicipalitiesParser
 from .parsers.pa_pombola import PaPombolaParser
+from .parsers.electai_wards import ElectAIWardsParser
 from .writer import SupabaseWriter
 
 load_dotenv()
@@ -41,6 +42,7 @@ PARSERS: dict[str, type[BaseParser]] = {
     TreasuryMunicipalitiesParser.source_id: TreasuryMunicipalitiesParser,
     JhbCouncillorsParser.source_id: JhbCouncillorsParser,
     PaPombolaParser.source_id: PaPombolaParser,
+    ElectAIWardsParser.source_id: ElectAIWardsParser,
 }
 
 

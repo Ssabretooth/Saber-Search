@@ -222,6 +222,31 @@ sources:
     rate_limit_rps: 0.2
     contact_email: luckynyambi@gmail.com
 
+  - id: "electai_wards"
+    publisher: "ElectAI"
+    title: "Ward Councillor Candidates 2026 — All 4 485 Wards"
+    candidate_domain: "electai.co.za"
+    url: "https://www.electai.co.za/councillors-in-my-ward"
+    format: "json"
+    tier: "tier3_media"
+    republication_of: "iec_ward_candidates"
+    licence_note: "robots.txt: ai-input=yes; data sourced from IEC certified list 16 Sep 2026"
+    default_chamber: "local"
+    verified: true
+    robots_ok: true
+    verified_by: "Lucky Sandleni"
+    verified_at: "2026-11-27"
+    first_fetch_sha256: "571238d7c871bbf7893d5344b8fada3a18617402edb3ba3c7a14994598f34a18"
+    rate_limit_rps: 0.5
+    contact_email: luckynyambi@gmail.com
+    notes: >
+      Parser fetches all 4 485 ward endpoints (/api/ward/{id}?v=1.48.0) using
+      async httpx (8 concurrent workers). The SHA gates on the main page HTML;
+      a site redeploy will bump the SHA and trigger a re-ingest. Ward IDs are
+      IEC 8-digit codes derived from 213 muni prefixes in the layout JS bundle.
+      Emits MPSeed(chamber='local') for every 2026 candidate plus the 2021
+      election winner (portfolio='Sitting Councillor (2021)') per ward.
+
   - id: "jhb_councillors"
     publisher: "City of Johannesburg"
     title: "JHB Councillors Contact Details PR-Ward and Region"
