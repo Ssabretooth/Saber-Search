@@ -23,7 +23,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <TooltipProvider>
             <div className="flex min-h-screen">
               <SidebarNav />
-              <main className="flex-1 overflow-y-auto px-6 py-6 sm:px-10">
+              <main className="flex-1 overflow-y-auto px-4 py-6 sm:px-8 pb-20 md:pb-6">
                 {children}
               </main>
             </div>
