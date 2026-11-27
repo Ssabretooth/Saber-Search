@@ -39,7 +39,7 @@ export default function HomePage() {
   const { user, profile, loading } = useAuth();
 
   return (
-    <div className="max-w-4xl">
+    <div className="flex min-h-[calc(100vh-3rem)] max-w-4xl flex-col">
       {/* Welcome */}
       <div className="mb-10">
         <h1 className="mb-3 text-2xl font-bold tracking-tight text-slate-900">
@@ -102,8 +102,8 @@ export default function HomePage() {
         </>
       )}
 
-      {/* Footer */}
-      <footer className="mt-16 border-t border-stone-200 pt-6">
+      {/* Footer — pinned to bottom */}
+      <footer className="mt-auto border-t border-stone-200 pt-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <p className="text-xs font-medium text-slate-700">PublikEye</p>
