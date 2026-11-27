@@ -1,25 +1,62 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { UserCircle, ChevronDown } from "lucide-react";
 import { MpPublic, MunicipalityPublic } from "@/lib/types/database";
 import { PartyBadge } from "@/components/PartyBadge";
 import { LocalGovernment } from "./LocalGovernment";
 
+const PAGE = 1000;
+
 export function MembersDirectory({
-  mps,
+  naMps,
+  ncopMps,
+  localCount,
   municipalities,
 }: {
-  mps: MpPublic[];
+  naMps: MpPublic[];
+  ncopMps: MpPublic[];
+  localCount: number;
   municipalities: MunicipalityPublic[];
 }) {
   const [chamber, setChamber] = useState<"na" | "ncop" | "local" | null>(null);
   const [openGroups, setOpenGroups] = useState<Set<string>>(new Set());
 
-  const naMps = mps.filter((m) => m.chamber === "na");
-  const ncopMps = mps.filter((m) => m.chamber === "ncop");
-  const localMps = mps.filter((m) => m.chamber === "local");
+  // Local councillors are fetched on demand to avoid loading 100k rows upfront
+  const [localMps, setLocalMps] = useState<MpPublic[]>([]);
+  const [localLoading, setLocalLoading] = useState(false);
+
+  useEffect(() => {
+    if (chamber !== "local" || localMps.length > 0) return;
+    setLocalLoading(true);
+
+    async function fetchAll() {
+      const { createClient } = await import("@supabase/supabase-js");
+      const sb = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      );
+      const rows: MpPublic[] = [];
+      let offset = 0;
+      while (true) {
+        const { data, error } = await sb
+          .from("v_mps_public")
+          .select("*")
+          .eq("chamber", "local")
+          .order("full_name")
+          .range(offset, offset + PAGE - 1);
+        if (error || !data?.length) break;
+        rows.push(...(data as MpPublic[]));
+        if (data.length < PAGE) break;
+        offset += PAGE;
+      }
+      setLocalMps(rows);
+      setLocalLoading(false);
+    }
+
+    fetchAll();
+  }, [chamber, localMps.length]);
 
   const naGrouped = naMps.reduce((acc, mp) => {
     const party = mp.party || "Unknown / Independent";
@@ -38,18 +75,18 @@ export function MembersDirectory({
       <div className="grid md:grid-cols-3 gap-6">
         <div className="cursor-pointer border rounded-xl p-6 bg-white shadow-sm hover:border-green-500 transition-colors" onClick={() => setChamber("na")}>
           <h2 className="text-2xl font-semibold mb-2">National Assembly</h2>
-          <p className="text-4xl font-bold text-green-700">{naMps.length}</p>
+          <p className="text-4xl font-bold text-green-700">{naMps.length.toLocaleString()}</p>
           <p className="text-sm text-gray-500 mt-1">Main legislative chamber</p>
         </div>
         <div className="cursor-pointer border rounded-xl p-6 bg-white shadow-sm hover:border-green-500 transition-colors" onClick={() => setChamber("ncop")}>
           <h2 className="text-2xl font-semibold mb-2">National Council of Provinces</h2>
-          <p className="text-4xl font-bold text-green-700">{ncopMps.length}</p>
+          <p className="text-4xl font-bold text-green-700">{ncopMps.length.toLocaleString()}</p>
           <p className="text-sm text-gray-500 mt-1">Provincial representation</p>
         </div>
         <div className="cursor-pointer border rounded-xl p-6 bg-white shadow-sm hover:border-green-500 transition-colors" onClick={() => setChamber("local")}>
           <h2 className="text-2xl font-semibold mb-2">Local Government</h2>
-          <p className="text-4xl font-bold text-green-700">{localMps.length}</p>
-          <p className="text-sm text-gray-500 mt-1">Mayors & Councilors</p>
+          <p className="text-4xl font-bold text-green-700">{localCount.toLocaleString()}</p>
+          <p className="text-sm text-gray-500 mt-1">Mayors & Councillors</p>
         </div>
       </div>
     );
@@ -62,7 +99,11 @@ export function MembersDirectory({
           ← Back to Chambers
         </button>
         <h2 className="text-2xl font-bold border-l-4 border-green-700 pl-3">Local Government</h2>
-        <LocalGovernment municipalities={municipalities} councillors={localMps} />
+        {localLoading ? (
+          <p className="text-sm text-gray-400">Loading {localCount.toLocaleString()} councillors…</p>
+        ) : (
+          <LocalGovernment municipalities={municipalities} councillors={localMps} />
+        )}
       </div>
     );
   }
