@@ -10,8 +10,8 @@ export default async function MembersPage() {
   // Query NA and NCOP fully (small enough); get local count separately
   // to avoid hitting Supabase's default 1 000-row limit on a 100k+ table.
   const [naRes, ncopRes, localCountRes, munisRes] = await Promise.all([
-    supabase.from("v_mps_public").select("*").eq("chamber", "na").order("full_name"),
-    supabase.from("v_mps_public").select("*").eq("chamber", "ncop").order("full_name"),
+    supabase.from("v_mps_public").select("*").eq("chamber", "na").not("term_start", "is", null).order("full_name"),
+    supabase.from("v_mps_public").select("*").eq("chamber", "ncop").not("term_start", "is", null).order("full_name"),
     supabase.from("v_mps_public").select("id", { count: "exact", head: true }).eq("chamber", "local"),
     supabase.from("v_municipalities_public").select("*").order("province").order("name"),
   ]);
