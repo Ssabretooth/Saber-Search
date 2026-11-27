@@ -7,6 +7,9 @@ const webRoot = path.dirname(fileURLToPath(import.meta.url));
 const nextConfig = {
   reactStrictMode: true,
   turbopack: { root: webRoot },
+  experimental: {
+    agentUpgrade: "security",
+  },
 };
 
 export default nextConfig;
