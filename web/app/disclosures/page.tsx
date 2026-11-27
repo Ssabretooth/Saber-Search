@@ -77,7 +77,7 @@ const ALLIANCES: Alliance[] = [
     },
   },
   {
-    key: "unknown", label: "Unknown / Independent", abbr: "?",
+    key: "unknown", label: "Unknown Alliance / Independent", abbr: "Unknown Alliance",
     accent: "text-zinc-600", bg: "bg-zinc-50", border: "border-zinc-200",
     match: (p) => !p,
   },
@@ -215,11 +215,12 @@ export default async function DisclosuresPage({
           <p className="text-center text-slate-400 py-16 text-sm">No disclosures found.</p>
         )}
 
-        {byAlliance.map(({ alliance, groups: allianceGroups }) => (
-          <section key={alliance.key}>
-            {/* Alliance banner */}
-            <div className={`flex items-center justify-between px-4 py-2.5 rounded-xl ${alliance.bg} border ${alliance.border} mb-3`}>
+        {byAlliance.map(({ alliance, groups: allianceGroups }, idx) => (
+          <details key={alliance.key} open={idx === 0} className="group">
+            {/* Alliance banner — acts as the toggle */}
+            <summary className={`flex items-center justify-between px-4 py-2.5 rounded-xl ${alliance.bg} border ${alliance.border} cursor-pointer list-none select-none`}>
               <div className="flex items-center gap-2">
+                <span className={`text-[11px] transition-transform group-open:rotate-90 mr-0.5 ${alliance.accent} opacity-50`}>▶</span>
                 <span className={`text-xs font-black uppercase tracking-widest ${alliance.accent}`}>
                   {alliance.abbr}
                 </span>
@@ -230,15 +231,15 @@ export default async function DisclosuresPage({
               <span className={`text-xs font-semibold ${alliance.accent} opacity-60`}>
                 {allianceGroups.length} member{allianceGroups.length !== 1 ? "s" : ""}
               </span>
-            </div>
+            </summary>
 
             {/* MP cards */}
-            <div className="space-y-3">
+            <div className="mt-3 space-y-3">
               {allianceGroups.map(({ mp, disclosures: rows, totalValue: mpTotal }) => (
                 <MPCard key={mp.id} mp={mp} rows={rows} totalValue={mpTotal} />
               ))}
             </div>
-          </section>
+          </details>
         ))}
       </div>
 
