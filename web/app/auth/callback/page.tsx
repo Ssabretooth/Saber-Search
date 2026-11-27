@@ -16,7 +16,7 @@ export default function AuthCallbackPage() {
   }, []);
 
   useEffect(() => {
-    if (!loading && user) router.replace('/profile');
+    if (!loading && user) router.replace('/');
   }, [loading, user, router]);
 
   if (loading || user) {
