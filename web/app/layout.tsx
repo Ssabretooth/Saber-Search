@@ -4,6 +4,7 @@ import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/lib/auth-context";
+import { GlobalBackNav } from "@/components/global-back-nav";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
@@ -20,7 +21,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body className="bg-[#FAFAF7] text-slate-900 antialiased">
         <AuthProvider>
           <TooltipProvider>
-            <main className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6">{children}</main>
+            <main className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6">
+                <GlobalBackNav />
+                {children}
+              </main>
           </TooltipProvider>
         </AuthProvider>
         <Analytics />
