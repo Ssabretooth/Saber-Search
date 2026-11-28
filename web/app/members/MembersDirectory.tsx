@@ -86,9 +86,9 @@ export function MembersDirectory({
         <div className="cursor-pointer border rounded-xl p-6 bg-white shadow-sm hover:border-green-500 transition-colors" onClick={() => setChamber("local")}>
           <h2 className="text-2xl font-semibold mb-2">Local Government</h2>
           <p className="text-4xl font-bold text-green-700">{localCount.toLocaleString()}</p>
-          <p className="text-sm text-gray-500 mt-1">Confirmed councillors</p>
-          <p className="text-xs text-amber-600 mt-2 bg-amber-50 rounded px-2 py-1">
-            ~10 926 total seats (IEC 2021) · ingestion in progress
+          <p className="text-sm text-gray-500 mt-1">2026 LGE ward councillors</p>
+          <p className="text-xs text-green-700 mt-2 bg-green-50 rounded px-2 py-1">
+            4 432 ward winners · 268 metro councillors · 2026 election
           </p>
         </div>
       </div>
