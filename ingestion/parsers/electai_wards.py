@@ -31,8 +31,9 @@ log = logging.getLogger("publikeye.ingestion")
 
 API_VERSION = "1.48.0"
 BASE_URL = "https://www.electai.co.za"
-CONCURRENCY = 8
-REQUEST_TIMEOUT = 15
+CONCURRENCY = 30   # max simultaneous in-flight requests
+REQUEST_TIMEOUT = 20
+_WARD_RETRIES = 3
 
 # 213 municipality prefixes → IEC demarcation code, extracted from ElectAI layout bundle.
 # robots.txt: ai-input=yes
@@ -116,20 +117,61 @@ async def _fetch_ward(
     sem: asyncio.Semaphore,
     ward_id: str,
 ) -> dict | None:
+    """Fetch a single ward, retrying on transient failures. Returns None on 404 or exhausted retries."""
     url = f"{BASE_URL}/api/ward/{ward_id}?v={API_VERSION}"
     async with sem:
-        try:
-            r = await client.get(url, timeout=REQUEST_TIMEOUT)
-            if r.status_code == 404:
+        for attempt in range(_WARD_RETRIES):
+            try:
+                r = await client.get(url, timeout=REQUEST_TIMEOUT)
+                if r.status_code == 404:
+                    return None
+                if r.status_code == 429 or r.status_code >= 500:
+                    if attempt < _WARD_RETRIES - 1:
+                        await asyncio.sleep(2 ** attempt)
+                        continue
+                    log.warning("ward %s: HTTP %s after %d attempts", ward_id, r.status_code, _WARD_RETRIES)
+                    return None
+                r.raise_for_status()
+                return r.json()
+            except (httpx.TimeoutException, httpx.NetworkError) as exc:
+                if attempt < _WARD_RETRIES - 1:
+                    await asyncio.sleep(2 ** attempt)
+                    continue
+                log.warning("ward %s: network error after %d attempts: %s", ward_id, _WARD_RETRIES, exc)
                 return None
-            r.raise_for_status()
-            return r.json()
-        except Exception as exc:
-            log.debug("ward %s fetch error: %s", ward_id, exc)
-            return None
+            except Exception as exc:
+                log.debug("ward %s: unexpected error: %s", ward_id, exc)
+                return None
+    return None
+
+
+async def _fetch_muni(
+    client: httpx.AsyncClient,
+    sem: asyncio.Semaphore,
+    prefix: str,
+    dem_code: str,
+) -> tuple[str, str, list[tuple[str, dict]]]:
+    """Probe all wards for one municipality; stop after 3 consecutive misses."""
+    ward_no = 1
+    consecutive_misses = 0
+    results: list[tuple[str, dict]] = []
+
+    while ward_no <= 200 and consecutive_misses < 3:
+        ward_id = f"{prefix}{ward_no:03d}"
+        data = await _fetch_ward(client, sem, ward_id)
+        if data is None:
+            consecutive_misses += 1
+        else:
+            consecutive_misses = 0
+            results.append((ward_id, data))
+        ward_no += 1
+
+    log.info("muni %s (%s): %d wards found", dem_code, prefix, len(results))
+    return prefix, dem_code, results
 
 
 async def _fetch_all() -> tuple[list[MPSeed], list[MunicipalitySeed]]:
+    """Fetch all wards across all municipalities CONCURRENTLY."""
     sem = asyncio.Semaphore(CONCURRENCY)
     headers = {
         "User-Agent": "PublikEye/1.0 (transparency research; ai-input=yes per robots.txt)",
@@ -140,71 +182,66 @@ async def _fetch_all() -> tuple[list[MPSeed], list[MunicipalitySeed]]:
     munis_seen: dict[str, MunicipalitySeed] = {}
 
     async with httpx.AsyncClient(headers=headers, follow_redirects=True) as client:
-        for prefix, dem_code in MUNI_PREFIXES.items():
-            # Probe wards 1..200; stop at first consecutive 404 after at least one hit
-            ward_no = 1
-            consecutive_misses = 0
-            ward_results: list[dict] = []
+        # Run all 213 municipalities concurrently — semaphore caps in-flight requests
+        tasks = [
+            _fetch_muni(client, sem, prefix, dem_code)
+            for prefix, dem_code in MUNI_PREFIXES.items()
+        ]
+        all_results = await asyncio.gather(*tasks, return_exceptions=True)
 
-            while ward_no <= 200 and consecutive_misses < 2:
-                ward_id = f"{prefix}{ward_no:03d}"
-                data = await _fetch_ward(client, sem, ward_id)
-                if data is None:
-                    consecutive_misses += 1
-                else:
-                    consecutive_misses = 0
-                    ward_results.append((ward_id, data))
-                ward_no += 1
+    for item in all_results:
+        if isinstance(item, Exception):
+            log.warning("municipality fetch raised: %s", item)
+            continue
 
-            log.info("muni %s (%s): %d wards", dem_code, prefix, len(ward_results))
+        prefix, dem_code, ward_results = item
 
-            for ward_id, data in ward_results:
-                muni_data = data.get("municipality") or {}
-                muni_code = muni_data.get("code") or dem_code
-                muni_name = muni_data.get("name") or ""
-                province = muni_data.get("province") or _province(prefix) or ""
-                ward_no_str = str((data.get("ward") or {}).get("no", ""))
+        for ward_id, data in ward_results:
+            muni_data = data.get("municipality") or {}
+            muni_code = muni_data.get("code") or dem_code
+            muni_name = muni_data.get("name") or ""
+            province = muni_data.get("province") or _province(prefix) or ""
+            ward_no_str = str((data.get("ward") or {}).get("no", ""))
 
-                # Emit municipality seed once per code
-                if muni_code and muni_code not in munis_seen:
-                    munis_seen[muni_code] = MunicipalitySeed(
-                        demarcation_code=muni_code,
-                        name=muni_name or muni_code,
-                        province=province or None,
-                    )
+            if muni_code and muni_code not in munis_seen:
+                munis_seen[muni_code] = MunicipalitySeed(
+                    demarcation_code=muni_code,
+                    name=muni_name or muni_code,
+                    province=province or None,
+                )
 
-                constituency = f"{muni_name} Ward {ward_no_str}" if ward_no_str else muni_name
+            constituency = f"{muni_name} Ward {ward_no_str}" if ward_no_str else muni_name
 
-                # 2026 ward candidates
-                for cand in data.get("candidates") or []:
-                    name = (cand.get("name") or "").strip()
-                    party = (cand.get("partyName") or cand.get("party") or "").strip() or None
-                    if not name or len(name) < 2:
-                        continue
+            # 2026 ward candidates
+            for cand in data.get("candidates") or []:
+                name = (cand.get("name") or "").strip()
+                party = (cand.get("partyName") or cand.get("party") or "").strip() or None
+                if not name or len(name) < 2:
+                    continue
+                mps.append(MPSeed(
+                    full_name=name,
+                    chamber="local",
+                    government_level="local",
+                    party=party,
+                    constituency=constituency,
+                ))
+
+            # 2021 election winner (sitting councillor until results certified)
+            history = data.get("history") or {}
+            predecessors = history.get("predecessors") or []
+            if predecessors:
+                winner = predecessors[0]
+                w_name = (winner.get("name") or "").strip()
+                w_party = (winner.get("party") or "").strip() or None
+                if w_name and len(w_name) >= 2:
                     mps.append(MPSeed(
-                        full_name=name,
+                        full_name=w_name,
                         chamber="local",
                         government_level="local",
-                        party=party,
+                        party=w_party,
                         constituency=constituency,
+                        portfolio="Sitting Councillor (2021)",
                     ))
-
-                # 2021 election winner (sitting councillor until results certified)
-                history = data.get("history") or {}
-                predecessors = history.get("predecessors") or []
-                if predecessors:
-                    winner = predecessors[0]
-                    w_name = (winner.get("name") or "").strip()
-                    w_party = (winner.get("party") or "").strip() or None
-                    if w_name and len(w_name) >= 2:
-                        mps.append(MPSeed(
-                            full_name=w_name,
-                            chamber="local",
-                            government_level="local",
-                            party=w_party,
-                            constituency=constituency,
-                            portfolio="Sitting Councillor (2021)",
-                        ))
 
     return mps, list(munis_seen.values())
 
