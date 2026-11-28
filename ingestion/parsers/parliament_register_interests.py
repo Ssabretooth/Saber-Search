@@ -9,14 +9,17 @@ are skipped — they contain exact residential addresses.
 """
 
 import io
+import logging
 import re
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 
 from pypdf import PdfReader
 
 from ..errors import ParserSpecGap
 from ..models import DisclosureRow, MPSeed, ParsedDocument
 from .base import PARSER_VERSION_PREFIX, BaseParser
+
+log = logging.getLogger("publikeye.ingestion")
 
 # (section_start_prefix_upper, category, [col0_role, col1_role, col2_role, col3_role])
 # roles: 'counterparty' | 'description' | 'value' | None (discard)
@@ -64,7 +67,7 @@ def _extract_zar(text: str) -> Decimal | None:
     try:
         d = Decimal(clean)
         return d if d <= _ZAR_MAX else None
-    except Exception:
+    except (InvalidOperation, ValueError, ArithmeticError):
         return None
 
 
@@ -76,7 +79,7 @@ def _extract_zar_from_number(text: str) -> Decimal | None:
         try:
             d = Decimal(clean)
             return d if 0 < d <= _ZAR_MAX else None
-        except Exception:
+        except (InvalidOperation, ValueError, ArithmeticError):
             pass
     return None
 
@@ -130,10 +133,11 @@ class ParliamentRegisterInterestsParser(BaseParser):
         try:
             reader = PdfReader(io.BytesIO(content))
             pages = []
-            for page in reader.pages:
+            for page_no, page in enumerate(reader.pages):
                 try:
                     pages.append(page.extract_text(extraction_mode="layout") or "")
-                except Exception:
+                except Exception as exc:
+                    log.debug("register: layout extraction failed on page %d, falling back: %s", page_no, exc)
                     pages.append(page.extract_text() or "")
             full_text = "\n".join(pages)
         except Exception as e:

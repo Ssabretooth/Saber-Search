@@ -1,9 +1,12 @@
 import json
+import logging
 from datetime import datetime
 from decimal import Decimal
 from ..errors import ParserSpecGap
 from ..models import ParsedDocument, TenderRow
 from .base import PARSER_VERSION_PREFIX, BaseParser
+
+log = logging.getLogger("publikeye.ingestion")
 
 
 class TreasuryEtendersParser(BaseParser):
@@ -19,8 +22,11 @@ class TreasuryEtendersParser(BaseParser):
         except Exception as e:
             raise ParserSpecGap(f"Invalid JSON: {e}")
 
+        releases = data.get("Releases") or data.get("releases") or []
         tenders = []
-        for r in data.get("Releases") or data.get("releases") or []:
+        skipped = 0
+        for r in releases:
+            ocid = r.get("ocid", "<no-ocid>")
             try:
                 awards = r.get("awards", [])
                 if not awards or not awards[0].get("suppliers"):
@@ -39,7 +45,7 @@ class TreasuryEtendersParser(BaseParser):
                     try:
                         award_date = datetime.fromisoformat(award_date_str.replace("Z", "+00:00")).date()
                     except ValueError:
-                        pass
+                        log.debug("etenders: unparseable date %r on ocid=%s", award_date_str, ocid)
 
                 tenders.append(TenderRow(
                     ocid=r["ocid"],
@@ -49,7 +55,12 @@ class TreasuryEtendersParser(BaseParser):
                     amount_zar=Decimal(str(amount)) if amount is not None else None,
                     award_date=award_date,
                 ))
-            except Exception:
+            except Exception as exc:
+                skipped += 1
+                log.warning("etenders: skipping record ocid=%s — %s: %s", ocid, type(exc).__name__, exc)
                 continue
+
+        if skipped:
+            log.warning("etenders: skipped %d/%d records due to parse errors", skipped, len(releases))
 
         return ParsedDocument(source_id=self.source_id, tenders=tenders)
