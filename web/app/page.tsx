@@ -1,8 +1,61 @@
 "use client";
 
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { Users, FileText, Search, AlertCircle } from "lucide-react";
+import { Users, FileText, Search, AlertCircle, Loader2, UserCircle } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
+import { createClient } from "@supabase/supabase-js";
+
+const CHAMBER_LABEL: Record<string, string> = {
+  na:    "National Assembly",
+  ncop:  "NCOP",
+  local: "Local Government",
+};
+const CHAMBER_COLOR: Record<string, string> = {
+  na:    "bg-teal-50 text-teal-700",
+  ncop:  "bg-blue-50 text-blue-700",
+  local: "bg-amber-50 text-amber-700",
+};
+
+type MpResult = {
+  id: string;
+  full_name: string;
+  known_as: string | null;
+  party: string | null;
+  constituency: string | null;
+  chamber: string;
+  portfolio: string | null;
+};
+
+function useGlobalSearch(query: string) {
+  const [results, setResults] = useState<MpResult[]>([]);
+  const [loading, setLoading] = useState(false);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const q = query.trim();
+    if (q.length < 2) { setResults([]); setLoading(false); return; }
+    setLoading(true);
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = setTimeout(async () => {
+      const sb = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      );
+      const { data } = await sb
+        .from("v_mps_public")
+        .select("id, full_name, known_as, party, constituency, chamber, portfolio")
+        .or(`full_name.ilike.%${q}%,party.ilike.%${q}%,constituency.ilike.%${q}%,known_as.ilike.%${q}%`)
+        .order("full_name")
+        .limit(12);
+      setResults((data as MpResult[]) ?? []);
+      setLoading(false);
+    }, 300);
+    return () => { if (timer.current) clearTimeout(timer.current); };
+  }, [query]);
+
+  return { results, loading };
+}
 
 const categories = [
   {
@@ -37,6 +90,9 @@ const categories = [
 
 export default function HomePage() {
   const { user, profile, loading } = useAuth();
+  const [search, setSearch] = useState("");
+  const { results, loading: searching } = useGlobalSearch(search);
+  const q = search.trim();
 
   return (
     <div className="flex min-h-[calc(100vh-3rem)] max-w-4xl flex-col">
@@ -67,6 +123,53 @@ export default function HomePage() {
             >
               Sign in
             </Link>
+          </div>
+        )}
+      </div>
+
+      {/* Global search */}
+      <div className="mb-8">
+        <div className="relative">
+          {searching
+            ? <Loader2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 animate-spin" />
+            : <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          }
+          <input
+            type="search"
+            placeholder="Search any MP, councillor, party, constituency…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full pl-9 pr-4 py-3 text-sm bg-white border border-stone-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 shadow-sm"
+          />
+        </div>
+
+        {q.length >= 2 && (
+          <div className="mt-2 bg-white border border-stone-200 rounded-xl shadow-lg overflow-hidden">
+            {results.length === 0 && !searching && (
+              <div className="px-4 py-6 text-center text-sm text-slate-400">
+                No members match &ldquo;{q}&rdquo;
+              </div>
+            )}
+            {results.map((mp) => (
+              <Link
+                key={mp.id}
+                href={`/mps/${mp.id}`}
+                className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 border-b border-stone-100 last:border-0 transition-colors group"
+              >
+                <UserCircle className="w-7 h-7 text-slate-300 shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-slate-900 group-hover:text-teal-700 truncate">
+                    {mp.known_as ?? mp.full_name}
+                  </p>
+                  <p className="text-xs text-slate-500 truncate">
+                    {[mp.party, mp.constituency].filter(Boolean).join(" · ")}
+                  </p>
+                </div>
+                <span className={`shrink-0 text-[10px] font-semibold px-2 py-0.5 rounded-full ${CHAMBER_COLOR[mp.chamber] ?? "bg-slate-100 text-slate-600"}`}>
+                  {CHAMBER_LABEL[mp.chamber] ?? mp.chamber}
+                </span>
+              </Link>
+            ))}
           </div>
         )}
       </div>
