@@ -1,9 +1,6 @@
 import { notFound } from "next/navigation";
-import { AlertTriangle, ExternalLink, MapPin, Building2 } from "lucide-react";
+import { ExternalLink, MapPin, Building2 } from "lucide-react";
 import { getSupabase } from "@/lib/supabase";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { FlagBadge } from "@/components/FlagBadge";
-import { PartyBadge } from "@/components/PartyBadge";
 import { SourceCitation } from "@/components/SourceCitation";
 import { DisclosuresTable } from "@/components/DisclosuresTable";
 import type {
@@ -12,6 +9,7 @@ import type {
   MpPublic,
   SourceDocument,
 } from "@/lib/types/database";
+import type { FlagType } from "@/lib/types/flags";
 
 export const dynamic = "force-dynamic";
 
@@ -83,129 +81,267 @@ export default async function MPProfilePage({ params }: { params: Promise<{ id: 
 
   const profile: MpPublic = mpProfile;
 
+  const accent = partyAccent(profile.party);
+  const chamberLabel = CHAMBER_LABEL[profile.chamber] ?? profile.chamber.toUpperCase();
+  const totalDeclared = disclosures.reduce((s, d) => s + (d.value_zar ? Number(d.value_zar) : 0), 0);
+
   return (
-    <main className="container mx-auto max-w-5xl space-y-8 px-4 py-10">
-      <Alert className="border-amber-200 bg-amber-50 text-amber-900">
-        <AlertTriangle className="h-4 w-4 text-amber-600" />
-        <AlertTitle className="font-semibold">Audit Notice</AlertTitle>
-        <AlertDescription>
-          Figures are reproduced from official public records. Flags are statistical or documentary
-          observations, not findings of wrongdoing.
-        </AlertDescription>
-      </Alert>
+    <div>
+      {/* ── Hero ─────────────────────────────────────────────────────────── */}
+      <div className="-mx-4 sm:-mx-8 -mt-6 mb-8 relative overflow-hidden bg-slate-900">
+        {/* party colour bar */}
+        <div className="absolute inset-y-0 left-0 w-[3px]" style={{ background: accent }} />
 
-      <header className="space-y-3 border-b pb-6">
-        <div className="flex flex-wrap items-center gap-3">
-          <h1 className="text-3xl font-bold tracking-tight">{profile.known_as ?? profile.full_name}</h1>
-          <PartyBadge party={profile.party} />
-        </div>
+        <div className="max-w-5xl mx-auto pl-8 pr-6 pt-7 pb-8">
+          {/* party + chamber row */}
+          <div className="flex items-center justify-between mb-3">
+            <span
+              className="text-[11px] font-black uppercase tracking-widest"
+              style={{ color: accent }}
+            >
+              {profile.party ?? "Independent"}
+            </span>
+            <span className="text-[11px] font-semibold uppercase tracking-widest text-slate-500">
+              {chamberLabel}
+            </span>
+          </div>
 
-        {/* Local councillor: show ward + municipality prominently */}
-        {profile.chamber === "local" && localData && (
-          <div className="flex flex-wrap gap-3">
-            {localData.ward_no != null && (
-              <div className="inline-flex items-center gap-1.5 rounded-lg bg-amber-50 border border-amber-200 px-3 py-1.5">
-                <MapPin className="h-3.5 w-3.5 text-amber-600 shrink-0" />
-                <span className="text-sm font-semibold text-amber-800">Ward {localData.ward_no}</span>
-              </div>
-            )}
-            {localData.municipality_name && (
-              <div className="inline-flex items-center gap-1.5 rounded-lg bg-teal-50 border border-teal-200 px-3 py-1.5">
-                <Building2 className="h-3.5 w-3.5 text-teal-600 shrink-0" />
-                <span className="text-sm font-semibold text-teal-800">{localData.municipality_name}</span>
-                {localData.province && (
-                  <span className="text-xs text-teal-600 opacity-70">· {localData.province}</span>
+          {/* name */}
+          <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-white leading-tight mb-1">
+            {profile.full_name}
+          </h1>
+          {profile.known_as && profile.known_as !== profile.full_name && (
+            <p className="text-slate-400 text-sm mb-4">
+              Known as &ldquo;{profile.known_as}&rdquo;
+            </p>
+          )}
+
+          {/* location / role metadata */}
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mt-4 text-sm text-slate-300">
+            {profile.chamber === "local" && localData ? (
+              <>
+                {localData.ward_no != null && (
+                  <span className="flex items-center gap-1.5">
+                    <MapPin className="h-3.5 w-3.5 text-slate-500 shrink-0" />
+                    <span className="font-semibold text-white">Ward {localData.ward_no}</span>
+                  </span>
                 )}
-              </div>
+                {localData.municipality_name && (
+                  <span className="flex items-center gap-1.5">
+                    <Building2 className="h-3.5 w-3.5 text-slate-500 shrink-0" />
+                    <span>{localData.municipality_name}</span>
+                    {localData.province && (
+                      <span className="text-slate-500">· {localData.province}</span>
+                    )}
+                  </span>
+                )}
+                {localData.muni_code && (
+                  <span className="text-slate-600 font-mono text-xs">{localData.muni_code}</span>
+                )}
+              </>
+            ) : (
+              <>
+                {profile.constituency && <span>{profile.constituency}</span>}
+              </>
+            )}
+            {profile.portfolio && (
+              <span className="text-slate-400">{profile.portfolio}</span>
             )}
           </div>
-        )}
 
-        <div className="flex flex-wrap gap-4 text-sm text-gray-500">
-          {profile.chamber === "local"
-            ? (
-              <>
-                {localData?.muni_code && <span>Code: {localData.muni_code}</span>}
-                {profile.portfolio && <span>• {profile.portfolio}</span>}
-                <span>• Local Government</span>
-              </>
-            )
-            : (
-              <>
-                {profile.constituency && <span>• {profile.constituency}</span>}
-                {profile.portfolio && <span>• {profile.portfolio}</span>}
-                <span>• Chamber: {profile.chamber.toUpperCase()}</span>
-              </>
-            )
-          }
-        </div>
-
-        {profile.official_profile_url && (
-          <a
-            href={profile.official_profile_url}
-            target="_blank"
-            rel="noreferrer"
-            className="flex items-center gap-1 text-sm text-blue-600 hover:underline"
-          >
-            Official Parliament Profile <ExternalLink className="h-3 w-3" />
-          </a>
-        )}
-      </header>
-
-      <section className="space-y-4">
-        <h2 className="flex items-center gap-2 text-xl font-semibold tracking-tight">
-          Follow the Tender
-          {procurementFlags.length > 0 && (
-            <span className="rounded-full bg-red-100 px-2 py-1 text-xs text-red-800">
-              {procurementFlags.length}
-            </span>
+          {/* official profile link */}
+          {profile.official_profile_url && (
+            <a
+              href={profile.official_profile_url}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-5 inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-300 transition-colors"
+            >
+              Official Parliament Profile
+              <ExternalLink className="h-3 w-3" />
+            </a>
           )}
-        </h2>
-        {procurementFlags.length > 0 ? (
-          <ul className="flex flex-col gap-3">
-            {withSource(procurementFlags).map((f) => (
-              <li key={f.id} className="flex flex-col gap-2 rounded-md border border-red-200 bg-white p-4 shadow-sm">
-                <div className="flex items-center justify-between">
-                  <FlagBadge flagType={f.flag_type} />
-                  <SourceCitation source={f.source} />
-                </div>
-                <p className="text-sm font-medium text-gray-900">{f.public_text}</p>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="rounded-md border border-dashed bg-gray-50 p-4 text-sm text-gray-500">
-            No procurement relationships detected for this Member.
-          </p>
-        )}
-      </section>
+        </div>
+      </div>
 
-      <section className="space-y-4">
-        <h2 className="text-xl font-semibold tracking-tight">Other Flags</h2>
-        {otherFlags.length > 0 ? (
-          <ul className="flex flex-col gap-3">
-            {withSource(otherFlags).map((f) => (
-              <li
-                key={f.id}
-                className="flex items-center gap-3 rounded-md border bg-white p-3 shadow-sm"
-              >
-                <FlagBadge flagType={f.flag_type} />
-                <span className="flex-1 text-sm text-gray-600">{f.public_text}</span>
-                <SourceCitation source={f.source} />
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="rounded-md border border-dashed bg-gray-50 p-4 text-sm text-gray-500">
-            No other flags detected for this Member.
-          </p>
+      {/* ── Stat strip ───────────────────────────────────────────────────── */}
+      <div className="max-w-5xl -mx-4 sm:-mx-8 px-6 sm:px-10 mb-8 flex flex-wrap gap-6 text-sm border-b border-slate-100 pb-5">
+        <StatPill value={flags.length} label={flags.length === 1 ? "flag" : "flags"} highlight={flags.length > 0} />
+        <StatPill value={disclosures.length} label={disclosures.length === 1 ? "disclosure" : "disclosures"} />
+        {totalDeclared > 0 && (
+          <StatPill
+            value={`R${(totalDeclared / 1_000_000).toFixed(1)}M`}
+            label="declared"
+          />
         )}
-      </section>
+      </div>
 
-      <section className="space-y-4">
-        <h2 className="text-xl font-semibold tracking-tight">Financial Disclosures</h2>
-        <DisclosuresTable rows={withSource(disclosures)} />
-      </section>
-    </main>
+      {/* ── Content ──────────────────────────────────────────────────────── */}
+      <div className="max-w-5xl space-y-10">
+
+        {/* Procurement Connections */}
+        <section>
+          <SectionHeader label="Procurement Connections" count={procurementFlags.length} countColor="text-red-600" />
+          {procurementFlags.length > 0 ? (
+            <ul className="flex flex-col gap-3 mt-5">
+              {withSource(procurementFlags).map((f) => (
+                <li
+                  key={f.id}
+                  className="relative border-l-[3px] border-red-500 bg-white rounded-r-xl shadow-sm px-5 py-4"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-red-600 mb-1.5">
+                        {flagLabel(f.flag_type)}
+                      </p>
+                      <p className="text-sm text-slate-800 leading-relaxed">{f.public_text}</p>
+                    </div>
+                    <div className="flex-shrink-0 mt-0.5">
+                      <SourceCitation source={f.source} />
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="mt-5 text-sm text-slate-400 italic">
+              No procurement relationships detected.
+            </p>
+          )}
+        </section>
+
+        {/* Flags & Observations */}
+        <section>
+          <SectionHeader label="Flags & Observations" count={otherFlags.length} countColor="text-amber-600" />
+          {otherFlags.length > 0 ? (
+            <ul className="mt-5 divide-y divide-slate-100 border border-slate-100 rounded-xl bg-white shadow-sm overflow-hidden">
+              {withSource(otherFlags).map((f) => {
+                const { severity } = flagMeta(f.flag_type);
+                const dot =
+                  severity === "high" ? "bg-red-500" :
+                  severity === "medium" ? "bg-amber-400" : "bg-slate-300";
+                return (
+                  <li key={f.id} className="flex items-start gap-4 px-5 py-3.5">
+                    <span className={`mt-1.5 w-2 h-2 rounded-full flex-shrink-0 ${dot}`} />
+                    <div className="flex-1 min-w-0 space-y-0.5">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                        {flagLabel(f.flag_type)}
+                      </p>
+                      <p className="text-sm text-slate-700 leading-snug">{f.public_text}</p>
+                    </div>
+                    <div className="flex-shrink-0 mt-0.5">
+                      <SourceCitation source={f.source} />
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          ) : (
+            <p className="mt-5 text-sm text-slate-400 italic">
+              No other flags on record.
+            </p>
+          )}
+        </section>
+
+        {/* Register of Interests */}
+        <section>
+          <SectionHeader label="Register of Interests" count={disclosures.length} />
+          <div className="mt-5">
+            <DisclosuresTable rows={withSource(disclosures)} />
+          </div>
+        </section>
+
+        {/* Disclaimer */}
+        <p className="text-[11px] text-slate-400 leading-relaxed pb-4 border-t border-slate-100 pt-5">
+          Figures reproduced from official public records. Flags are statistical or documentary
+          observations — not findings of wrongdoing. Presumption of innocence applies in all
+          pending matters.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+const CHAMBER_LABEL: Record<string, string> = {
+  na: "National Assembly",
+  ncop: "National Council of Provinces",
+  local: "Local Government",
+};
+
+function partyAccent(party: string | null): string {
+  if (!party) return "#64748b";
+  const p = party.toUpperCase();
+  if (p.includes("ANC")) return "#15803d";
+  if (p.includes("DA")) return "#1d4ed8";
+  if (p.includes("EFF")) return "#b91c1c";
+  if (p.includes("MK")) return "#7c3aed";
+  if (p.includes("IFP")) return "#c2410c";
+  if (p.includes("FF+")) return "#0f766e";
+  if (p.includes("ACDP")) return "#4338ca";
+  return "#64748b";
+}
+
+const FLAG_META: Record<FlagType, { label: string; severity: "high" | "medium" | "info" }> = {
+  procurement_relationship:  { label: "Procurement Relationship",   severity: "high"   },
+  criminal_charge_pending:   { label: "Criminal Charge (Pending)",  severity: "high"   },
+  convicted_final:           { label: "Convicted — Final",          severity: "high"   },
+  convicted_appeal_pending:  { label: "Convicted — Appeal Pending", severity: "high"   },
+  civil_proceeding:          { label: "Civil Proceeding",           severity: "medium" },
+  disclosure_inconsistency:  { label: "Disclosure Inconsistency",   severity: "medium" },
+  cipc_directorship_match:   { label: "CIPC Directorship Match",    severity: "medium" },
+  outlier_expense:           { label: "Statistical Outlier",        severity: "info"   },
+  acquitted:                 { label: "Acquitted",                  severity: "info"   },
+};
+
+function flagMeta(type: FlagType) {
+  return FLAG_META[type] ?? { label: type, severity: "info" as const };
+}
+
+function flagLabel(type: FlagType) {
+  return flagMeta(type).label;
+}
+
+// ── Sub-components ────────────────────────────────────────────────────────────
+
+function StatPill({
+  value,
+  label,
+  highlight = false,
+}: {
+  value: string | number;
+  label: string;
+  highlight?: boolean;
+}) {
+  return (
+    <span className="flex items-baseline gap-1.5">
+      <span className={`text-lg font-black tabular-nums leading-none ${highlight ? "text-red-600" : "text-slate-900"}`}>
+        {value}
+      </span>
+      <span className="text-xs text-slate-400 font-medium">{label}</span>
+    </span>
+  );
+}
+
+function SectionHeader({
+  label,
+  count,
+  countColor = "text-slate-500",
+}: {
+  label: string;
+  count: number;
+  countColor?: string;
+}) {
+  return (
+    <div className="flex items-center gap-4">
+      <h2 className="text-[11px] font-black uppercase tracking-widest text-slate-400 whitespace-nowrap">
+        {label}
+      </h2>
+      <div className="flex-1 h-px bg-slate-100" />
+      {count > 0 && (
+        <span className={`text-xs font-bold tabular-nums ${countColor}`}>{count}</span>
+      )}
+    </div>
   );
 }
