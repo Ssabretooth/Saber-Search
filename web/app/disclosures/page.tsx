@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { TrendingUp, Building2, Briefcase, Wallet, Gift, Plane, FileText, Users, DollarSign, LayoutGrid } from "lucide-react";
+import { TrendingUp, Building2, Briefcase, Wallet, Gift, Plane, FileText, Users, DollarSign, LayoutGrid, Home } from "lucide-react";
 import { getSupabase } from "@/lib/supabase";
 import { DisclosuresClient } from "./DisclosuresClient";
 
@@ -17,6 +17,7 @@ const CATEGORIES: Record<string, {
   paid_employment:  { label: "Employment",             Icon: Wallet,      color: "text-emerald-700",bg: "bg-emerald-50", border: "border-emerald-200" },
   gift_hospitality: { label: "Gifts & Hospitality",   Icon: Gift,        color: "text-amber-700",  bg: "bg-amber-50",   border: "border-amber-200"   },
   foreign_travel:   { label: "Foreign Travel",         Icon: Plane,       color: "text-sky-700",    bg: "bg-sky-50",     border: "border-sky-200"     },
+  land_property:    { label: "Land & Property",        Icon: Home,        color: "text-stone-700",  bg: "bg-stone-50",   border: "border-stone-200"   },
   other:            { label: "Other Interests",        Icon: FileText,    color: "text-slate-600",  bg: "bg-slate-50",   border: "border-slate-200"   },
 };
 
@@ -148,10 +149,19 @@ export default async function DisclosuresPage({
     query = query.eq("category", catFilter);
   }
 
-  const { data: disclosures, error } = await query.limit(2000);
-  if (error) throw new Error(`Failed to load disclosures: ${error.message}`);
+  // Paginate to cover all rows — 5900+ after adding land_property section
+  const PAGE = 2000;
+  const allDisclosures: Disclosure[] = [];
+  for (let offset = 0; ; offset += PAGE) {
+    const { data: page, error: pageErr } = await query.range(offset, offset + PAGE - 1);
+    if (pageErr) throw new Error(`Failed to load disclosures: ${pageErr.message}`);
+    if (!page || page.length === 0) break;
+    allDisclosures.push(...(page as Disclosure[]));
+    if (page.length < PAGE) break;
+  }
+  const disclosures = allDisclosures;
 
-  const mpIds = [...new Set((disclosures ?? []).map((d) => d.mp_id))];
+  const mpIds = [...new Set(disclosures.map((d) => d.mp_id))];
   const { data: mpsRaw, error: mpErr } = mpIds.length
     ? await supabase
         .from("v_mps_public")
@@ -164,7 +174,7 @@ export default async function DisclosuresPage({
 
   // Build MP groups
   const groups = new Map<string, MPGroup>();
-  for (const d of disclosures ?? []) {
+  for (const d of disclosures) {
     const mp = mpById.get(d.mp_id);
     if (!mp) continue;
     if (!groups.has(d.mp_id)) groups.set(d.mp_id, { mp, disclosures: [], totalValue: 0 });
@@ -183,7 +193,7 @@ export default async function DisclosuresPage({
     groups: allGroups.filter((g) => allianceFor(g.mp.party).key === alliance.key),
   })).filter((s) => s.groups.length > 0);
 
-  const totalDisclosures = (disclosures ?? []).length;
+  const totalDisclosures = disclosures.length;
   const totalValue = allGroups.reduce((s, g) => s + g.totalValue, 0);
   const memberCount = allGroups.length;
 

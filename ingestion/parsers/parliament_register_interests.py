@@ -4,8 +4,9 @@ Uses pypdf layout-mode extraction to preserve column positions, then splits
 each data row by 2+ space runs to recover the original column values:
   counterparty, description, value_zar.
 
-POPIA guardrail: sections 9 (land/property) and 11 (rented property)
-are skipped — they contain exact residential addresses.
+POPIA guardrail: for sections 9 and 11 (land/property) the "Area where
+Property is Located" column is stripped to province name only — suburb,
+street and erf details are discarded before any row is stored.
 """
 
 import io
@@ -22,7 +23,9 @@ from .base import PARSER_VERSION_PREFIX, BaseParser
 log = logging.getLogger("publikeye.ingestion")
 
 # (section_start_prefix_upper, category, [col0_role, col1_role, col2_role, col3_role])
-# roles: 'counterparty' | 'description' | 'value' | None (discard)
+# roles: 'counterparty' | 'description' | 'value' | 'province' | None (discard)
+# 'province': POPIA-safe extraction — keeps only the SA province name from
+#   the location column, discarding suburb/street/erf details.
 _SECTIONS = [
     ("1. SHARES",        "shareholding",    ["counterparty", "description", "description", "value"]),
     ("2. REMUNERATED",   "paid_employment", ["counterparty", "description"]),
@@ -32,22 +35,41 @@ _SECTIONS = [
     ("6. GIFTS",         "gift_hospitality",["description",  "value",        "counterparty"]),
     ("7. BENEFITS",      "other",           ["counterparty", "description"]),
     ("8. TRAVEL",        "foreign_travel",  ["counterparty", "description",  "description"]),
-    # 9 / 11: POPIA skip — residential addresses
+    # 9 / 11: location column → province only (POPIA: street/suburb discarded)
+    ("9. OWNERSHIP IN LAND", "land_property", ["description", "province", "description"]),
+    ("9. LAND AND PROPERTY", "land_property", ["description", "province", "description"]),
+    ("11. RENTED PROPERTY",  "land_property", ["description", "province", "description"]),
     ("10. PENSIONS",     "other",           ["counterparty", "description"]),
     ("12. INCOME",       "other",           ["description",  "description"]),
     ("13. TRUSTS",       "other",           ["counterparty", "description"]),
 ]
 
 _SECTION_MAP = {pfx: (cat, cols) for pfx, cat, cols in _SECTIONS}
-_POPIA_SKIP = {"9. OWNERSHIP IN LAND", "9. LAND AND PROPERTY", "11. RENTED PROPERTY"}
+_POPIA_SKIP: set[str] = set()  # section 9/11 now parsed with province-only extraction
+
+# Regex matching the nine SA provinces — used to strip location to province only
+_SA_PROVINCE_RE = re.compile(
+    r"\b(gauteng|western cape|eastern cape|kwazulu[\-\s]natal|limpopo|mpumalanga"
+    r"|northern cape|north[\s\-]west|free state)\b",
+    re.I,
+)
 
 _PLACEHOLDER = re.compile(
     r"^\s*(nothing to disclose|none|n/a|not applicable|no disclosure)\s*$", re.I
 )
+# Catches street addresses like "18 Acacia Road" that may appear in the description
+# column due to PDF column-boundary misreads on some MPs' Section 9/11 entries.
+_STREET_ADDR_RE = re.compile(
+    r"\b\d+\s+\w[\w\s]{0,30}?\s+"
+    r"(street|road|avenue|drive|boulevard|lane|close|crescent|place|way|rd\b|st\b|ave\b)",
+    re.I,
+)
 _HEADER_WORDS = re.compile(
     r"^(name of|type of|number of|nature of|nominal value|source of|description of|"
     r"purpose of|area where|size of|public/\s*private|trustee/\s*beneficiary|"
-    r"duration of|description and purpose|description\b|source\b|value\b|journey\b)", re.I
+    r"duration of|description and purpose|description\b|source\b|value\b|journey\b|"
+    # section 9/11 column-header continuation lines that wrap onto their own row
+    r"located\b|square\b|property and its)", re.I
 )
 _MP_RE = re.compile(r"^\d+\.\d+\s+(.+?)(?:\s+\.{3,}\s*\d*)?$")
 _PARTY_SECTION_RE = re.compile(r"^\d+\.\s+[A-Z][A-Z\s\-]+$")
@@ -104,9 +126,26 @@ def _build_disclosure(
             desc_parts.append(val)
         elif role == "value":
             value_zar = _extract_zar(val) or _extract_zar_from_number(val)
+        elif role == "province":
+            # POPIA: discard suburb/street — keep only the SA province name.
+            m = _SA_PROVINCE_RE.search(val)
+            if m:
+                province = " ".join(w.capitalize() for w in m.group(0).split())
+                cpty_parts.append(province)
+            # If no province is identifiable, nothing is recorded — no guessing.
 
     desc = " — ".join(p for p in desc_parts if p) or None
     cpty = " / ".join(p for p in cpty_parts if p) or None
+
+    # Drop land_property rows whose description contains a street address —
+    # these arise when the PDF column boundary is misread and an address ends
+    # up in the description column rather than the (province-stripped) location column.
+    if category == "land_property" and _STREET_ADDR_RE.search(desc or ""):
+        return None
+
+    # Drop rows where everything resolved to placeholder text
+    if desc and re.fullmatch(r"(none(\s*[—\-]\s*none)*)", desc.strip(), re.I):
+        desc = None
 
     if not desc and not cpty:
         return None
