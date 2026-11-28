@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { AlertTriangle, ExternalLink } from "lucide-react";
+import { AlertTriangle, ExternalLink, MapPin, Building2 } from "lucide-react";
 import { getSupabase } from "@/lib/supabase";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { FlagBadge } from "@/components/FlagBadge";
@@ -31,6 +31,23 @@ export default async function MPProfilePage({ params }: { params: Promise<{ id: 
     .maybeSingle();
   if (mpError) throw new Error(`Failed to load MP ${id}: ${mpError.message}`);
   if (!mp) notFound();
+
+  const mpProfile = mp as MpPublic;
+
+  // For local councillors, fetch enriched ward/municipality data
+  const localRes = mpProfile.chamber === "local"
+    ? await supabase
+        .from("v_local_councillors")
+        .select("ward_no, muni_code, municipality_name, province")
+        .eq("id", id)
+        .maybeSingle()
+    : null;
+  const localData = localRes?.data as {
+    ward_no: number | null;
+    muni_code: string | null;
+    municipality_name: string | null;
+    province: string | null;
+  } | null;
 
   const [flagsRes, disclosuresRes] = await Promise.all([
     supabase.from("v_flags_public").select("*").eq("subject_id", id),
@@ -64,7 +81,7 @@ export default async function MPProfilePage({ params }: { params: Promise<{ id: 
   const withSource = <T extends { source_document_id: string }>(rows: T[]): WithSource<T>[] =>
     rows.map((r) => ({ ...r, source: sourceById.get(r.source_document_id) }));
 
-  const profile: MpPublic = mp;
+  const profile: MpPublic = mpProfile;
 
   return (
     <main className="container mx-auto max-w-5xl space-y-8 px-4 py-10">
@@ -77,16 +94,52 @@ export default async function MPProfilePage({ params }: { params: Promise<{ id: 
         </AlertDescription>
       </Alert>
 
-      <header className="space-y-2 border-b pb-6">
+      <header className="space-y-3 border-b pb-6">
         <div className="flex flex-wrap items-center gap-3">
           <h1 className="text-3xl font-bold tracking-tight">{profile.known_as ?? profile.full_name}</h1>
           <PartyBadge party={profile.party} />
         </div>
-        <div className="flex flex-wrap gap-4 text-sm text-gray-600">
-          {profile.constituency && <p>• {profile.constituency}</p>}
-          {profile.portfolio && <p>• {profile.portfolio}</p>}
-          <p>• Chamber: {profile.chamber.toUpperCase()}</p>
+
+        {/* Local councillor: show ward + municipality prominently */}
+        {profile.chamber === "local" && localData && (
+          <div className="flex flex-wrap gap-3">
+            {localData.ward_no != null && (
+              <div className="inline-flex items-center gap-1.5 rounded-lg bg-amber-50 border border-amber-200 px-3 py-1.5">
+                <MapPin className="h-3.5 w-3.5 text-amber-600 shrink-0" />
+                <span className="text-sm font-semibold text-amber-800">Ward {localData.ward_no}</span>
+              </div>
+            )}
+            {localData.municipality_name && (
+              <div className="inline-flex items-center gap-1.5 rounded-lg bg-teal-50 border border-teal-200 px-3 py-1.5">
+                <Building2 className="h-3.5 w-3.5 text-teal-600 shrink-0" />
+                <span className="text-sm font-semibold text-teal-800">{localData.municipality_name}</span>
+                {localData.province && (
+                  <span className="text-xs text-teal-600 opacity-70">· {localData.province}</span>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        <div className="flex flex-wrap gap-4 text-sm text-gray-500">
+          {profile.chamber === "local"
+            ? (
+              <>
+                {localData?.muni_code && <span>Code: {localData.muni_code}</span>}
+                {profile.portfolio && <span>• {profile.portfolio}</span>}
+                <span>• Local Government</span>
+              </>
+            )
+            : (
+              <>
+                {profile.constituency && <span>• {profile.constituency}</span>}
+                {profile.portfolio && <span>• {profile.portfolio}</span>}
+                <span>• Chamber: {profile.chamber.toUpperCase()}</span>
+              </>
+            )
+          }
         </div>
+
         {profile.official_profile_url && (
           <a
             href={profile.official_profile_url}
