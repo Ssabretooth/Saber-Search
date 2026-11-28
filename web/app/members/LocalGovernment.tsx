@@ -81,11 +81,19 @@ export function LocalGovernment({ municipalities, councillors }: Props) {
 
   // Filter + group by municipality
   const filtered = useMemo(() => {
-    const q = search.toLowerCase();
+    const q = search.trim().toLowerCase();
     return enriched.filter((c) => {
       if (province !== "all" && c.province !== province) return false;
-      if (q && !c.full_name.toLowerCase().includes(q) && !c.municipality_name.toLowerCase().includes(q)) return false;
-      return true;
+      if (!q) return true;
+      return (
+        c.full_name.toLowerCase().includes(q) ||
+        (c.municipality_name ?? "").toLowerCase().includes(q) ||
+        (c.muni_code ?? "").toLowerCase().includes(q) ||
+        (c.province ?? "").toLowerCase().includes(q) ||
+        (c.constituency ?? "").toLowerCase().includes(q) ||
+        (c.party ?? "").toLowerCase().includes(q) ||
+        (c.ward_no != null && (`ward ${c.ward_no}` === q || `w${c.ward_no}` === q || String(c.ward_no) === q))
+      );
     });
   }, [enriched, search, province]);
 
@@ -189,7 +197,7 @@ export function LocalGovernment({ municipalities, councillors }: Props) {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
             type="search"
-            placeholder="Search councillor or municipality…"
+            placeholder="Search name, municipality, ward number, party, code…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-9 pr-4 py-2.5 text-sm border rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-amber-400"
