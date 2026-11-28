@@ -1,10 +1,7 @@
 import Link from "next/link";
-import {
-  TrendingUp, Building2, Briefcase, Wallet, Gift, Plane,
-  FileText, Users, DollarSign, LayoutGrid, ChevronRight,
-} from "lucide-react";
+import { TrendingUp, Building2, Briefcase, Wallet, Gift, Plane, FileText, Users, DollarSign, LayoutGrid } from "lucide-react";
 import { getSupabase } from "@/lib/supabase";
-import { PartyBadge } from "@/components/PartyBadge";
+import { DisclosuresClient } from "./DisclosuresClient";
 
 export const dynamic = "force-dynamic";
 
@@ -209,39 +206,8 @@ export default async function DisclosuresPage({
         </div>
       </div>
 
-      {/* ── Feed grouped by party alliance ── */}
-      <div className="max-w-4xl mx-auto px-3 sm:px-4 py-6 space-y-8">
-        {byAlliance.length === 0 && (
-          <p className="text-center text-slate-400 py-16 text-sm">No disclosures found.</p>
-        )}
-
-        {byAlliance.map(({ alliance, groups: allianceGroups }, idx) => (
-          <details key={alliance.key} open={idx === 0} className="group">
-            {/* Alliance banner — acts as the toggle */}
-            <summary className={`flex items-center justify-between px-4 py-2.5 rounded-xl ${alliance.bg} border ${alliance.border} cursor-pointer list-none select-none`}>
-              <div className="flex items-center gap-2">
-                <span className={`text-[11px] transition-transform group-open:rotate-90 mr-0.5 ${alliance.accent} opacity-50`}>▶</span>
-                <span className={`text-xs font-black uppercase tracking-widest ${alliance.accent}`}>
-                  {alliance.abbr}
-                </span>
-                <span className={`hidden sm:inline text-xs font-semibold ${alliance.accent} opacity-70`}>
-                  · {alliance.label}
-                </span>
-              </div>
-              <span className={`text-xs font-semibold ${alliance.accent} opacity-60`}>
-                {allianceGroups.length} member{allianceGroups.length !== 1 ? "s" : ""}
-              </span>
-            </summary>
-
-            {/* MP cards */}
-            <div className="mt-3 space-y-3">
-              {allianceGroups.map(({ mp, disclosures: rows, totalValue: mpTotal }) => (
-                <MPCard key={mp.id} mp={mp} rows={rows} totalValue={mpTotal} />
-              ))}
-            </div>
-          </details>
-        ))}
-      </div>
+      {/* ── Feed grouped by party alliance (client-rendered with search) ── */}
+      <DisclosuresClient byAlliance={byAlliance} />
 
       <div className="max-w-4xl mx-auto px-4 pb-10 text-[11px] text-slate-400 leading-relaxed">
         Source: Parliament Register of Members&apos; Interests, June 2026. Figures reproduced
@@ -282,80 +248,3 @@ function FilterPill({ label, href, active }: { label: string; href: string; acti
   );
 }
 
-function MPCard({ mp, rows, totalValue }: { mp: MP; rows: Disclosure[]; totalValue: number }) {
-  const displayName = mp.known_as ?? mp.full_name;
-
-  const byCat = new Map<string, Disclosure[]>();
-  for (const r of rows) {
-    if (!byCat.has(r.category)) byCat.set(r.category, []);
-    byCat.get(r.category)!.push(r);
-  }
-
-  return (
-    <div className="bg-white rounded-xl border shadow-sm overflow-hidden">
-      {/* MP header */}
-      <Link
-        href={`/mps/${mp.id}`}
-        className="flex items-center justify-between gap-2 px-4 py-3 border-b bg-slate-50/70 hover:bg-slate-100/70 transition-colors group"
-      >
-        <div className="flex items-center gap-2 min-w-0">
-          <span className="font-semibold text-sm text-slate-900 group-hover:text-teal-700 transition-colors truncate">
-            {displayName}
-          </span>
-          <PartyBadge party={mp.party} />
-        </div>
-        <div className="flex items-center gap-2 flex-shrink-0">
-          {totalValue > 0 && (
-            <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded-full tabular-nums hidden sm:inline">
-              R{totalValue.toLocaleString("en-ZA", { maximumFractionDigits: 0 })}
-            </span>
-          )}
-          <span className="text-[11px] text-slate-400">{rows.length}</span>
-          <ChevronRight size={13} className="text-slate-300 group-hover:text-teal-500 transition-colors" />
-        </div>
-      </Link>
-
-      {/* Category sections */}
-      <div className="divide-y divide-slate-100">
-        {[...byCat.entries()].map(([cat, catRows]) => {
-          const { label, Icon, color, bg, border } = categoryMeta(cat);
-          return (
-            <div key={cat} className="px-4 py-2.5">
-              <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold ${bg} ${color} border ${border} mb-1.5`}>
-                <Icon size={10} />
-                {label}
-              </div>
-              <div className="space-y-1">
-                {catRows.map((r) => (
-                  <div key={r.id} className="flex items-baseline justify-between gap-3 text-xs">
-                    <div className="min-w-0 flex-1">
-                      {r.counterparty && (
-                        <span className="font-medium text-slate-800">{r.counterparty}</span>
-                      )}
-                      {r.counterparty && r.description && (
-                        <span className="text-slate-400 mx-1">·</span>
-                      )}
-                      {r.description && (
-                        <span className="text-slate-500">{r.description}</span>
-                      )}
-                      {!r.counterparty && !r.description && (
-                        <span className="text-slate-300 italic">No detail provided</span>
-                      )}
-                    </div>
-                    {r.value_zar !== null ? (
-                      <span className="font-semibold tabular-nums text-slate-800 whitespace-nowrap flex-shrink-0">
-                        R{Number(r.value_zar).toLocaleString("en-ZA")}
-                      </span>
-                    ) : (
-                      <span className="text-slate-200 flex-shrink-0">—</span>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}

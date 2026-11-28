@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Search, MapPin, Users, Building2, ChevronDown, ExternalLink } from "lucide-react";
 import { MpPublic, MunicipalityPublic } from "@/lib/types/database";
-import { normalizeProvince, councillorWardNo, muniCodeFromConstituency } from "@/lib/municipalities";
+import { normalizeProvince, councillorWardNo, muniCodeFromConstituency, councillorMunicipality } from "@/lib/municipalities";
 
 type Props = {
   municipalities: MunicipalityPublic[];
@@ -40,9 +40,13 @@ export function LocalGovernment({ municipalities, councillors }: Props) {
   const [province, setProvince] = useState<string>("all");
   const [openMunis, setOpenMunis] = useState<Set<string>>(new Set());
 
-  // Build a lookup: demarcation_code → MunicipalityPublic
+  // Build lookups: by demarcation_code (new format) and by name (legacy PDF format)
   const muniByCode = useMemo(
     () => new Map(municipalities.map((m) => [m.demarcation_code, m])),
+    [municipalities],
+  );
+  const muniByName = useMemo(
+    () => new Map(municipalities.map((m) => [m.name.toLowerCase(), m])),
     [municipalities],
   );
 
@@ -50,16 +54,22 @@ export function LocalGovernment({ municipalities, councillors }: Props) {
   const enriched = useMemo(() => {
     return councillors.map((c) => {
       const code = muniCodeFromConstituency(c.constituency);
-      const muni = code ? muniByCode.get(code) : null;
+      let muni = code ? (muniByCode.get(code) ?? null) : null;
+      // Fallback: legacy "City of Johannesburg - WD71/ REGION C" format
+      if (!muni) {
+        const nameKey = councillorMunicipality(c.constituency)?.toLowerCase();
+        if (nameKey) muni = muniByName.get(nameKey) ?? null;
+      }
+      const resolvedCode = muni?.demarcation_code ?? code ?? null;
       return {
         ...c,
-        muni_code: code,
+        muni_code: resolvedCode,
         ward_no: councillorWardNo(c.constituency),
         municipality_name: muni?.name ?? code ?? "Unknown",
         province: normalizeProvince(muni?.province ?? null),
       };
     });
-  }, [councillors, muniByCode]);
+  }, [councillors, muniByCode, muniByName]);
 
   // Party totals for breakdown bar
   const partyTotals = useMemo(() => {
