@@ -56,14 +56,18 @@ def test_upsert_facts_never_overwrites_existing_rows(mock_client):
     writer.upsert_facts(table="fact_table", rows=[{"row_hash": "h"}], conflict_cols="row_hash")
     assert mock_client.table().upsert.call_args.kwargs["ignore_duplicates"] is True
 
-def test_get_mps_by_name_rejects_ambiguous_names(mock_client):
+def test_get_mps_by_name_resolves_duplicate_names(mock_client):
+    # get_mps_by_name() silently resolves duplicate lowercased names by
+    # preferring the row that has term_start set (the canonical entry).
     writer = SupabaseWriter("http://url", "key")
-    mock_client.table().select().execute.return_value = MagicMock(data=[
-        {"id": "a", "full_name": "Jane Doe"},
-        {"id": "b", "full_name": "jane doe "},
+    # The method calls .select().range().execute(), not .select().execute()
+    mock_client.table().select().range().execute.return_value = MagicMock(data=[
+        {"id": "a", "full_name": "Jane Doe",  "term_start": "2024-05-29"},
+        {"id": "b", "full_name": "jane doe ", "term_start": None},
     ])
-    with pytest.raises(PublikEyeError, match="ambiguous MP name"):
-        writer.get_mps_by_name()
+    result = writer.get_mps_by_name()
+    assert list(result.keys()) == ["jane doe"]
+    assert result["jane doe"] == "a"  # canonical row (has term_start) wins
 
 def test_quarantine_private_schema(mock_client, mock_source):
     writer = SupabaseWriter("http://url", "key")

@@ -36,11 +36,14 @@ def test_pmg_na_members_parser_wrong_content_type():
 
 def test_nationalgov_ncop_members_parser_basic():
     parser = NationalGovNcopMembersParser()
+    # The parser anchors on "permanent delegates to the NCOP" then scans for
+    # title-prefixed names within the blob before the secretary marker.
     html = b"""
     <html>
     <body>
-    - Mr John Doe (Eastern Cape)
-    - Ms Jane Smith (Western Cape)
+    There are 54 permanent delegates to the NCOP.
+    Mr John Doe (ANC) Ms Jane Smith (DA)
+    Secretary to the National Council
     </body>
     </html>
     """
@@ -53,8 +56,15 @@ def test_nationalgov_ncop_members_parser_basic():
 
 def test_nationalgov_ncop_members_parser_zero_mps():
     parser = NationalGovNcopMembersParser()
-    html = b"<html><body>No members here</body></html>"
-    with pytest.raises(ParserSpecGap, match="Zero MPs parsed"):
+    # Anchor is present but no title-prefixed names follow → "Zero NCOP delegates parsed."
+    html = b"""
+    <html><body>
+    There are 54 permanent delegates to the NCOP.
+    No names with titles here.
+    Secretary to the National Council
+    </body></html>
+    """
+    with pytest.raises(ParserSpecGap, match="Zero NCOP delegates parsed"):
         parser.parse(content=html, content_type="text/html", fetched_url="https://nationalgovernment.co.za/...")
 
 
