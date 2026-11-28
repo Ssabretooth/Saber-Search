@@ -83,9 +83,10 @@ const FLAG_TYPE_META: Record<string, {
 export default async function FlagsPage() {
   const supabase = getSupabase();
 
-  // Fetch flags with full inputs JSON
+  // v_flags_public = review_flags filtered to status='published', inputs included.
+  // Querying review_flags directly is blocked for anon (revoked in migration 0012).
   const { data: rawFlags, error } = await supabase
-    .from("review_flags")
+    .from("v_flags_public")
     .select("id, flag_type, public_text, rule_id, subject_id, inputs")
     .order("inputs->tender_amount_zar", { ascending: false })
     .limit(200) as unknown as { data: FlagRow[] | null; error: unknown };
