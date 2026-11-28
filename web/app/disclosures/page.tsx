@@ -38,29 +38,46 @@ interface Alliance {
 
 const ALLIANCES: Alliance[] = [
   {
+    // "ALLIANCE" contains "ANC" as a substring — use word-boundary regex to avoid
+    // "Democratic Alliance" and "Patriotic Alliance" being matched here.
     key: "anc", label: "African National Congress", abbr: "ANC",
     accent: "text-green-800", bg: "bg-green-50", border: "border-green-200",
-    match: (p) => !!p && p.toUpperCase().includes("ANC"),
+    match: (p) => !!p && (/\bANC\b/i.test(p) || p.toUpperCase().includes("AFRICAN NATIONAL CONGRESS")),
   },
   {
     key: "da", label: "Democratic Alliance", abbr: "DA",
     accent: "text-blue-800", bg: "bg-blue-50", border: "border-blue-200",
-    match: (p) => !!p && (p.toUpperCase().includes(" DA") || p.toUpperCase().startsWith("DA") || p.toUpperCase().includes("DEMOCRATIC ALLIANCE")),
+    match: (p) => !!p && (p.toUpperCase().includes("DEMOCRATIC ALLIANCE") || /\bDA\b/i.test(p)),
   },
   {
     key: "eff", label: "Economic Freedom Fighters", abbr: "EFF",
     accent: "text-red-800", bg: "bg-red-50", border: "border-red-200",
-    match: (p) => !!p && p.toUpperCase().includes("EFF"),
+    match: (p) => !!p && (/\bEFF\b/i.test(p) || p.toUpperCase().includes("ECONOMIC FREEDOM")),
   },
   {
-    key: "mk", label: "uMkhonto we Sizwe Party", abbr: "MK",
+    key: "mk", label: "uMkhonto we Sizwe", abbr: "MK",
     accent: "text-purple-800", bg: "bg-purple-50", border: "border-purple-200",
-    match: (p) => !!p && (p.toUpperCase().includes("MK") || p.toUpperCase().includes("UMKHONTO")),
+    match: (p) => !!p && (p.toUpperCase().includes("UMKHONTO") || /\bMKP?\b/i.test(p)),
   },
   {
     key: "ifp", label: "Inkatha Freedom Party", abbr: "IFP",
     accent: "text-orange-800", bg: "bg-orange-50", border: "border-orange-200",
-    match: (p) => !!p && p.toUpperCase().includes("IFP"),
+    match: (p) => !!p && (/\bIFP\b/i.test(p) || p.toUpperCase().includes("INKATHA")),
+  },
+  {
+    key: "actionsa", label: "ActionSA", abbr: "ActionSA",
+    accent: "text-sky-800", bg: "bg-sky-50", border: "border-sky-200",
+    match: (p) => !!p && p.toUpperCase().includes("ACTIONSA"),
+  },
+  {
+    key: "pa", label: "Patriotic Alliance", abbr: "PA",
+    accent: "text-rose-800", bg: "bg-rose-50", border: "border-rose-200",
+    match: (p) => !!p && p.toUpperCase().includes("PATRIOTIC ALLIANCE"),
+  },
+  {
+    key: "acdp", label: "African Christian Democratic Party", abbr: "ACDP",
+    accent: "text-indigo-800", bg: "bg-indigo-50", border: "border-indigo-200",
+    match: (p) => !!p && (/\bACDP\b/i.test(p) || p.toUpperCase().includes("AFRICAN CHRISTIAN")),
   },
   {
     key: "other", label: "Other Parties", abbr: "Other",
@@ -68,13 +85,18 @@ const ALLIANCES: Alliance[] = [
     match: (p) => {
       if (!p) return false;
       const u = p.toUpperCase();
-      return !u.includes("ANC") && !u.includes(" DA") && !u.startsWith("DA")
-        && !u.includes("DEMOCRATIC ALLIANCE") && !u.includes("EFF")
-        && !u.includes("MK") && !u.includes("UMKHONTO") && !u.includes("IFP");
+      return !(/\bANC\b/i.test(p) || u.includes("AFRICAN NATIONAL CONGRESS"))
+        && !( u.includes("DEMOCRATIC ALLIANCE") || /\bDA\b/i.test(p))
+        && !(/\bEFF\b/i.test(p) || u.includes("ECONOMIC FREEDOM"))
+        && !(u.includes("UMKHONTO") || /\bMKP?\b/i.test(p))
+        && !(/\bIFP\b/i.test(p) || u.includes("INKATHA"))
+        && !u.includes("ACTIONSA")
+        && !u.includes("PATRIOTIC ALLIANCE")
+        && !(/\bACDP\b/i.test(p) || u.includes("AFRICAN CHRISTIAN"));
     },
   },
   {
-    key: "unknown", label: "Unknown Alliance / Independent", abbr: "Unknown Alliance",
+    key: "unknown", label: "Independent / Unknown", abbr: "Independent",
     accent: "text-zinc-600", bg: "bg-zinc-50", border: "border-zinc-200",
     match: (p) => !p,
   },
