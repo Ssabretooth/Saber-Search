@@ -102,8 +102,11 @@ export function MembersDirectory({
           ← Back to Chambers
         </button>
         <h2 className="text-2xl font-bold border-l-4 border-green-700 pl-3">Local Government</h2>
-        {localLoading ? (
-          <p className="text-sm text-gray-400">Loading {localCount.toLocaleString()} councillors…</p>
+        {localLoading && localMps.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 text-gray-400 gap-3">
+            <div className="w-8 h-8 border-2 border-amber-400 border-t-transparent rounded-full animate-spin" />
+            <p className="text-sm">Loading {localCount.toLocaleString()} councillors…</p>
+          </div>
         ) : (
           <LocalGovernment municipalities={municipalities} councillors={localMps} />
         )}
