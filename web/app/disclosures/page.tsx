@@ -155,8 +155,8 @@ export default async function DisclosuresPage({
     (a.mp.full_name ?? "").localeCompare(b.mp.full_name ?? "")
   );
 
-  // Split by alliance
-  const byAlliance = ALLIANCES.map((alliance) => ({
+  // Split by alliance — strip `match` fn before passing to client component (not serializable)
+  const byAlliance = ALLIANCES.map(({ match: _match, ...alliance }) => ({
     alliance,
     groups: allGroups.filter((g) => allianceFor(g.mp.party).key === alliance.key),
   })).filter((s) => s.groups.length > 0);
