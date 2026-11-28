@@ -1,6 +1,6 @@
 import { getSupabase } from "@/lib/supabase";
-import Link from "next/link";
-import { ArrowUpRight, Scale, Info } from "lucide-react";
+import { Scale, Info } from "lucide-react";
+import { TendersClient } from "./TendersClient";
 
 export const dynamic = "force-dynamic";
 
@@ -60,24 +60,6 @@ function partyAbbr(party: string | null): string {
   if (u.includes("IFP")) return "IFP";
   return "Other";
 }
-
-const CAT_LABEL: Record<string, string> = {
-  shareholding:     "Shares",
-  directorship:     "Director",
-  consultancy:      "Consultant",
-  paid_employment:  "Employed",
-  gift_hospitality: "Gift / Hospitality",
-  other:            "Other",
-};
-
-const CAT_COLOR: Record<string, string> = {
-  shareholding:     "bg-indigo-100 text-indigo-700",
-  directorship:     "bg-blue-100 text-blue-700",
-  consultancy:      "bg-cyan-100 text-cyan-700",
-  paid_employment:  "bg-emerald-100 text-emerald-700",
-  gift_hospitality: "bg-amber-100 text-amber-700",
-  other:            "bg-slate-100 text-slate-600",
-};
 
 // ── page ─────────────────────────────────────────────────────────────────────
 
@@ -236,110 +218,10 @@ export default async function TendersPage() {
       </div>
 
       {/* ── COMPANY CARDS ────────────────────────────────────────────────── */}
-      <div className="max-w-5xl mx-auto px-6 md:px-10 mt-6 pb-16 space-y-4">
-
-        {companies.map((co, idx) => {
-          const pct = maxAmount > 0 ? (co.amount / maxAmount) * 100 : 0;
-          const rank = idx + 1;
-          // heat colour based on amount tier
-          const heatBorder = co.amount >= 1e9 ? "border-l-red-600"
-            : co.amount >= 5e8 ? "border-l-orange-500"
-            : co.amount >= 1e8 ? "border-l-amber-500"
-            : "border-l-teal-500";
-          const heatBar = co.amount >= 1e9 ? "bg-red-500"
-            : co.amount >= 5e8 ? "bg-orange-400"
-            : co.amount >= 1e8 ? "bg-amber-400"
-            : "bg-teal-400";
-
-          return (
-            <div
-              key={co.displayName}
-              className={`bg-white rounded-xl border border-stone-200 border-l-4 ${heatBorder} shadow-sm overflow-hidden`}
-            >
-              {/* card header */}
-              <div className="px-4 md:px-5 pt-4 md:pt-5 pb-3">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-                      <span className="text-[10px] font-black text-slate-300 tabular-nums shrink-0">#{rank.toString().padStart(2, "0")}</span>
-                      <h2 className="text-base md:text-lg font-black text-slate-900 leading-tight tracking-tight">
-                        {co.displayName}
-                      </h2>
-                    </div>
-                    {co.department && (
-                      <p className="text-xs text-slate-400 line-clamp-1">{co.department}</p>
-                    )}
-                  </div>
-                  <div className="shrink-0 text-right">
-                    <div className="text-xl md:text-2xl font-black tabular-nums text-slate-900 leading-none">
-                      {fmtAmount(co.amount)}
-                    </div>
-                    <div className="text-[11px] text-slate-400 mt-0.5">{fmtDate(co.awardDate)}</div>
-                  </div>
-                </div>
-
-                {/* amount heat bar */}
-                <div className="mt-3 h-1.5 bg-stone-100 rounded-full overflow-hidden">
-                  <div
-                    className={`h-full ${heatBar} rounded-full transition-all`}
-                    style={{ width: `${pct}%` }}
-                  />
-                </div>
-                <div className="flex justify-between mt-1">
-                  <span className="text-[10px] text-slate-300">0</span>
-                  <span className="text-[10px] text-slate-400 font-medium">{pct.toFixed(0)}% of highest</span>
-                </div>
-              </div>
-
-              {/* divider */}
-              <div className="border-t border-stone-100 mx-4 md:mx-5" />
-
-              {/* MPs + categories */}
-              <div className="px-4 md:px-5 py-3 flex flex-col gap-3">
-                <div className="flex-1 min-w-0">
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-2">
-                    {co.mps.length} MP{co.mps.length !== 1 ? "s" : ""} with declared interests
-                  </p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {co.mps.map((mp) => {
-                      const abbr = partyAbbr(mp.party);
-                      const chip = PARTY_CHIP[abbr] ?? { bg: "bg-slate-100", text: "text-slate-700", dot: "bg-slate-400" };
-                      return (
-                        <Link
-                          key={mp.id}
-                          href={`/mps/${mp.id}`}
-                          className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold
-                            transition-opacity hover:opacity-75 ${chip.bg} ${chip.text}`}
-                        >
-                          <span className={`w-1.5 h-1.5 rounded-full ${chip.dot} shrink-0`} />
-                          {mp.name.replace(/^.*?,\s*/, "")}
-                          <span className="opacity-60">{abbr}</span>
-                          <ArrowUpRight size={9} className="opacity-40" />
-                        </Link>
-                      );
-                    })}
-                    {co.mps.length === 0 && (
-                      <span className="text-xs text-slate-400 italic">Unmatched register entries only</span>
-                    )}
-                  </div>
-                </div>
-
-                {/* category tags */}
-                <div className="flex flex-wrap gap-1">
-                  {[...co.categories].map((cat) => (
-                    <span
-                      key={cat}
-                      className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${CAT_COLOR[cat] ?? "bg-slate-100 text-slate-600"}`}
-                    >
-                      {CAT_LABEL[cat] ?? cat}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+      <TendersClient
+        companies={companies.map((co) => ({ ...co, categories: [...co.categories] }))}
+        maxAmount={maxAmount}
+      />
 
       {/* footer */}
       <div className="max-w-5xl mx-auto px-6 md:px-10 pb-10 text-center">
