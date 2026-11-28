@@ -9,8 +9,11 @@
 --     v_procurement_flags_public, so the status=draft was providing no protection)
 
 -- ── 1. Recreate v_flags_public with inputs ───────────────────────────────────
+-- CREATE OR REPLACE VIEW cannot change column order; must drop and recreate.
 
-create or replace view public.v_flags_public
+drop view if exists public.v_flags_public;
+
+create view public.v_flags_public
 with (security_invoker = false) as
   select
     id,
