@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import {
   Search, TrendingUp, Building2, Briefcase, Wallet, Gift, Plane,
-  FileText, ChevronRight,
+  FileText, ChevronRight, Home,
 } from "lucide-react";
 import { PartyBadge } from "@/components/PartyBadge";
 
@@ -55,6 +55,7 @@ const CATEGORIES: Record<string, { label: string; Icon: typeof FileText; color: 
   paid_employment:  { label: "Employment",             Icon: Wallet,      color: "text-emerald-700",bg: "bg-emerald-50", border: "border-emerald-200" },
   gift_hospitality: { label: "Gifts & Hospitality",   Icon: Gift,        color: "text-amber-700",  bg: "bg-amber-50",   border: "border-amber-200"   },
   foreign_travel:   { label: "Foreign Travel",         Icon: Plane,       color: "text-sky-700",    bg: "bg-sky-50",     border: "border-sky-200"     },
+  land_property:    { label: "Land & Property",        Icon: Home,        color: "text-stone-700",  bg: "bg-stone-50",   border: "border-stone-200"   },
   other:            { label: "Other Interests",        Icon: FileText,    color: "text-slate-600",  bg: "bg-slate-50",   border: "border-slate-200"   },
 };
 
