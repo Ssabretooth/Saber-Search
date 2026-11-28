@@ -25,14 +25,14 @@ export default async function MembersPage() {
   const localCount = localCountRes.count ?? 0;
   const municipalities = (munisRes.data as MunicipalityPublic[]) ?? [];
 
-  const totalLegislators = naMps.length + ncopMps.length + localCount;
+  const nationalCount = naMps.length + ncopMps.length;
 
   return (
     <main className="container mx-auto py-10 px-4 max-w-6xl">
       <div className="mb-8">
         <h1 className="text-4xl font-bold tracking-tight">Members & Councillors</h1>
         <p className="text-gray-500 mt-2">
-          {totalLegislators.toLocaleString()} legislators and councillors · {municipalities.length} municipalities
+          {nationalCount.toLocaleString()} national legislators · {localCount.toLocaleString()} confirmed councillors · {municipalities.length} municipalities
         </p>
       </div>
       <MembersDirectory
