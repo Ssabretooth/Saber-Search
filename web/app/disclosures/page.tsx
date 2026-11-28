@@ -149,8 +149,9 @@ export default async function DisclosuresPage({
     query = query.eq("category", catFilter);
   }
 
-  // Paginate to cover all rows — 5900+ after adding land_property section
-  const PAGE = 2000;
+  // Paginate to cover all rows — 5900+ after adding land_property section.
+  // PostgREST caps anon responses at 1000 rows per request regardless of range.
+  const PAGE = 1000;
   const allDisclosures: Disclosure[] = [];
   for (let offset = 0; ; offset += PAGE) {
     const { data: page, error: pageErr } = await query.range(offset, offset + PAGE - 1);
